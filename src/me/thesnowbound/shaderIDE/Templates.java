@@ -52,7 +52,17 @@ final class Templates {
             new Example("astral_sigil", "Astral Sigil", "Sky", "a huge glowing sigil overhead"),
             new Example("event_horizon", "Event Horizon", "Sky", "black hole that bends light"),
             new Example("cosmic_rift", "Cosmic Rift", "Sky", "a tear with plasma pouring out"),
-            new Example("hyperspace", "Hyperspace", "Sky", "stretched starlight"));
+            new Example("hyperspace", "Hyperspace", "Sky", "stretched starlight"),
+            new Example("nebula_core", "Nebula Core", "Object", "a glowing gas cloud hanging in the item"),
+            new Example("ice_shard", "Ice Shard", "Object", "a faceted ice crystal turning in the item"),
+            new Example("scanline_monitor", "Scanline Monitor", "Surface", "a green CRT screen with a rolling bar"),
+            new Example("circuit_board", "Circuit Board", "Surface", "traces with light pulses running along them"),
+            new Example("neon_grid", "Neon Grid", "Material", "the item covered in pulsing neon lines"),
+            new Example("obsidian", "Obsidian", "Material", "polished black glass with a sliding sheen"),
+            new Example("night_vision", "Night Vision", "Overlay", "a green visor with grain and a dark edge"),
+            new Example("ember_drift", "Ember Drift", "Overlay", "red embers rising past the view"),
+            new Example("aurora_sky", "Aurora Sky", "Sky", "stars and a rippling green and violet aurora"),
+            new Example("sunset_sky", "Sunset Sky", "Sky", "a sinking sun over orange and purple clouds"));
 
     static final String NEW_SURFACE = """
             // the line below picks the item's shape: cube, panel, pillar or floor
