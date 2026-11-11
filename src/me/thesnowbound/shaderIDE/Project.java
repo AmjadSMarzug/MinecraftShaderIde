@@ -16,7 +16,7 @@ final class Project {
     final Path dir;
     String name = "My Skies";
     String description = "Custom skies";
-    String author = "Mirothe";
+    String author = "Thesnowbound";
     String namespace = "skyboxes";
     long seed = 4211;
     String discordImage = "";

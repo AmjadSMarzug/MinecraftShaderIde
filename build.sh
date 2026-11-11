@@ -47,7 +47,7 @@ VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/me/thesnowbound/shaderIDE/F
 rm -rf out/jpkg out/app
 mkdir -p out/jpkg
 cp "out/dist/Shader IDE.jar" out/jpkg/
-jpackage --type app-image --name "Shader IDE" --app-version "$VERSION" --vendor Mirothe \
+jpackage --type app-image --name "Shader IDE" --app-version "$VERSION" --vendor Thesnowbound \
     --input out/jpkg --main-jar "Shader IDE.jar" --main-class me.thesnowbound.shaderIDE.Main \
     ${ICON:+--icon "$ICON"} --dest out/app
 APP=$(ls out/app)

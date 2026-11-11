@@ -1,5 +1,7 @@
 # Shader IDE
 
+Fork of [Mirothe's Hogyoku Vessel](https://github.com/Mirothe/Hogyoku-Vessel), an IDE for Minecraft shaders. This fork is by Thesnowbound.
+
 An IDE for Minecraft shaders. You write GLSL, watch it run live as you type, and Shader IDE builds it into a resource pack that works on every version from 1.21 to 26.3.
 
 Minecraft's core shaders changed shape five times across those versions, with different uniforms, includes, fog and lighting each time. Shader IDE keeps a template for each one, drops your code into all of them, and compiles every result with glslang, so a mistake shows up in the editor instead of as a broken game.

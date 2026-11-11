@@ -515,7 +515,7 @@ final class Home extends Fx.Reveal {
         JLabel name = new JLabel(Forge.TOOL);
         name.setFont(name.getFont().deriveFont(Font.BOLD, 22f));
         name.setForeground(t.strong());
-        JLabel sub = new JLabel("IDE for Minecraft shaders, by Mirothe  ·  version " + Forge.VERSION);
+        JLabel sub = new JLabel("IDE for Minecraft shaders, by Thesnowbound, a fork of Mirothe's IDE  ·  version " + Forge.VERSION);
         sub.setForeground(t.dim());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         buttons.setOpaque(false);

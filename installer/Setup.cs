@@ -17,8 +17,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("Shader IDE Setup")]
 [assembly: AssemblyProduct("Shader IDE")]
-[assembly: AssemblyCompany("Mirothe")]
-[assembly: AssemblyCopyright("Copyright 2026 Mirothe")]
+[assembly: AssemblyCompany("Thesnowbound")]
+[assembly: AssemblyCopyright("Copyright 2026 Thesnowbound, fork of Mirothe")]
 
 namespace ShaderIDE
 {
@@ -307,7 +307,7 @@ namespace ShaderIDE
             {
                 key.SetValue("DisplayName", AppName);
                 key.SetValue("DisplayVersion", version.TrimStart('v', 'V'));
-                key.SetValue("Publisher", "Mirothe");
+                key.SetValue("Publisher", "Thesnowbound");
                 key.SetValue("DisplayIcon", exe);
                 key.SetValue("InstallLocation", InstallDir);
                 key.SetValue("UninstallString", "\"" + Path.Combine(InstallDir, "Setup.exe") + "\" /uninstall");
