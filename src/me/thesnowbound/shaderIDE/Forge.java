@@ -81,7 +81,7 @@ final class Forge {
         StringBuilder dispatch = new StringBuilder();
         boolean skies = false;
         for (Project.Effect e : project.effects) {
-            String raw = Files.readString(project.dir.resolve(e.file()), StandardCharsets.UTF_8);
+            String raw = Library.expand(Files.readString(project.dir.resolve(e.file()), StandardCharsets.UTF_8));
             float[] box = Obfuscator.shapeSize(raw);
             float scale = Obfuscator.scale(raw);
             shapes.put(e.id(), new float[]{box[0] * scale, box[1] * scale, box[2] * scale});

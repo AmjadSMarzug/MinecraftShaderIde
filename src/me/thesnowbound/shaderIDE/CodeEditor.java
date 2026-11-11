@@ -1,6 +1,12 @@
 package me.thesnowbound.shaderIDE;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPopupMenu;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -20,6 +26,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoManager;
 import java.awt.BasicStroke;
+import java.awt.Component;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -28,6 +35,9 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -36,7 +46,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,6 +99,13 @@ final class CodeEditor extends JScrollPane {
     private final UndoManager undo = new UndoManager();
     private final Timer recolor = new Timer(150, e -> highlight());
     private final Highlighter.HighlightPainter squiggle = new Squiggle();
+    private record Suggestion(String text, String kind) {
+    }
+    private final JPopupMenu suggest = new JPopupMenu();
+    private final DefaultListModel<Suggestion> suggestModel = new DefaultListModel<>();
+    private final JList<Suggestion> suggestList = new JList<>(suggestModel);
+    private int wordStart;
+    private boolean accepting;
     private final Path file;
     private List<Preview.Problem> problems = List.of();
     private boolean dirty;
@@ -146,6 +166,50 @@ final class CodeEditor extends JScrollPane {
             public void changedUpdate(DocumentEvent e) { }
         });
         keys();
+        suggestList.setFont(mono(textSize()));
+        suggestList.setFixedCellHeight(22);
+        suggestList.setFocusable(false);
+        suggestList.setBackground(theme.raised());
+        suggestList.setForeground(theme.text());
+        suggestList.setSelectionBackground(theme.textSelect());
+        suggestList.setSelectionForeground(theme.strong());
+        suggestList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected, boolean focus) {
+                Suggestion s = (Suggestion) value;
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, s.text(), index, selected, false);
+                label.setFont(mono(textSize()));
+                label.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 8, 0, 8));
+                label.setText("<html>" + s.text() + "&nbsp;&nbsp;<font color='" + Fx.hex(theme.dim()) + "'>" + s.kind() + "</font></html>");
+                return label;
+            }
+        });
+        suggestList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int i = suggestList.locationToIndex(e.getPoint());
+                if (i >= 0) {
+                    suggestList.setSelectedIndex(i);
+                    acceptSuggestion();
+                    text.requestFocusInWindow();
+                }
+            }
+        });
+        suggest.setFocusable(false);
+        suggest.setBorder(javax.swing.BorderFactory.createLineBorder(theme.dim()));
+        suggest.add(new JScrollPane(suggestList));
+        text.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                hideSuggest();
+            }
+        });
+        text.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                hideSuggest();
+            }
+        });
         text.addCaretListener(e -> {
             getRowHeader().repaint();
             text.repaint();
@@ -193,6 +257,7 @@ final class CodeEditor extends JScrollPane {
         if (painting) return;
         dirty = true;
         recolor.restart();
+        if (!accepting) updateSuggestions();
         onChange.run();
         getRowHeader().repaint();
     }
@@ -207,6 +272,22 @@ final class CodeEditor extends JScrollPane {
             if (before.stripTrailing().endsWith("{")) indent += "    ";
             text.replaceSelection("\n" + indent);
         });
+        suggestKey(KeyEvent.VK_DOWN, () -> moveSuggestion(1));
+        suggestKey(KeyEvent.VK_UP, () -> moveSuggestion(-1));
+        suggestKey(KeyEvent.VK_ENTER, this::acceptSuggestion);
+        suggestKey(KeyEvent.VK_TAB, this::acceptSuggestion);
+        suggestKey(KeyEvent.VK_ESCAPE, this::hideSuggest);
+    }
+
+    // while the suggestion list is open these keys drive it, otherwise they do what they did before
+    private void suggestKey(int code, Runnable whenOpen) {
+        KeyStroke key = KeyStroke.getKeyStroke(code, 0);
+        Object name = text.getInputMap(JComponent.WHEN_FOCUSED).get(key);
+        Action previous = name == null ? null : text.getActionMap().get(name);
+        bind(key, () -> {
+            if (suggest.isVisible()) whenOpen.run();
+            else if (previous != null) previous.actionPerformed(new ActionEvent(text, ActionEvent.ACTION_PERFORMED, ""));
+        });
     }
 
     private void bind(KeyStroke key, Runnable action) {
@@ -218,6 +299,88 @@ final class CodeEditor extends JScrollPane {
                 action.run();
             }
         });
+    }
+
+    private static boolean wordChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
+    }
+
+    // the words offered while typing: GLSL types and keywords, the built-in functions, the library's functions
+    // and every name already written in this file. offered when the word under the caret is two letters or more
+    private void updateSuggestions() {
+        int caret = text.getCaretPosition();
+        String all;
+        try {
+            all = doc.getText(0, doc.getLength());
+        } catch (BadLocationException e) {
+            return;
+        }
+        int start = caret;
+        while (start > 0 && wordChar(all.charAt(start - 1))) start--;
+        String prefix = all.substring(start, caret);
+        boolean directive = start > 0 && all.charAt(start - 1) == '#';
+        if (prefix.length() < 2 || Character.isDigit(prefix.charAt(0)) || directive) {
+            hideSuggest();
+            return;
+        }
+        wordStart = start;
+
+        Map<String, String> found = new LinkedHashMap<>();
+        for (String f : Library.functions()) found.putIfAbsent(f, "library");
+        for (String t : Obfuscator.TYPES) found.putIfAbsent(t, "type");
+        for (String k : Obfuscator.KEYWORDS) found.putIfAbsent(k, "keyword");
+        for (String b : BUILTINS) found.putIfAbsent(b, "builtin");
+        Matcher w = Pattern.compile("\\b[A-Za-z_]\\w*\\b").matcher(all);
+        while (w.find()) found.putIfAbsent(w.group(), "in file");
+
+        List<Suggestion> list = new ArrayList<>();
+        for (Map.Entry<String, String> e : found.entrySet()) {
+            String word = e.getKey();
+            if (word.equals(prefix) || !word.regionMatches(true, 0, prefix, 0, prefix.length())) continue;
+            list.add(new Suggestion(word, e.getValue()));
+            if (list.size() == 12) break;
+        }
+        if (list.isEmpty()) {
+            hideSuggest();
+            return;
+        }
+        suggestModel.clear();
+        list.forEach(suggestModel::addElement);
+        suggestList.setSelectedIndex(0);
+        try {
+            java.awt.geom.Rectangle2D r = text.modelToView2D(caret);
+            int h = Math.min(list.size(), 8) * suggestList.getFixedCellHeight() + 4;
+            suggest.setPreferredSize(new Dimension(260, Math.max(h, 24)));
+            suggest.show(text, (int) r.getX(), (int) (r.getY() + r.getHeight()));
+            suggest.pack();
+        } catch (BadLocationException e) {
+            hideSuggest();
+        }
+    }
+
+    private void moveSuggestion(int by) {
+        int i = Math.max(0, Math.min(suggestModel.size() - 1, suggestList.getSelectedIndex() + by));
+        suggestList.setSelectedIndex(i);
+        suggestList.ensureIndexIsVisible(i);
+    }
+
+    private void acceptSuggestion() {
+        Suggestion s = suggestList.getSelectedValue();
+        hideSuggest();
+        if (s == null) return;
+        int caret = text.getCaretPosition();
+        accepting = true;
+        try {
+            doc.remove(wordStart, caret - wordStart);
+            doc.insertString(wordStart, s.text(), null);
+        } catch (BadLocationException ignored) {
+        } finally {
+            accepting = false;
+        }
+    }
+
+    private void hideSuggest() {
+        suggest.setVisible(false);
     }
 
     private String lineBeforeCaret() {

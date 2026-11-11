@@ -123,6 +123,7 @@ final class Preview extends AWTGLCanvas {
     }
 
     void show(String effectSource, Map<String, String> defines) {
+        effectSource = Library.expand(effectSource);
         StringBuilder head = new StringBuilder();
         defines.forEach((k, v) -> head.append("#define ").append(k).append(' ').append(v).append('\n'));
         float[] size = Obfuscator.shapeSize(effectSource);

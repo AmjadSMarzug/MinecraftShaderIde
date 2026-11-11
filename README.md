@@ -31,6 +31,30 @@ An effect is one `.glsl` file with a main function. Which function it has decide
 
 The examples in `resources/examples/` show each kind, and the Learn tab in the app walks through them.
 
+### Built-in functions
+
+Common shader helpers come with the app. Call them directly and they're added for you, or import a module by name at the top of the file:
+
+| Module | Functions |
+|---|---|
+| `hash` | `vHash1(float)`, `vHash2(vec2)`, `vHash3(vec3)`, `vHash22(vec2)` |
+| `noise` | `vNoise(vec2)`, `vNoise3(vec3)` (uses `hash`) |
+| `fbm` | `vFbm(vec2)`, `vFbm3(vec3)` (uses `noise`) |
+| `voronoi` | `vVoronoi(vec2)`, `vVoronoiEdge(vec2)` (uses `hash`) |
+| `rotate` | `vRotate(vec2, float)` |
+| `palette` | `vPalette(float)` |
+| `sdf` | `vSdSphere(vec3, float)`, `vSdBox(vec3, vec3)`, `vSdTorus(vec3, vec2)` |
+
+```glsl
+#import noise fbm palette
+
+vec3 sky(vec3 dir, float time) {
+    return vPalette(vFbm(dir.xz * 3.0 + time * 0.1)) * 0.5 + 0.2;
+}
+```
+
+A call to a built-in function without an `#import` adds its module automatically. Functions you define yourself with the same name win over the built-in ones. Imports don't change the line numbers in the editor.
+
 ## Running
 
 Shader IDE runs on Windows, Linux and macOS (Intel and Apple Silicon) with Java 21 or newer. The live preview needs OpenGL 3.3.

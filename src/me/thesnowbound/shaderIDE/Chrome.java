@@ -20,6 +20,8 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -226,6 +228,7 @@ final class Chrome {
             private final Entry entry;
             private final boolean on;
             private boolean hot;
+            private boolean overClose;
             private final Fx.Glide glow = new Fx.Glide(this, 0);
 
             Chip(Entry entry, boolean on) {
@@ -246,6 +249,7 @@ final class Chrome {
                     public void mouseExited(MouseEvent e) {
                         hot = false;
                         glow.to(0);
+                        setOverClose(false);
                     }
 
                     @Override
@@ -265,6 +269,19 @@ final class Chrome {
                         popup(e);
                     }
                 });
+                addMouseMotionListener(new MouseMotionAdapter() {
+                    @Override
+                    public void mouseMoved(MouseEvent e) {
+                        setOverClose(entry != null && entry.closable() && e.getX() > getWidth() - 28);
+                    }
+                });
+            }
+
+            private void setOverClose(boolean over) {
+                if (over != overClose) {
+                    overClose = over;
+                    repaint();
+                }
             }
 
             private void popup(MouseEvent e) {
@@ -304,9 +321,14 @@ final class Chrome {
                     g2.setFont(chipFont());
                     g2.setColor(on ? t.strong() : Fx.mix(t.dim(), t.text(), glow.get()));
                     g2.drawString(text(), 42, h / 2f + 5);
-                    if (entry.closable() && (glow.get() > 0.05 || on)) {
-                        if (!on) g2.setColor(Fx.mix(t.frame(), t.text(), glow.get()));
+                    if (entry.closable()) {
                         int x = getWidth() - 20, m = h / 2;
+                        if (overClose) {
+                            g2.setColor(Fx.mix(t.frame(), t.text(), 0.22f));
+                            g2.fill(new Ellipse2D.Float(x - 10, m - 10, 20, 20));
+                        }
+                        double bright = overClose ? 1.0 : Math.max(glow.get(), on ? 0.6 : 0.35);
+                        g2.setColor(on && !overClose ? t.strong() : Fx.mix(t.dim(), t.text(), bright));
                         g2.setStroke(new java.awt.BasicStroke(1.4f));
                         g2.drawLine(x - 4, m - 4, x + 4, m + 4);
                         g2.drawLine(x - 4, m + 4, x + 4, m - 4);
