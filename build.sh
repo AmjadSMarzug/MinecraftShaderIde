@@ -62,3 +62,15 @@ case "$OS" in
     *) tar -czf "out/dist/$NAME.tar.gz" -C out/app "$APP"; FILE=$NAME.tar.gz ;;
 esac
 echo "built out/dist/$FILE"
+
+# a Linux rpm too, when the rpm tools are installed (Fedora has them, the release workflow installs them)
+if [ "$(uname -s)" = Linux ] && command -v rpmbuild >/dev/null 2>&1; then
+    rm -rf out/rpm && mkdir -p out/rpm
+    jpackage --type rpm --name "Shader IDE" --app-version "$VERSION" --vendor Thesnowbound \
+        --input out/jpkg --main-jar "Shader IDE.jar" --main-class me.thesnowbound.shaderIDE.Main \
+        --icon packaging/icon.png --linux-shortcut --linux-package-name shader-ide \
+        --linux-app-category Development --description "An IDE for Minecraft core shaders" \
+        --license-file LICENSE --dest out/rpm
+    cp out/rpm/*.rpm out/dist/
+    echo "built out/dist/$(cd out/dist && ls *.rpm)"
+fi
