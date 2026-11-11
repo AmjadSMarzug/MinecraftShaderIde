@@ -131,6 +131,10 @@ final class Learn {
                     <p>Most maths works on every part of a vector at once. <code>vec3(1.0, 0.5, 0.2) * 2.0</code> doubles all three parts,
                     and adding two vec3s adds them part by part. Functions like <code>sin</code>, <code>max</code> and <code>mix</code>
                     work part by part too. Both sides have to be the same size: you can't add a vec2 to a vec3.</p>
+<h2>Working through the tasks</h2>
+                    <p>The first tasks fix a broken line and then use the value that was worked out but never used. Next you make a
+                    float of your own and a vector from parts. The last two cover <code>if</code>, which only runs code when a
+                    condition is true, and writing your own function. Each one builds on the last, so keep the shader working as you go.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Delete a <code>;</code> on purpose and read the message it gives.</li>
@@ -158,7 +162,11 @@ final class Learn {
                             "return color.bgr * brightness;", has("\\w\\.([rgba]{2,4}|[xyzw]{2,4})\\b")),
                     step("Write your own function", "Above sky, write a small function that takes a color and gives a changed one back, then use it in the return.",
                             "vec3 warm(vec3 c) {\n    return c * vec3(1.2, 0.9, 0.7);\n}\n\n// and in sky():\nreturn warm(color.bgr * brightness);",
-                            has("(vec[234]|float)\\s+(?!sky\\b)\\w+\\s*\\([^)]*\\)\\s*\\{")))),
+                            has("(vec[234]|float)\\s+(?!sky\\b)\\w+\\s*\\([^)]*\\)\\s*\\{")),
+                    step("Check a value with if", "An if runs its block only when the condition is true. Here the color only goes bright above the horizon.",
+                            "if (height > 0.5) {\n    color = vec3(1.0, 0.95, 0.8);\n}", has("if\\s*\\(")),
+                    step("Build a new vector from parts", "Swizzling also works on the left side of a vector: vec3(color.b, color.g, color.r) is the same color with red and blue swapped, written out in full.",
+                            "vec3 flipped = vec3(color.b, color.g, color.r);", has("vec3\\s*\\(\\s*\\w+\\.b\\s*,\\s*\\w+\\.g")))),
 
             new Lesson("lesson_first_sky", "Your first sky", "colors, mix and the horizon", 6, """
                     <p>Everything in a sky effect happens inside one function, <code>sky</code>. Minecraft calls it once for
@@ -190,6 +198,10 @@ final class Learn {
                     <li><code>float up = 1;</code> is an error, write <code>1.0</code>.</li>
                     <li>Without its own ground color, everything below the horizon is just the horizon color again.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>You start with one color mix and finish with a sky that has a ground, a glow on the horizon and a slow change
+                    over time. Each task changes only one thing, so when something breaks you know which change caused it. Keep <code>dir.y</code>
+                    in mind: almost every trick on this page is just a different way of bending that one number.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Use two mixes for three colors: one from the horizon to the middle, one from the middle to the top.</li>
@@ -214,7 +226,11 @@ final class Learn {
                     step("Give the ground its own color", "Check dir.y and send back a different color for everything below the horizon.",
                             "if (dir.y < 0.0) return vec3(0.12, 0.09, 0.08);", has("dir\\.y\\s*<|dir\\.y\\s*<=").or(count("mix\\s*\\(", 2))),
                     step("Make it breathe with time", "sin(time) swings from -1 to 1 and back every few seconds. Add a little of it to the mix amount.",
-                            "float up = max(dir.y + sin(time) * 0.1, 0.0);", uses("time")))),
+                            "float up = max(dir.y + sin(time) * 0.1, 0.0);", uses("time")),
+                    step("Soften the horizon", "smoothstep(0.0, 0.3, dir.y) rises from 0 to 1 over the first 0.3 above the horizon, so the fade is smooth instead of a straight line.",
+                            "float band = smoothstep(0.0, 0.3, dir.y);", has("smoothstep\\s*\\(\\s*-?0\\.?\\d*\\s*,\\s*-?\\d*\\.\\d+\\s*,\\s*dir\\.y")),
+                    step("Add a glow along the horizon", "exp(-abs(dir.y) * 8.0) is 1 right on the horizon and dies away quickly above and below it. Add it in a warm color.",
+                            "float glow = exp(-abs(dir.y) * 8.0);\nreturn mix(vec3(0.1, 0.2, 0.5), vec3(1.0, 0.6, 0.3), up) + vec3(1.0, 0.5, 0.2) * glow * 0.4;", has("exp\\s*\\(\\s*-\\s*abs\\s*\\(\\s*dir\\.y")))),
 
             new Lesson("lesson_sun", "A sun", "dot, pow and glow", 8, """
                     <p><code>dot(a, b)</code> of two directions tells you how much they agree: 1 when they point the same way,
@@ -243,6 +259,10 @@ final class Learn {
                     black or flickering pixels. Keeping it above zero with <code>max</code> prevents that.</li>
                     <li>Forgetting <code>normalize</code> makes the sun the wrong size, or missing completely.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>The sun is built in layers: the measure of closeness, then a tight disc, then two softer glows, then the color of the
+                    sky around it. Once it works, the last tasks move it through the sky and darken the world when it sets. The new tasks add
+                    a moon on the far side, and a sun with a hard edge instead of a soft one.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Swap the soft disc for a hard edged one with smoothstep.</li>
@@ -270,7 +290,11 @@ final class Learn {
                     step("Let it rise and set", "Put time into sunDir, so its height swings up and down.",
                             "vec3 sunDir = normalize(vec3(0.0, sin(time * 0.2) * 0.4, -1.0));", has("(?i)sun\\w*\\s*=[^;]*\\btime\\b")),
                     step("Darken the sky when the sun is low", "sunDir.y tells you how high the sun is. Scale the sky color by it on the line right after color is made, before any of the sun is added, so the sun itself stays bright.",
-                            "vec3 color = mix(vec3(0.9, 0.5, 0.3), vec3(0.1, 0.15, 0.4), max(dir.y, 0.0));\ncolor *= 0.25 + 0.75 * clamp(sunDir.y * 3.0, 0.0, 1.0);", has("(?i)sun\\w*\\.y")))),
+                            "vec3 color = mix(vec3(0.9, 0.5, 0.3), vec3(0.1, 0.15, 0.4), max(dir.y, 0.0));\ncolor *= 0.25 + 0.75 * clamp(sunDir.y * 3.0, 0.0, 1.0);", has("(?i)sun\\w*\\.y")),
+                    step("Add a moon on the far side", "The opposite of a direction is its negative, so -sunDir points the other way across the sky. Make the moon smaller and pale blue.",
+                            "vec3 moonDir = -sunDir;\nfloat moon = pow(max(dot(dir, moonDir), 0.0), 800.0);\ncolor += vec3(0.7, 0.8, 1.0) * moon;", has("-\\s*sunDir")),
+                    step("Give the sun a hard edge", "smoothstep between two numbers very close to 1 turns the soft disc into a sharp-edged one, like the real sun.",
+                            "float disc = smoothstep(0.9995, 0.9998, sun);\ncolor += vec3(1.0, 0.95, 0.8) * disc;", has("smoothstep\\s*\\(\\s*0\\.999")))),
 
             new Lesson("lesson_clouds", "Noise clouds", "noise, octaves and a cloud ceiling", 12, """
                     <p>Random numbers per pixel only give you static. <b>Value noise</b> picks random numbers at the corners of a
@@ -302,6 +326,9 @@ final class Learn {
                     <li>No horizon fade leaves a shimmering line where the clouds meet the ground.</li>
                     <li>Adding time inside the loop makes every octave drift at a different speed. Sometimes that looks good, but it's easy to do by accident.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>The tasks go from one noise call, to a stack of octaves, to a cloud ceiling, to drifting and cutting out shapes. The new
+                    tasks add lighting that fakes sunlight on one side of a cloud and a second, faster layer above the first.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Two cloud layers at different heights drifting at different speeds.</li>
@@ -343,7 +370,11 @@ final class Learn {
                     step("Cut out cloud shapes", "smoothstep(0.45, 0.7, n) turns the soft noise into clouds with clear gaps of sky between them.",
                             "float cover = smoothstep(0.45, 0.7, n);\nreturn mix(blue, vec3(1.0), cover);", has("smoothstep\\s*\\(")),
                     step("Fade them out at the horizon", "A second smoothstep on dir.y hides the squashed clouds right at the edge.",
-                            "float cover = smoothstep(0.45, 0.7, n);\ncover *= smoothstep(0.0, 0.25, dir.y);\nreturn mix(blue, vec3(1.0), cover);", has("smoothstep\\s*\\([^;]*dir\\.y")))),
+                            "float cover = smoothstep(0.45, 0.7, n);\ncover *= smoothstep(0.0, 0.25, dir.y);\nreturn mix(blue, vec3(1.0), cover);", has("smoothstep\\s*\\([^;]*dir\\.y")),
+                    step("Light the cloud from the sun's side", "Look the noise up a little toward the sun. Where that value is lower, the cloud's edge faces the light and you can brighten it.",
+                            "float lit = noise(p + vec3(0.2, 0.4, 0.0));", has("noise\\s*\\(\\s*p\\s*\\+")),
+                    step("Add a higher, faster layer", "A second ceiling at half the height moves at a different speed, so the two layers slide past each other.",
+                            "vec2 high = dir.xz / max(dir.y, 0.05) * 0.5;", has("dir\\.xz\\s*/\\s*max\\s*\\([^;]*\\)\\s*\\*\\s*0\\.5")))),
 
             new Lesson("lesson_stars", "Stars", "cells, floor and fract", 10, """
                     <p>Stars are a different kind of random: a few sharp points scattered across the sky. The trick is to cut
@@ -375,6 +406,10 @@ final class Learn {
                     <li>Stars that look like a grid: add jitter.</li>
                     <li>Stars that blink together: each one needs its own phase from the hash.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>Each star is decided by its own cell, so the tasks are about changing that decision: which cells get a star, how
+                    big it is, what color, and whether it twinkles. The new tasks fade the stars toward the horizon and add a rare set of
+                    big, bright ones.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>A milky way: multiply the chance of a star by a band, like <code>exp(-abs(dir.z) * 4.0)</code>.</li>
@@ -404,7 +439,11 @@ final class Learn {
                     step("Give each star its own color", "Hash the cell again with an offset and use it to pick between blue white and warm white, then multiply the star by that tint in the return.",
                             "vec3 tint = mix(vec3(0.7, 0.8, 1.0), vec3(1.0, 0.85, 0.7), hash(cell + 7.0));\nreturn night + tint * star;", count("\\bhash\\s*\\(", 3)),
                     step("Add a second, finer layer", "Do it all again at a higher cell count and half the brightness for faint background stars, and add them in the return too.",
-                            "vec3 fine = floor(dir * 200.0);\nfloat faint = step(0.98, hash(fine)) * (1.0 - smoothstep(0.0, 0.5, length(fract(dir * 200.0) - 0.5)));\nreturn night + tint * star + vec3(faint * 0.5);", count("floor\\s*\\(", 2)))),
+                            "vec3 fine = floor(dir * 200.0);\nfloat faint = step(0.98, hash(fine)) * (1.0 - smoothstep(0.0, 0.5, length(fract(dir * 200.0) - 0.5)));\nreturn night + tint * star + vec3(faint * 0.5);", count("floor\\s*\\(", 2)),
+                    step("Keep stars off the horizon", "Multiply the star by a smoothstep on dir.y, so stars fade out as you look down toward the ground.",
+                            "star *= smoothstep(0.0, 0.3, dir.y);", has("star\\s*\\*=\\s*smoothstep")),
+                    step("Make a few stars big and bright", "Only about one cell in a thousand gets this rare, bigger star. A higher threshold means fewer cells qualify.",
+                            "float big = step(0.999, hash(cell + 11.0)) * 3.0;", has("step\\s*\\(\\s*0\\.99[89]")))),
 
             new Lesson("lesson_warp", "Domain warping", "noise that bends itself", 12, """
                     <p>fbm on its own looks like fog. To get swirls and gas that looks like it's flowing, you
@@ -438,6 +477,10 @@ final class Learn {
                     <li>Animating everything turns it to mush. Move only the warp and let the final pattern follow.</li>
                     <li>A huge strength makes the pattern noisy rather than swirly.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>The first tasks build one warp, feed it into the final lookup and make it move. The new tasks warp the warp a second
+                    time, which makes folds inside folds, and color the result by how far the space was pushed, so the folds show up
+                    as veins.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Marble: warp a pattern of stripes, <code>sin(p.x * 10.0)</code>, instead of fbm.</li>
@@ -487,7 +530,11 @@ final class Learn {
                     step("Color it in two tones", "mix a dark color and a bright one using n, and return that instead of vec3(n).",
                             "vec3 color = mix(vec3(0.05, 0.0, 0.1), vec3(0.6, 0.2, 0.8), n);\nreturn color;", has("mix\\s*\\(\\s*vec3")),
                     step("Light up the thickest parts", "pow of n with a high power only lets the brightest spots through. Add them on top in a warm color.",
-                            "color += vec3(1.0, 0.7, 0.4) * pow(n, 4.0) * 3.0;\nreturn color;", has("pow\\s*\\(")))),
+                            "color += vec3(1.0, 0.7, 0.4) * pow(n, 4.0) * 3.0;\nreturn color;", has("pow\\s*\\(")),
+                    step("Warp the warp", "Feed the first warp back in to build a second one. Each level adds another fold.",
+                            "vec3 warp2 = vec3(fbm(p + warp), fbm(p + warp + vec3(3.1, 1.7, 0.4)), fbm(p + warp + vec3(9.2, 5.5, 2.8)));", has("fbm\\s*\\(\\s*p\\s*\\+\\s*warp\\b")),
+                    step("Color by how far the space was pushed", "length(warp) is big where the warp moved things the most. Mixing with it lights up the folds like veins.",
+                            "color = mix(color, vec3(1.0, 0.9, 0.6), length(warp) * 0.3);", has("length\\s*\\(\\s*warp")))),
 
             new Lesson("lesson_palettes", "Color like a pro", "cosine palettes and tone mapping", 8, """
                     <p>Picking every color by hand gets old. A <b>cosine palette</b> turns one number into a whole smooth range
@@ -523,6 +570,9 @@ final class Learn {
                     <li>Adding more light after tone mapping brings the clipping back. Tone map last.</li>
                     <li>A big <code>c</code> makes the colors cycle so fast they look like stripes.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>You build the palette function first, then use it, animate it and finally tone map. The new tasks are about the
+                    brightness of the whole sky: a square root to lift the dark parts, and one exposure value to control everything at once.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Color the clouds from lesson 4 with a palette.</li>
@@ -546,7 +596,11 @@ final class Learn {
                     step("Animate the hues", "Add time to what you pass in, and the colors cycle around.",
                             "vec3 color = palette(t + time * 0.05) * 1.5;", uses("time")),
                     step("Tone map the result", "Return 1.0 - exp(-color) instead of the raw color and watch the clipping go away.",
-                            "return 1.0 - exp(-color * 1.5);", has("exp\\s*\\(\\s*-")))),
+                            "return 1.0 - exp(-color * 1.5);", has("exp\\s*\\(\\s*-")),
+                    step("Brighten the blends with a square root", "The square root of a color lifts the darks, which stops the middle of a gradient looking muddy.",
+                            "color = sqrt(color);", has("sqrt\\s*\\(\\s*color")),
+                    step("Pick the exposure in one place", "Put the exposure in its own variable, so one number tunes the whole sky.",
+                            "float exposure = 1.5;\nreturn 1.0 - exp(-color * exposure);", has("\\bexposure\\b")))),
 
             new Lesson("lesson_object", "Your first object", "raymarching inside the item", 10, """
                     <p>An object draws a 3D shape inside the item's box, which goes from -1 to 1 on every axis. For every pixel
@@ -585,6 +639,10 @@ final class Learn {
                     <li>A shape bigger than the box gets cut off flat at its walls.</li>
                     <li>Returning a color with alpha 1 when the ray misses draws a black box around everything.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>Each task changes one part of the ray march: the shape, its size, how it spins and how it's lit. The new tasks add
+                    a pattern across the surface and a fog that thickens with distance, so the object sits in the air instead of
+                    floating in a void.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Move the sphere round in a circle with <code>cos(time)</code> and <code>sin(time)</code>.</li>
@@ -620,7 +678,11 @@ final class Learn {
                             "float back = max(dot(n, normalize(vec3(-0.6, 0.2, -0.5))), 0.0);\nreturn vec4(vec3(0.3, 0.6, 1.0) * (0.2 + light) + vec3(1.0, 0.4, 0.2) * back * 0.5, 1.0);", count("\\bdot\\s*\\(", 2)),
                     step("Give it a glow when the ray misses", "Keep the smallest distance the ray ever had. Three lines: one before the loop, one in the loop right after d, and the last return swapped for a soft alpha.",
                             "float closest = 9.0;\nfor (int i = 0; i < 64; i++) {\n    vec3 p = origin + dir * t;\n    float d = length(p) - 0.5;\n    closest = min(closest, d);\n    // ... the rest of the loop stays the same\n}\nreturn vec4(0.3, 0.6, 1.0, exp(-closest * 12.0) * 0.6);",
-                            has("min\\s*\\(").and(has("exp\\s*\\("))))),
+                            has("min\\s*\\(").and(has("exp\\s*\\("))),
+                    step("Stripes across the surface", "fract(p.y * 8.0) repeats every eighth of a unit up the shape, and step turns it into hard bands.",
+                            "float stripes = step(0.5, fract(p.y * 8.0));\ncolor *= 0.7 + 0.3 * stripes;", has("fract\\s*\\(\\s*p\\.y")),
+                    step("Fog that gets thicker with distance", "t is how far the ray has travelled, so exp(-t * 0.8) fades the shape into the background the further away it is.",
+                            "color = mix(vec3(0.5, 0.6, 0.7), color, exp(-t * 0.8));", has("exp\\s*\\(\\s*-\\s*t\\b")))),
 
             new Lesson("lesson_shapes", "Combining shapes", "union, cut and smooth blends", 12, """
                     <p>Distance functions combine with plain math. <code>min(a, b)</code> keeps whichever surface is closer,
@@ -655,6 +717,9 @@ final class Learn {
                     <li>Carving with the wrong sign removes everything outside the cutter instead of inside it.</li>
                     <li>Heavy twisting with full steps leaves holes and missing chunks.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>You build a shape out of parts, then carve, blend, repeat and animate it. The new tasks repeat a copy of the shape
+                    across space with <code>mod</code>, and twist it, which is the fastest way to get complex forms from one simple one.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>A twisted box.</li>
@@ -697,7 +762,11 @@ final class Learn {
                     step("Add a ring", "A torus is a circle in the xz plane with thickness. length(p.xz) gives the distance from the middle.",
                             "vec2 q = vec2(length(p.xz) - 0.7, p.y);\nfloat ring = length(q) - 0.06;\nreturn min(max(smin(ball, box, 0.15), -hole), ring);", has("length\\s*\\(\\s*p\\.xz\\s*\\)")),
                     step("Animate it", "shape() can't see time, and it's called seven times, so instead of passing it everywhere keep it in a variable above shape. Set it first thing in object, then move a piece with it, like the ring bobbing up and down.",
-                            "float now;   // above shape()\n\nnow = time;   // first line of object()\n\nvec2 q = vec2(length(p.xz) - 0.7, p.y - sin(now) * 0.2);   // in shape()", uses("time")))),
+                            "float now;   // above shape()\n\nnow = time;   // first line of object()\n\nvec2 q = vec2(length(p.xz) - 0.7, p.y - sin(now) * 0.2);   // in shape()", uses("time")),
+                    step("Repeat the shape", "mod(p + half, c) - half folds space so the shape copies itself every c units along x.",
+                            "vec3 q = mod(p + vec3(0.5), vec3(1.0)) - vec3(0.5);", has("mod\\s*\\(\\s*p")),
+                    step("Twist it", "Turning p.xz by an angle that depends on p.y twists the shape like a towel. Use a small angle so it doesn't tear.",
+                            "float a = p.y * 2.0;\nvec2 twisted = mat2(cos(a), -sin(a), sin(a), cos(a)) * p.xz;", has("cos\\s*\\(\\s*p\\.y|a\\s*=\\s*p\\.y")))),
 
             new Lesson("lesson_lighting", "Lighting objects", "diffuse, specular, rim and occlusion", 10, """
                     <p>The <b>normal</b> is the direction a surface faces. You can get it from any distance function by checking
@@ -732,6 +801,10 @@ final class Learn {
                     little outside it: <code>p + n * 0.01</code>.</li>
                     <li>Forgetting ambient light makes the dark side pure black.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>Lighting is layers added together: diffuse for the main light, ambient so nothing is pure black, specular for the
+                    shine, rim for the edges and a fake occlusion to darken creases. The new tasks add a warm light bouncing up from the
+                    ground and a tighter shine for polished metal.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Add a hard shadow on the ring from the ball.</li>
@@ -776,7 +849,11 @@ final class Learn {
                     step("Add a rim light", "Edges that face away from the camera get brighter.",
                             "float rim = pow(1.0 - max(dot(n, -dir), 0.0), 3.0);\ncolor += vec3(0.4, 0.6, 1.0) * rim * 0.6;", has("pow\\s*\\(\\s*1\\.0\\s*-|1\\.0\\s*-\\s*(max|abs|clamp)\\s*\\(\\s*dot")),
                     step("Fake ambient occlusion", "Scale everything by how many steps the ray took to get here.",
-                            "float occlusion = 1.0 - float(i) / 80.0;\ncolor *= occlusion;", has("float\\s*\\(\\s*\\w+\\s*\\)\\s*/")))),
+                            "float occlusion = 1.0 - float(i) / 80.0;\ncolor *= occlusion;", has("float\\s*\\(\\s*\\w+\\s*\\)\\s*/")),
+                    step("Add a warm bounce from below", "dot with -light lights the underside. Sunlight bounces off the ground, so give that light a warm color.",
+                            "float bounce = max(dot(n, -light), 0.0);\ncolor += vec3(0.6, 0.4, 0.2) * bounce * 0.3;", has("dot\\s*\\(\\s*n\\s*,\\s*-\\s*light")),
+                    step("Make the shine tighter", "A bigger power on the specular term makes the highlight smaller and sharper, like polished metal.",
+                            "float tight = pow(max(dot(reflect(dir, n), light), 0.0), 64.0);\ncolor += vec3(1.0) * tight;", has("pow\\s*\\([^;]*,\\s*64\\.0")))),
 
             new Lesson("lesson_glow", "Glow and see-through", "light that isn't a surface", 10, """
                     <p>Not everything has a surface. Plasma, magic and energy are light floating in the air. Instead of stopping
@@ -812,6 +889,9 @@ final class Learn {
                     <li>Too few steps make the glow look like stacked slices.</li>
                     <li>Forgetting to tone map turns the core into a flat white blob.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>Glow is built by adding light at many points along the ray. The first tasks add a core, a ring and a pulse, then
+                    tone map the result. The new tasks add a long soft halo, and a fine grain so the glow doesn't show bands.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Plasma: multiply the core's glow by a moving noise.</li>
@@ -842,7 +922,11 @@ final class Learn {
                     step("Make it pulse", "Make a pulse from sin(time) and use it to grow and shrink the core. This replaces the core line in the loop.",
                             "float pulse = 0.8 + 0.2 * sin(time * 3.0);\nglow += vec3(1.0, 0.6, 0.2) * exp(-length(p) * 8.0 / pulse) * 0.05;", uses("time")),
                     step("Tone map before returning", "1.0 - exp(-glow) keeps the core from clipping into a flat white blob. Put it after the loop, before the alpha is worked out.",
-                            "glow = 1.0 - exp(-glow * 1.5);\nfloat alpha = clamp(max(glow.r, max(glow.g, glow.b)), 0.0, 1.0);", has("1\\.0\\s*-\\s*exp\\s*\\(")))),
+                            "glow = 1.0 - exp(-glow * 1.5);\nfloat alpha = clamp(max(glow.r, max(glow.g, glow.b)), 0.0, 1.0);", has("1\\.0\\s*-\\s*exp\\s*\\(")),
+                    step("Add a faint halo", "1.0 / (1.0 + d * d) falls off more slowly than an exponential, so it leaves a long soft tail around the core.",
+                            "glow += vec3(0.5, 0.2, 0.8) * (1.0 / (1.0 + dot(p, p) * 20.0)) * 0.01;", has("1\\.0\\s*/\\s*\\(\\s*1\\.0\\s*\\+")),
+                    step("Break the glow up with grain", "gl_FragCoord is the pixel's position on the screen. A hash of it changes every pixel, so the glow gets a fine speckle instead of smooth bands.",
+                            "float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);\nglow *= 0.9 + 0.1 * grain;", has("gl_FragCoord")))),
 
             new Lesson("lesson_surface", "Your first surface", "uv, grids, holes and edge glow", 10, """
                     <p>A surface paints the faces of the item itself, so the item becomes a screen, a sign, a portal or a wall.
@@ -878,6 +962,10 @@ final class Learn {
                     <li>A pattern flipped on some faces: that face's uv runs the other way, use pos for it instead.</li>
                     <li>On panel and floor shapes the thin edges are skipped, so don't put anything important there.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>A surface is a flat picture on the face of the item, drawn from <code>uv</code>. The first tasks draw a grid, scroll
+                    it, cut the face into a circle, add an edge glow and make it see-through. The new tasks add ripples that spread from the
+                    middle and a frame around the edge of the face.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>A screen with moving scanlines.</li>
@@ -904,7 +992,11 @@ final class Learn {
                             "float rim = pow(1.0 - abs(dot(normal, view)), 2.0);\ncolor += vec3(0.3, 0.9, 1.0) * rim;\nreturn vec4(color, 1.0);",
                             has("dot\\s*\\(\\s*(normal\\s*,\\s*view|view\\s*,\\s*normal)")),
                     step("Make it see-through", "Return an alpha under 1 and the world shows through, like a hologram.",
-                            "return vec4(color, 0.75);", has("return\\s+vec4\\s*\\([^;]*,\\s*0?\\.\\d+\\s*\\)\\s*;")))),
+                            "return vec4(color, 0.75);", has("return\\s+vec4\\s*\\([^;]*,\\s*0?\\.\\d+\\s*\\)\\s*;")),
+                    step("Ripples from the middle", "sin of the distance from the middle, minus time, sends rings outward. Mix them into the color as a faint pattern.",
+                            "float ripple = 0.5 + 0.5 * sin(length(uv - 0.5) * 40.0 - time * 4.0);", has("sin\\s*\\(\\s*length\\s*\\(\\s*uv")),
+                    step("Frame the face", "min(uv.x, 1.0 - uv.x) is small near the left and right edges, so the smallest of all four is small near any edge. A thin line there frames the panel.",
+                            "float frame = smoothstep(0.02, 0.0, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));", has("min\\s*\\(\\s*min\\s*\\(\\s*uv\\.x")))),
 
             new Lesson("lesson_material", "Your first material", "repainting an item's pixels", 10, """
                     <p>A material keeps the item's normal flat sprite and repaints every pixel of it. <code>texel</code> is that
@@ -938,6 +1030,10 @@ final class Learn {
                     <li>Returning alpha 1 everywhere turns the transparent area into a solid square.</li>
                     <li>Smooth, unsnapped effects look out of place next to blocky vanilla items.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>A material keeps the item's own pixels and repaints them. The first tasks tint, snap, animate and shade the pixels, then add
+                    a glint. The new tasks use the sprite's brightness as a mask, so only the bright pixels glow, and sweep a glint diagonally
+                    across the item.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Lava only on the bright parts, using a brightness mask.</li>
@@ -964,7 +1060,11 @@ final class Learn {
                             has("dot\\s*\\(\\s*texel|texel\\.[rgb]\\b(?!g)")),
                     step("Make it glint as you turn", "Reflect the view off the item and see how close it bounces toward a light. Add that as a highlight before the return.",
                             "float glint = pow(max(dot(reflect(view, normal), normalize(vec3(0.4, 0.8, 0.4))), 0.0), 16.0);\ncolor += vec3(1.0) * glint;\nreturn vec4(color, texel.a);",
-                            has("reflect\\s*\\(|dot\\s*\\([^;]*\\bview\\b")))),
+                            has("reflect\\s*\\(|dot\\s*\\([^;]*\\bview\\b")),
+                    step("Only glow on the bright parts", "The brightness of the texel is a mask. smoothstep picks out the bright pixels, so the dark parts keep their own color.",
+                            "float mask = smoothstep(0.6, 0.8, dot(texel.rgb, vec3(0.299, 0.587, 0.114)));", has("smoothstep\\s*\\([^;]*texel")),
+                    step("Sweep a glint across diagonally", "uv.x + uv.y is the same along every diagonal, so a band across it that moves with time sweeps across the item.",
+                            "float band = smoothstep(0.08, 0.0, abs(uv.x + uv.y - fract(time * 0.3) * 2.0));", has("abs\\s*\\(\\s*uv\\.x\\s*\\+\\s*uv\\.y").and(uses("time"))))),
 
             new Lesson("lesson_overlay", "Your first overlay", "vignettes, pulses and the aspect trap", 10, """
                     <p>An overlay is laid over everything the player sees, like rain on the lens or the red edges you get at low
@@ -1001,6 +1101,10 @@ final class Learn {
                     <li>Returning a color with alpha 1 everywhere covers the whole world.</li>
                     <li>Forgetting the aspect fix stretches every circle into an oval.</li>
                     </ul>
+<h2>Working through the tasks</h2>
+                    <p>An overlay covers the screen. The first tasks darken the edges, keep the shape round on a wide window, pulse it,
+                    tint it and pin a spot to the world. The new tasks fade the whole effect in when it starts and add raindrops on the
+                    glass, made from cells on <code>screen</code>.</p>
                     <h2>Try this</h2>
                     <ul>
                     <li>Snow drifting past, placed with <code>dir</code> so it stays in the world.</li>
@@ -1025,7 +1129,11 @@ final class Learn {
                             "return vec4(0.6, 0.0, 0.05, smoothstep(0.6, 1.2, edge) * (0.6 + 0.4 * beat));", has("return\\s+vec4\\s*\\(\\s*(0?\\.0*[1-9]|[1-9])")),
                     step("Pin something to the world", "dot(dir, d) is close to 1 when you look toward d. A glowing spot made from it stays in one place in the world while the vignette follows your view. Add it to the alpha.",
                             "float spot = pow(max(dot(dir, normalize(vec3(0.0, 0.2, -1.0))), 0.0), 300.0);\nfloat alpha = smoothstep(0.6, 1.2, edge) * (0.6 + 0.4 * beat) + spot;\nreturn vec4(0.6, 0.0, 0.05, alpha);",
-                            has("dot\\s*\\(\\s*dir\\b|dot\\s*\\([^;]*,\\s*dir\\s*\\)")))));
+                            has("dot\\s*\\(\\s*dir\\b|dot\\s*\\([^;]*,\\s*dir\\s*\\)")),
+                    step("Fade the whole effect in", "clamp(time / 2.0, 0.0, 1.0) grows from 0 to 1 over two seconds. Multiply the alpha by it so the effect eases in.",
+                            "float fade = clamp(time / 2.0, 0.0, 1.0);", has("clamp\\s*\\(\\s*time")),
+                    step("Raindrops from cells on the glass", "floor(screen * 12.0) cuts the window into cells. A hash of each cell decides whether a drop sits in it.",
+                            "vec2 cell = floor(screen * 12.0);\nfloat drop = step(0.9, fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453));", has("floor\\s*\\(\\s*screen")))));
 
     // one open task per lesson with no example, where you have to work it out yourself
     static final java.util.Map<String, String> CHALLENGES = java.util.Map.ofEntries(
