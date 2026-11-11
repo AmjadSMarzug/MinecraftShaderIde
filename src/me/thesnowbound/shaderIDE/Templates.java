@@ -62,7 +62,18 @@ final class Templates {
             new Example("night_vision", "Night Vision", "Overlay", "a green visor with grain and a dark edge"),
             new Example("ember_drift", "Ember Drift", "Overlay", "red embers rising past the view"),
             new Example("aurora_sky", "Aurora Sky", "Sky", "stars and a rippling green and violet aurora"),
-            new Example("sunset_sky", "Sunset Sky", "Sky", "a sinking sun over orange and purple clouds"));
+            new Example("sunset_sky", "Sunset Sky", "Sky", "a sinking sun over orange and purple clouds"),
+            new Example("water_drop", "Water Drop", "Object", "a bead of water with a bright highlight"),
+            new Example("galaxy_spiral", "Galaxy Spiral", "Object", "a spiral galaxy turning in the item"),
+            new Example("brick_wall", "Brick Wall", "Surface", "warm light sweeping over old bricks"),
+            new Example("rusted_plate", "Rusted Plate", "Surface", "riveted steel with rust creeping through"),
+            new Example("rainbow_foil", "Rainbow Foil", "Material", "holographic colour that shifts with your angle"),
+            new Example("frozen_ice", "Frozen Ice", "Material", "a frost coating with cracks running through"),
+            new Example("vignette_pulse", "Vignette Pulse", "Overlay", "red alarm edges pulsing in and out"),
+            new Example("rain_streaks", "Rain Streaks", "Overlay", "rain falling down the view"),
+            new Example("storm_clouds", "Storm Clouds", "Sky", "dark clouds with lightning inside them"),
+            new Example("synthwave_sky", "Synthwave", "Sky", "a striped neon sun and a grid running to the horizon"),
+            new Example("web_sunset", "Web Sunset", "Sky", "the sunset from the website, with a dark sea below"));
 
     static final String NEW_SURFACE = """
             // the line below picks the item's shape: cube, panel, pillar or floor
