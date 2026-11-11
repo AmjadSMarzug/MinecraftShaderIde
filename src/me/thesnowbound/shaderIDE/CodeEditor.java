@@ -49,6 +49,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -277,6 +278,7 @@ final class CodeEditor extends JScrollPane {
         suggestKey(KeyEvent.VK_ENTER, this::acceptSuggestion);
         suggestKey(KeyEvent.VK_TAB, this::acceptSuggestion);
         suggestKey(KeyEvent.VK_ESCAPE, this::hideSuggest);
+        bind(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), this::pickAtCaret);
     }
 
     // while the suggestion list is open these keys drive it, otherwise they do what they did before
@@ -299,6 +301,89 @@ final class CodeEditor extends JScrollPane {
                 action.run();
             }
         });
+    }
+
+    // a vec3 written with plain numbers, like vec3(0.2, 0.5, 1.0). these get a colour chip and a picker
+    private static final Pattern VEC3 = Pattern.compile(
+            "vec3\\s*\\(\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*,\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*,\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*\\)");
+    private static final int CHIP_X = 20;
+
+    private record Literal(int start, int end, float[] rgb) {
+        Color color() {
+            return new Color(Math.round(ColorWheel.clamp01(rgb[0]) * 255), Math.round(ColorWheel.clamp01(rgb[1]) * 255),
+                    Math.round(ColorWheel.clamp01(rgb[2]) * 255));
+        }
+    }
+
+    // the first literal in a piece of text, with its offsets moved to where the text starts in the document
+    private static Literal firstLiteral(String text, int offset) {
+        Matcher m = VEC3.matcher(text);
+        if (!m.find()) return null;
+        return new Literal(offset + m.start(), offset + m.end(), new float[] {
+                Float.parseFloat(m.group(1)), Float.parseFloat(m.group(2)), Float.parseFloat(m.group(3))});
+    }
+
+    // the literal the caret is inside, if there is one
+    private Literal literalAtCaret() {
+        int caret = text.getCaretPosition();
+        try {
+            String all = doc.getText(0, doc.getLength());
+            Matcher m = VEC3.matcher(all);
+            while (m.find()) {
+                if (caret >= m.start() && caret <= m.end()) return firstLiteral(m.group(), m.start());
+            }
+        } catch (BadLocationException ignored) {
+        }
+        return null;
+    }
+
+    // numbers are written out with at most two decimals, trailing zeros dropped, so 0.50 becomes 0.5
+    private static String number(float x) {
+        String n = String.format(Locale.ROOT, "%.2f", ColorWheel.clamp01(x));
+        n = n.replaceAll("0+$", "");
+        return n.endsWith(".") ? n + "0" : n;
+    }
+
+    // opens the colour wheel for one literal. every change rewrites its three numbers in the file
+    private void openPicker(Literal lit, java.awt.Component where, int x, int y) {
+        int[] span = {lit.start(), lit.end()};
+        javax.swing.JLabel readout = new javax.swing.JLabel();
+        javax.swing.JPopupMenu popup = new javax.swing.JPopupMenu();
+        popup.setLayout(new java.awt.BorderLayout());
+        ColorWheel wheel = new ColorWheel(lit.rgb(), rgb -> {
+            String value = "vec3(" + number(rgb[0]) + ", " + number(rgb[1]) + ", " + number(rgb[2]) + ")";
+            readout.setText(value);
+            writeLiteral(span, value);
+        });
+        readout.setFont(mono(textSize()));
+        readout.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 10, 6, 10));
+        readout.setText("vec3(" + number(lit.rgb()[0]) + ", " + number(lit.rgb()[1]) + ", " + number(lit.rgb()[2]) + ")");
+        popup.add(wheel, java.awt.BorderLayout.CENTER);
+        popup.add(readout, java.awt.BorderLayout.SOUTH);
+        popup.show(where, x, y);
+    }
+
+    // replaces the literal at span with new text and moves span to cover the new text
+    private void writeLiteral(int[] span, String value) {
+        accepting = true;
+        try {
+            doc.remove(span[0], span[1] - span[0]);
+            doc.insertString(span[0], value, null);
+            span[1] = span[0] + value.length();
+        } catch (BadLocationException ignored) {
+        } finally {
+            accepting = false;
+        }
+    }
+
+    private void pickAtCaret() {
+        Literal lit = literalAtCaret();
+        if (lit == null) return;
+        try {
+            java.awt.geom.Rectangle2D r = text.modelToView2D(text.getCaretPosition());
+            openPicker(lit, text, (int) r.getX(), (int) (r.getY() + r.getHeight()));
+        } catch (BadLocationException ignored) {
+        }
     }
 
     private static boolean wordChar(char c) {
@@ -554,6 +639,24 @@ final class CodeEditor extends JScrollPane {
     private final class Gutter extends JComponent {
         Gutter() {
             setFont(mono(textSize() - 1));
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (e.getX() < CHIP_X - 2 || e.getX() > CHIP_X + 12) return;
+                    int line = root().getElementIndex(text.viewToModel2D(new java.awt.Point(0, e.getY())));
+                    javax.swing.text.Element el = root().getElement(line);
+                    try {
+                        String lineText = doc.getText(el.getStartOffset(), el.getEndOffset() - el.getStartOffset());
+                        Literal lit = firstLiteral(lineText, el.getStartOffset());
+                        if (lit != null) openPicker(lit, Gutter.this, e.getX(), e.getY());
+                    } catch (BadLocationException ignored) {
+                    }
+                }
+            });
+        }
+
+        private javax.swing.text.Element root() {
+            return doc.getDefaultRootElement();
         }
 
         @Override
@@ -583,6 +686,15 @@ final class CodeEditor extends JScrollPane {
                     if (bad) {
                         g.setColor(theme.error());
                         g.fillOval(6, y + (int) r.getHeight() / 2 - 3, 6, 6);
+                    }
+                    javax.swing.text.Element el = root.getElement(i);
+                    Literal lit = firstLiteral(doc.getText(el.getStartOffset(), el.getEndOffset() - el.getStartOffset()), el.getStartOffset());
+                    if (lit != null) {
+                        int cy = y + (int) r.getHeight() / 2 - 5;
+                        g.setColor(lit.color());
+                        g.fillRoundRect(CHIP_X, cy, 10, 10, 3, 3);
+                        g.setColor(theme.dim());
+                        g.drawRoundRect(CHIP_X, cy, 10, 10, 3, 3);
                     }
                     String n = String.valueOf(i + 1);
                     g.setColor(bad ? theme.error() : i == caretLine ? theme.text() : theme.gutter());

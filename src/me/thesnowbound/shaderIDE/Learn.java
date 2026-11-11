@@ -1191,6 +1191,8 @@ final class Learn {
                     <tr><td><code>Ctrl+Shift+E / V, Ctrl+J</code></td><td>show or hide files, preview and console</td></tr>
                     <tr><td><code>F1</code></td><td>this window</td></tr>
                     </table>
+                    <h2>Practice</h2>
+                    <ol><li>Open a new project, then pick the Glow lesson's example from the gallery and build the pack with Ctrl+B. Find the .zip in the build folder.</li><li>Turn the preview off with Ctrl+Shift+V, then on again, and check the window still shows the same effect.</li><li>Use the command palette to find Save All, run it, then close the window and reopen the project.</li></ol>
                     """),
             new Guide("How packs work", "alpha codes, items and versions", """
                     <h1>How packs work</h1>
@@ -1213,6 +1215,8 @@ final class Learn {
                     <p>With Check Shaders on, every copy is compiled with glslang before the zip is made, and 26.3 is also
                     compiled to Vulkan SPIR-V. Obfuscate renames every function and variable to random letters and adds decoy
                     code, so the shipped pack is hard to read. Your project files stay as you wrote them.</p>
+                    <h2>Practice</h2>
+                    <ol><li>Open an effect with <code>#pragma vessel shape cube</code> and change it to <code>panel</code>. Look at how the item changes in the preview.</li><li>Write a number between 0 and 255 as the effect's alpha in the project settings. Use the value to explain which effect wins when two share one.</li><li>Build the pack with the Versions setting on, then look inside the zip and find one file per Minecraft version.</li></ol>
                     """),
             new Guide("The sky function", "directions, projections and time", """
                     <h1>The sky function</h1>
@@ -1243,6 +1247,8 @@ final class Learn {
                     <h2>Brightness</h2>
                     <p>Colors clip at 1. When you stack suns, glows and stars, end with <code>return 1.0 - exp(-color * 1.5);</code>
                     so bright parts roll off smoothly instead of flattening into white.</p>
+                    <h2>Practice</h2>
+                    <ol><li>Return a color that depends only on <code>dir.x</code>, then only on <code>dir.z</code>. What happens to the sky when you turn around?</li><li>Use <code>time</code> to make the horizon move up and down slowly.</li><li>Draw a fixed band of color at <code>dir.y</code> between 0.2 and 0.25 and check it stays put as you look around.</li></ol>
                     """),
             new Guide("Objects and raymarching", "distance functions, shapes and blends", """
                     <h1>Objects and raymarching</h1>
@@ -1288,6 +1294,8 @@ final class Learn {
                     and the Skript's place and size commands still scale on top of it.</p>
                     <div class="tip">Objects stay upright to the world even when the item spins, because the box is worked
                     out in world space.</div>
+                    <h2>Practice</h2>
+                    <ol><li>Change the box size in a distance function and check the object still fits inside the item's box.</li><li>Make the object spin using a rotation of <code>p.xz</code> that depends on <code>time</code>.</li><li>Count how many steps the march took and return that as a grey color. Where does it get darkest?</li></ol>
                     """),
             new Guide("Surfaces", "painting the item's own faces", """
                     <h1>Surfaces</h1>
@@ -1319,6 +1327,8 @@ final class Learn {
                     <p><b>Holes.</b> Return alpha 0 to cut a pixel out, or anything between 0 and 1 for glass and holograms.</p>
                     <div class="tip">Put a surface on a thin, flat item and it's a screen or a sign. The Skript's place command
                     with a size works for that, and so does any item display you scale yourself.</div>
+                    <h2>Practice</h2>
+                    <ol><li>Make a checkerboard: one grid of <code>fract(uv * 4.0)</code>, colored alternately by whether the two cell numbers add up to an even number.</li><li>Use <code>pos</code> instead of <code>uv</code> for a pattern and look at the corners of a cube. Does the pattern wrap?</li><li>Put a hole in a panel with alpha 0 in one corner.</li></ol>
                     """),
             new Guide("Materials", "animating an item's own pixels", """
                     <h1>Materials</h1>
@@ -1346,6 +1356,8 @@ final class Learn {
                     as you turn, like the end portal. Star Cloth works this way.</p>
                     <div class="tip">Materials can't be placed or worn as a sky, use <code>/ns give</code> from the Skript or
                     any command that hands out the item.</div>
+                    <h2>Practice</h2>
+                    <ol><li>Recolor the texel so the item is entirely blue but keeps its shading. Use the texel's brightness.</li><li>Make the item blink on and off with <code>step(0.5, sin(time * 4.0))</code>.</li><li>Snap the uv to the 16 by 16 grid and check the effect moves in whole pixels.</li></ol>
                     """),
             new Guide("Overlays", "drawing over the player's view", """
                     <h1>Overlays</h1>
@@ -1369,6 +1381,8 @@ final class Learn {
                     <p>The overlay is an item in the offhand. The hand is drawn after the world, so it covers everything, and
                     nobody else can see it. <code>/ns overlay name</code> puts it on and keeps the old offhand item safe,
                     <code>/ns overlay off</code> gives it back.</p>
+                    <h2>Practice</h2>
+                    <ol><li>Draw a dot exactly in the middle of the screen with alpha 0.1, then move it toward the edge.</li><li>Make a red flash that lasts half a second every five seconds using <code>mod(time, 5.0)</code>.</li><li>Check your overlay on a wide and a narrow window. Which fix from the aspect section does it need?</li></ol>
                     """),
             new Guide("Noise and randomness", "hash, fbm, warping and cells", """
                     <h1>Noise and randomness</h1>
@@ -1393,6 +1407,8 @@ final class Learn {
                     <h2>Cells</h2>
                     <p><code>floor(p)</code> numbers the cells of a grid and <code>fract(p)</code> is the position inside one.
                     Hash the cell number to decide what each cell holds. Stars, rain, embers and petals are all this.</p>
+                    <h2>Practice</h2>
+                    <ol><li>Write a hash that returns a different number for each whole-number cell, then show the cells as gray squares.</li><li>Build a value noise with octaves and look at 1, 3 and 6 octaves side by side in three rows.</li><li>Use <code>voronoi</code> to draw the edges of cells, where the distance to the nearest point is small.</li></ol>
                     """),
             new Guide("Color and light", "mixing, palettes and tone mapping", """
                     <h1>Color and light</h1>
@@ -1414,6 +1430,8 @@ final class Learn {
                     the shape of highlights. Larger k makes everything brighter.</p>
                     <div class="tip">Keep one strong color idea per effect. The examples mostly use a dark base, one main
                     color and one accent.</div>
+                    <h2>Practice</h2>
+                    <ol><li>Mix two colors in linear space with a square root and compare the middle with a straight mix.</li><li>Build a rainbow from a cosine palette, then move it across the sky with <code>dir.x</code>.</li><li>Compare exposure 0.5, 1.5 and 4.0 on a bright sun and note where the core turns flat white.</li></ol>
                     """),
             new Guide("Animation", "time, cycles and phases", """
                     <h1>Animation</h1>
@@ -1434,6 +1452,8 @@ final class Learn {
                     <h2>Easing</h2>
                     <p><code>t * t * (3.0 - 2.0 * t)</code> on a 0 to 1 value starts and ends slowly, which makes movement feel
                     natural. That's what smoothstep does inside.</p>
+                    <h2>Practice</h2>
+                    <ol><li>Make a color cycle through red, green and blue every three seconds with <code>sin</code> offsets of one third of a cycle.</li><li>Stop an animation at a fixed point after five seconds with <code>min(time, 5.0)</code>.</li><li>Make two things move at different speeds and share a phase, so they stay in step every ten seconds.</li></ol>
                     """),
             new Guide("GLSL cheat sheet", "types, swizzles and built ins", """
                     <h1>GLSL cheat sheet</h1>
@@ -1465,6 +1485,8 @@ final class Learn {
                     nothing useful, wrap the base in <code>max(x, 0.0)</code>. Loops need a fixed number of steps, use
                     <code>break</code> to leave early. Some words are reserved and can't be variable names, like
                     <code>flat</code>, <code>sample</code>, <code>half</code> and <code>input</code>.</p>
+                    <h2>Practice</h2>
+                    <ol><li>Write a line that uses <code>.zyx</code>, <code>.rgb</code> and <code>.xy</code> on one vec3, and check which parts come out.</li><li>Find which function is missing a bracket by reading the error the preview gives you.</li><li>Declare a <code>const float</code> at the top and use it in a loop bound.</li></ol>
                     """),
             new Guide("Making it fast", "what costs the most and how to cut it", """
                     <h1>Making it fast</h1>
@@ -1483,6 +1505,8 @@ final class Learn {
                     <tr><td>solve instead of march</td><td>spheres and flat planes have exact formulas, Ringed Planet uses no march at all</td></tr>
                     <tr><td>bigger steps</td><td>for glow you can step in fixed sizes and get away with fewer of them</td></tr>
                     </table>
+                    <h2>Practice</h2>
+                    <ol><li>Halve the number of march steps and compare the look and the frame rate in the preview.</li><li>Replace a <code>pow(x, 8.0)</code> with <code>x * x * x * x * x * x * x * x</code> and check the result is the same.</li><li>Count the noise calls in a shader and drop one octave where you can't see the difference.</li></ol>
                     """),
             new Guide("Debugging", "errors, black screens and odd colors", """
                     <h1>Debugging</h1>
@@ -1503,6 +1527,8 @@ final class Learn {
                     <h2>See your numbers</h2>
                     <div class="tip">Return the value you're unsure about as a color: <code>return vec3(n);</code>. Black is 0, white
                     is 1. It's the fastest way to see what a noise, a mask or a distance is really doing.</div>
+                    <h2>Practice</h2>
+                    <ol><li>Return a single value, like <code>vec3(dir.y)</code>, to see whether a variable has the value you expect.</li><li>Find a black screen by checking the alpha you return from the object.</li><li>Break a shader on purpose with a missing semicolon, read the message, then fix it.</li></ol>
                     """),
             new Guide("Using it in game", "resource packs, commands and Skript", """
                     <h1>Using it in game</h1>
@@ -1523,6 +1549,8 @@ final class Learn {
                     <tr><td><code>/ns clear, give, list</code></td><td>remove nearby objects, get an item, see what's in the pack</td></tr>
                     </table>
                     <div class="tip">Tab suggestions need the SkBee addon. Rejoin after a reload so your client learns the new command.</div>
+                    <h2>Practice</h2>
+                    <ol><li>Build a pack, copy it into the resource packs folder and load it in Minecraft. Find your effect in the sky.</li><li>Use the copy give command from an effect's right click menu and paste it in the game chat.</li><li>Export the Skript file and load it on a test server to show your effect in game.</li></ol>
                     """));
 
     static JEditorPane page(String html) {

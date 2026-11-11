@@ -22,7 +22,7 @@ import java.util.zip.ZipOutputStream;
 
 final class Forge {
     static final String TOOL = "Shader IDE";
-    static final String VERSION = "1.0.0";
+    static final String VERSION = "2.0.0";
 
     record Tier(String name, int min, int max, String folder, List<String> files) {
     }
