@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 final class Templates {
     record Example(String id, String name, String level, String blurb) {

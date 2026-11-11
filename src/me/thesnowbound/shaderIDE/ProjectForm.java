@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -160,7 +160,7 @@ final class ProjectForm extends JDialog {
             namespace.setText(id.isEmpty() ? "skyboxes" : id);
         }
         if (!folderTouched && !editing) {
-            Path docs = Path.of(System.getProperty("user.home"), "Documents", "Hogyoku Vessel");
+            Path docs = Path.of(System.getProperty("user.home"), "Documents", "Shader IDE");
             folder.setText(docs.resolve(n.isEmpty() ? "My Skies" : n.replaceAll("[\\\\/:*?\"<>|]", "")).toString());
         }
     }

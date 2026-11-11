@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

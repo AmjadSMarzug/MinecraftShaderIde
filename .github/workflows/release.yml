@@ -36,7 +36,7 @@ jobs:
         run: bash installer/build.sh "${{ github.repository }}"
       - name: Keep the jar from one build only
         if: runner.os != 'Linux'
-        run: rm -f "out/dist/Hogyoku Vessel.jar"
+        run: rm -f "out/dist/Shader IDE.jar"
       - uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}

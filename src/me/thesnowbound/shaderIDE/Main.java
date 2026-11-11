@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import com.formdev.flatlaf.FlatLaf;
 
@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 
 public final class Main extends JFrame {
     private static final Preferences PREFS = Preferences.userNodeForPackage(Main.class);
-    private static final String RELEASES = "Mirothe/Hogyoku-Vessel";
+    private static final String RELEASES = "AmjadSMarzug/shaderIDE";
     private static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
             .filter(Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames())::contains)
             .findFirst().orElse(null);
@@ -1130,7 +1130,7 @@ public final class Main extends JFrame {
                     + "Open a project folder instead (one with a project.json in it), or start a new one.", Forge.TOOL, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        int r = JOptionPane.showConfirmDialog(this, dir.getFileName() + " isn't a Hogyoku Vessel project yet. Turn it into one?",
+        int r = JOptionPane.showConfirmDialog(this, dir.getFileName() + " isn't a Shader IDE project yet. Turn it into one?",
                 Forge.TOOL, JOptionPane.YES_NO_OPTION);
         if (r != JOptionPane.YES_OPTION || !confirmUnsaved()) return;
         try {
@@ -1386,7 +1386,7 @@ public final class Main extends JFrame {
 
     // lessons live in their own project in Documents so they never clutter a real pack
     private void startLesson(Learn.Lesson lesson) {
-        Path dir = Path.of(System.getProperty("user.home"), "Documents", "Hogyoku Vessel", "Lessons");
+        Path dir = Path.of(System.getProperty("user.home"), "Documents", "Shader IDE", "Lessons");
         try {
             if (project == null || !project.dir.equals(dir)) {
                 if (!confirmUnsaved()) return;
@@ -1784,7 +1784,7 @@ public final class Main extends JFrame {
         Thread t = new Thread(() -> {
             try {
                 HttpRequest req = HttpRequest.newBuilder(URI.create("https://api.github.com/repos/" + RELEASES + "/releases/latest"))
-                        .header("User-Agent", "HogyokuVessel")
+                        .header("User-Agent", "ShaderIDE")
                         .header("Accept", "application/vnd.github+json")
                         .timeout(Duration.ofSeconds(10))
                         .build();

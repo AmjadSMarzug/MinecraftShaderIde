@@ -1,8 +1,8 @@
-# Hogyoku Vessel
+# Shader IDE
 
-An IDE for Minecraft shaders. You write GLSL, watch it run live as you type, and Vessel builds it into a resource pack that works on every version from 1.21 to 26.3.
+An IDE for Minecraft shaders. You write GLSL, watch it run live as you type, and Shader IDE builds it into a resource pack that works on every version from 1.21 to 26.3.
 
-Minecraft's core shaders changed shape five times across those versions, with different uniforms, includes, fog and lighting each time. Vessel keeps a template for each one, drops your code into all of them, and compiles every result with glslang, so a mistake shows up in the editor instead of as a broken game.
+Minecraft's core shaders changed shape five times across those versions, with different uniforms, includes, fog and lighting each time. Shader IDE keeps a template for each one, drops your code into all of them, and compiles every result with glslang, so a mistake shows up in the editor instead of as a broken game.
 
 ## Features
 
@@ -31,14 +31,14 @@ The examples in `resources/examples/` show each kind, and the Learn tab in the a
 
 ## Running
 
-Hogyoku Vessel runs on Windows, Linux and macOS (Intel and Apple Silicon) with Java 21 or newer. The live preview needs OpenGL 3.3.
+Shader IDE runs on Windows, Linux and macOS (Intel and Apple Silicon) with Java 21 or newer. The live preview needs OpenGL 3.3.
 
-Every download on the [releases page](https://github.com/Mirothe/Hogyoku-Vessel/releases/latest) comes with its own Java.
+Every download on the [releases page](https://github.com/AmjadSMarzug/shaderIDE/releases/latest) comes with its own Java.
 
 - **Windows**: run the installer. It adds a Start menu shortcut and keeps the app up to date.
 - **macOS**: open the Apple Silicon or Intel disk image and drag the app onto the Applications folder. It isn't signed by Apple yet, so the first time, right-click it and choose Open.
-- **Linux**: unpack the tar.gz and run `Hogyoku Vessel/bin/Hogyoku Vessel`.
-- **Anything with Java 21**: `java -jar "Hogyoku Vessel.jar"`.
+- **Linux**: unpack the tar.gz and run `Shader IDE/bin/Shader IDE`.
+- **Anything with Java 21**: `java -jar "Shader IDE.jar"`.
 
 The shader check uses glslang. Windows has it built in; on Linux and macOS install it from your package manager (`sudo apt install glslang-tools`, `sudo pacman -S glslang` or `brew install glslang`). Without it packs still build, just unchecked.
 
@@ -52,7 +52,7 @@ You need a JDK 21 or newer with `javac`, `jar` and `jpackage` on the path, bash 
 bash build.sh
 ```
 
-That makes `out/dist/Hogyoku Vessel.jar`, which runs on every platform, and the app with its own Java for the platform you built on. A Mac or Linux app can only be built on that system, so `.github/workflows/release.yml` builds all of them on GitHub: push a tag like `v1.1.0` and the Windows, Linux and both Mac builds land on that release. The version comes from `Forge.VERSION` unless you set `VERSION=` yourself.
+That makes `out/dist/Shader IDE.jar`, which runs on every platform, and the app with its own Java for the platform you built on. A Mac or Linux app can only be built on that system, so `.github/workflows/release.yml` builds all of them on GitHub: push a tag like `v1.1.0` and the Windows, Linux and both Mac builds land on that release. The version comes from `Forge.VERSION` unless you set `VERSION=` yourself.
 
 The installer is a small C# program built with the .NET Framework compiler that ships with Windows:
 
@@ -64,7 +64,7 @@ bash installer/build.sh owner/repo
 
 | Path | What's there |
 |---|---|
-| `src/dev/mirothe/vessel/Main.java` | the window, the workspace and everything that wires the parts together |
+| `src/me/thesnowbound/shaderIDE/Main.java` | the window, the workspace and everything that wires the parts together |
 | `Home.java`, `Chrome.java`, `Fx.java`, `Theme.java` | the home pages, the shared custom-painted parts, animation and themes |
 | `CodeEditor.java`, `Preview.java` | the editor and the live OpenGL preview |
 | `Forge.java`, `Obfuscator.java`, `Skript.java` | building the pack, the obfuscator and the Skript output |

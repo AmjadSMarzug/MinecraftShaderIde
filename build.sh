@@ -38,26 +38,26 @@ for j in ../../lib/*.jar; do jar xf "$j"; done
 rm -rf META-INF/*.SF META-INF/*.RSA META-INF/*.DSA META-INF/MANIFEST.MF module-info.class META-INF/versions/*/module-info.class
 cd ../..
 
-printf 'Main-Class: dev.mirothe.vessel.Main\nMulti-Release: true\n' > out/manifest.txt
-jar cfm "out/dist/Hogyoku Vessel.jar" out/manifest.txt -C out/classes .
-echo "built out/dist/Hogyoku Vessel.jar"
+printf 'Main-Class: me.thesnowbound.shaderIDE.Main\nMulti-Release: true\n' > out/manifest.txt
+jar cfm "out/dist/Shader IDE.jar" out/manifest.txt -C out/classes .
+echo "built out/dist/Shader IDE.jar"
 
 # a self contained app with its own Java for this platform, packed up for the GitHub release
-VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/dev/mirothe/vessel/Forge.java | cut -d'"' -f2)}
+VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/me/thesnowbound/shaderIDE/Forge.java | cut -d'"' -f2)}
 rm -rf out/jpkg out/app
 mkdir -p out/jpkg
-cp "out/dist/Hogyoku Vessel.jar" out/jpkg/
-jpackage --type app-image --name "Hogyoku Vessel" --app-version "$VERSION" --vendor Mirothe \
-    --input out/jpkg --main-jar "Hogyoku Vessel.jar" --main-class dev.mirothe.vessel.Main \
+cp "out/dist/Shader IDE.jar" out/jpkg/
+jpackage --type app-image --name "Shader IDE" --app-version "$VERSION" --vendor Mirothe \
+    --input out/jpkg --main-jar "Shader IDE.jar" --main-class me.thesnowbound.shaderIDE.Main \
     ${ICON:+--icon "$ICON"} --dest out/app
 APP=$(ls out/app)
-NAME=Hogyoku-Vessel-$VERSION-$OS
+NAME=Shader-IDE-$VERSION-$OS
 # ditto and tar keep the launcher executable, a plain zip would lose that on Mac and Linux
 case "$OS" in
     windows) (cd out/app && python -c "import shutil; shutil.make_archive('../dist/$NAME', 'zip', '.', '$APP')"); FILE=$NAME.zip ;;
     macos-*)
         mkdir -p out/dmg && cp -R "out/app/$APP" out/dmg/ && ln -s /Applications out/dmg/Applications
-        hdiutil create -volname "Hogyoku Vessel" -srcfolder out/dmg -ov -format UDZO "out/dist/$NAME.dmg"
+        hdiutil create -volname "Shader IDE" -srcfolder out/dmg -ov -format UDZO "out/dist/$NAME.dmg"
         FILE=$NAME.dmg ;;
     *) tar -czf "out/dist/$NAME.tar.gz" -C out/app "$APP"; FILE=$NAME.tar.gz ;;
 esac

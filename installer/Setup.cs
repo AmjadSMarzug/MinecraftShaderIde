@@ -15,20 +15,20 @@ using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
-[assembly: AssemblyTitle("Hogyoku Vessel Setup")]
-[assembly: AssemblyProduct("Hogyoku Vessel")]
+[assembly: AssemblyTitle("Shader IDE Setup")]
+[assembly: AssemblyProduct("Shader IDE")]
 [assembly: AssemblyCompany("Mirothe")]
 [assembly: AssemblyCopyright("Copyright 2026 Mirothe")]
 
-namespace Vessel
+namespace ShaderIDE
 {
     static class Setup
     {
         const string Repo = "%REPO%";
-        const string AppName = "Hogyoku Vessel";
-        const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\HogyokuVessel";
+        const string AppName = "Shader IDE";
+        const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\ShaderIDE";
         // the app keeps its settings with java's Preferences, which on Windows live under this key
-        const string AppPrefsKey = @"Software\JavaSoft\Prefs\dev\mirothe\vessel";
+        const string AppPrefsKey = @"Software\JavaSoft\Prefs\me\thesnowbound\shaderIDE";
         static readonly string Site = "https://" + Repo.Split('/')[0].ToLowerInvariant() + ".github.io/" + (Repo.Contains("/") ? Repo.Split('/')[1] : "") + "/";
 
         static string installDir = RegisteredDir() ?? DefaultDir();
@@ -45,7 +45,7 @@ namespace Vessel
         static string ZipBeside()
         {
             string here = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string[] found = Directory.GetFiles(here, "Hogyoku-Vessel-*-windows.zip");
+            string[] found = Directory.GetFiles(here, "Shader-IDE-*-windows.zip");
             Array.Sort(found);
             return found.Length > 0 ? found[found.Length - 1] : null;
         }
@@ -90,7 +90,7 @@ namespace Vessel
             string self = Assembly.GetExecutingAssembly().Location;
             if (Inside(self))
             {
-                string copy = Path.Combine(Path.GetTempPath(), "Hogyoku Vessel Setup " + Guid.NewGuid().ToString("N").Substring(0, 8) + ".exe");
+                string copy = Path.Combine(Path.GetTempPath(), "Shader IDE Setup " + Guid.NewGuid().ToString("N").Substring(0, 8) + ".exe");
                 File.Copy(self, copy, true);
                 Process.Start(new ProcessStartInfo(copy, string.Join(" ", args)) { WorkingDirectory = Path.GetTempPath(), UseShellExecute = false });
                 return;
@@ -150,7 +150,7 @@ namespace Vessel
         {
             using (var web = new WebClient())
             {
-                web.Headers.Add("User-Agent", "HogyokuVesselSetup");
+                web.Headers.Add("User-Agent", "ShaderIDESetup");
                 web.Headers.Add("Accept", "application/vnd.github+json");
                 string json = web.DownloadString("https://api.github.com/repos/" + Repo + "/releases/latest");
                 var data = new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(json);
@@ -172,7 +172,7 @@ namespace Vessel
             }
         }
 
-        // the folder picked in the options always gets its own Hogyoku Vessel folder inside it, and an install never
+        // the folder picked in the options always gets its own Shader IDE folder inside it, and an install never
         // replaces a folder that holds something other than an earlier install
         static string FolderFor(string picked)
         {
@@ -195,7 +195,7 @@ namespace Vessel
         static void Install(Release release, Action<int, string> progress, Choices choices)
         {
             CheckFolder(InstallDir);
-            string temp = Path.Combine(Path.GetTempPath(), "hogyoku-vessel-" + Guid.NewGuid().ToString("N"));
+            string temp = Path.Combine(Path.GetTempPath(), "shader-ide-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(temp);
             try
             {
@@ -208,7 +208,7 @@ namespace Vessel
                 }
                 else using (var web = new WebClient())
                 {
-                    web.Headers.Add("User-Agent", "HogyokuVesselSetup");
+                    web.Headers.Add("User-Agent", "ShaderIDESetup");
                     var done = new ManualResetEvent(false);
                     Exception failed = null;
                     web.DownloadProgressChanged += (s, e) =>
@@ -529,7 +529,7 @@ namespace Vessel
             {
                 string want = release.Tag.TrimStart('v', 'V');
                 if (have == want) return "You already have " + want + ". You can install it again.";
-                if (have != null) return "This updates Hogyoku Vessel from " + have + " to " + want + ".";
+                if (have != null) return "This updates Shader IDE from " + have + " to " + want + ".";
                 if (File.Exists(release.Url)) return "Version " + want + ", installed from " + Path.GetFileName(release.Url) + " without going online.";
                 return "Version " + want + ", a " + (release.Size / 1048576) + " MB download. It takes about a minute.";
             }
@@ -540,7 +540,7 @@ namespace Vessel
                 var box = new Rectangle(32, 166, W - 64, 120);
                 using (var path = Rounded(box, 10))
                 using (var b = new SolidBrush(Color.FromArgb(16, 16, 16))) g.FillPath(b, path);
-                string terms = "Hogyoku Vessel is free and open source under the MIT license. Use it for anything, and the shaders and packs "
+                string terms = "Shader IDE is free and open source under the MIT license. Use it for anything, and the shaders and packs "
                     + "you make are yours. It comes with no warranty. When you share packs, Minecraft's own EULA and usage guidelines apply. "
                     + "Some features use GitHub, Discord and catbox.moe, and their terms apply too.";
                 TextRenderer.DrawText(g, terms, smallFont, new Rectangle(box.X + 16, box.Y + 14, box.Width - 32, box.Height - 20), Soft, TextFormatFlags.WordBreak);
@@ -795,7 +795,7 @@ namespace Vessel
 
             void Browse()
             {
-                using (var dialog = new FolderBrowserDialog { Description = "Pick where Hogyoku Vessel goes. It gets its own folder inside the one you pick.", ShowNewFolderButton = true })
+                using (var dialog = new FolderBrowserDialog { Description = "Pick where Shader IDE goes. It gets its own folder inside the one you pick.", ShowNewFolderButton = true })
                 {
                     string parent = Path.GetDirectoryName(InstallDir);
                     if (Directory.Exists(parent)) dialog.SelectedPath = parent;

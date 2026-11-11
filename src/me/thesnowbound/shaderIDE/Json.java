@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -368,9 +368,9 @@ final class Home extends Fx.Reveal {
             JLabel blurb = new JLabel(switch (picked[0]) {
                 case "building" -> "What happens when you press Build pack.";
                 case "projects" -> "Filled in for you every time you make a project.";
-                case "discord" -> "Your Discord status while Hogyoku Vessel is open.";
+                case "discord" -> "Your Discord status while Shader IDE is open.";
                 case "learning" -> "Lessons and how far along you are.";
-                default -> "How Hogyoku Vessel looks. Changes apply right away.";
+                default -> "How Shader IDE looks. Changes apply right away.";
             });
             blurb.setFont(blurb.getFont().deriveFont(15f));
             blurb.setForeground(t.dim());
@@ -538,10 +538,10 @@ final class Home extends Fx.Reveal {
 
         page.add(heading("What it is"));
         JEditorPane what = Learn.page("""
-                <p>Hogyoku Vessel is an IDE for Minecraft shaders. You write GLSL, watch it run on your GPU as you
+                <p>Shader IDE is an IDE for Minecraft shaders. You write GLSL, watch it run on your GPU as you
                 type, and it compiles, checks and packages your shaders into a resource pack for every version from 1.21 to 26.3.</p>
                 <p>Minecraft's own core shaders changed shape five times across those versions, with different uniforms, includes,
-                fog and lighting each time. Vessel keeps a template for every one of them, drops your code into all of them, and
+                fog and lighting each time. Shader IDE keeps a template for every one of them, drops your code into all of them, and
                 compiles each result so a mistake shows up in the editor instead of as a broken game.</p>
                 """);
         what.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -558,7 +558,7 @@ final class Home extends Fx.Reveal {
                 <tr><td><b>Obfuscator</b></td><td>renames every function and variable, pools the numbers and adds decoy code, so shipped shaders are hard to lift</td></tr>
                 <tr><td><b>Effect types</b></td><td>skies, objects inside an item, surfaces in four shapes, materials that animate an item's pixels, and overlays over the player's view</td></tr>
                 <tr><td><b>Skript output</b></td><td>a generated .sk with commands to show your effects in game</td></tr>
-                <tr><td><b>Themes</b></td><td>Islands Dark, Darcula, Islands Light, High Contrast and Vessel Black</td></tr>
+                <tr><td><b>Themes</b></td><td>Islands Dark, Darcula, Islands Light, High Contrast and Shader IDE Black</td></tr>
                 <tr><td><b>Learning</b></td><td>guides and lessons that check your code as you write it, plus finished shaders to pull apart</td></tr>
                 </table>
                 """);

@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
@@ -22,7 +22,7 @@ record Theme(String name, boolean dark,
              Color currentLine, Color textSelect, Color gutter) {
 
     static final List<Theme> ALL = List.of(
-            new Theme("Vessel Black", true,
+            new Theme("Shader IDE Black", true,
                     rgb(0x000000), rgb(0x0e0e0e), rgb(0x0e0e0e), rgb(0x1e1e1e), rgb(0x1c1c1c), rgb(0x2a2a2a), rgb(0x161616),
                     rgb(0xffffff), rgb(0x000000), rgb(0xffffff), rgb(0xd8d8d8), rgb(0x777777), rgb(0x4a4a4a), rgb(0xff5c5c), rgb(0x9ae6a0),
                     rgb(0xffffff), rgb(0x9e9e9e), rgb(0xe8e8e8), rgb(0xc8c8c8), rgb(0x555555), rgb(0xffffff), rgb(0xd0d0d0), rgb(0x8f8f8f),

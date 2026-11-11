@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;

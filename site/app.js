@@ -1,4 +1,4 @@
-// real Vessel effects compiled with WebGL2 and wrapped the same way the app's preview wraps them.
+// real Shader IDE effects compiled with WebGL2 and wrapped the same way the app's preview wraps them.
 // one renderer runs the sky behind the title, another runs the editor further down
 
 const HEAD = `#version 300 es

@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;

@@ -1,6 +1,6 @@
 # Third party
 
-Hogyoku Vessel's own code is under the MIT license in [LICENSE](LICENSE). These parts come from elsewhere and keep their own terms.
+Shader IDE's own code is under the MIT license in [LICENSE](LICENSE). These parts come from elsewhere and keep their own terms.
 
 | What | Where | License |
 |---|---|---|

@@ -1,4 +1,4 @@
-package dev.mirothe.vessel;
+package me.thesnowbound.shaderIDE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -407,7 +407,7 @@ final class Obfuscator {
         return "if(" + time + "<-1.0){" + color + "=vec4(vec3(" + sum + "),1.0);return true;}";
     }
 
-    // Vessel's own wrapper code gets the same treatment as the effects, with one set of names for every version
+    // Shader IDE's own wrapper code gets the same treatment as the effects, with one set of names for every version
     String scrub(String text, Set<String> names) {
         StringBuilder out = new StringBuilder();
         String prev = "";
