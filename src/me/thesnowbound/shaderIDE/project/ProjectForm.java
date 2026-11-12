@@ -1,4 +1,9 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.project;
+
+import me.thesnowbound.shaderIDE.Main;
+import me.thesnowbound.shaderIDE.ui.Fx;
+import me.thesnowbound.shaderIDE.build.Skript;
+import me.thesnowbound.shaderIDE.discord.Discord;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -25,11 +30,11 @@ import java.nio.file.Path;
 import java.util.prefs.Preferences;
 
 // asks for the pack's details before a project gets made, and edits them later from Project Settings
-final class ProjectForm extends JDialog {
-    record Answers(Path dir, String name, String author, String description, String namespace, String discordImage) {
+public final class ProjectForm extends JDialog {
+    public record Answers(Path dir, String name, String author, String description, String namespace, String discordImage) {
     }
 
-    private static final Preferences PREFS = Preferences.userNodeForPackage(ProjectForm.class);
+    private static final Preferences PREFS = Preferences.userNodeForPackage(Main.class);
 
     private final JTextField name = field("My Skies");
     private final JTextField author = field("Who made it");
@@ -136,15 +141,15 @@ final class ProjectForm extends JDialog {
         setLocationRelativeTo(owner);
     }
 
-    static String defaultAuthor() {
+    public static String defaultAuthor() {
         return PREFS.get("author", System.getProperty("user.name", ""));
     }
 
-    static void defaultAuthor(String name) {
+    public static void defaultAuthor(String name) {
         PREFS.put("author", name);
     }
 
-    static Answers ask(JFrame owner, Project existing) {
+    public static Answers ask(JFrame owner, Project existing) {
         ProjectForm form = new ProjectForm(owner, existing);
         // the dialog is modal, so the fade has to start before setVisible blocks
         form.setOpacity(0f);

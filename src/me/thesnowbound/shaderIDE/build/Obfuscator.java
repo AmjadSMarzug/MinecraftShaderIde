@@ -1,4 +1,4 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.build;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class Obfuscator {
-    static final Set<String> TYPES = Set.of("void", "bool", "int", "uint", "float", "double", "vec2", "vec3", "vec4", "ivec2",
+public final class Obfuscator {
+    public static final Set<String> TYPES = Set.of("void", "bool", "int", "uint", "float", "double", "vec2", "vec3", "vec4", "ivec2",
             "ivec3", "ivec4", "uvec2", "uvec3", "uvec4", "bvec2", "bvec3", "bvec4", "mat2", "mat3", "mat4", "mat2x2", "mat2x3",
             "mat2x4", "mat3x2", "mat3x3", "mat3x4", "mat4x2", "mat4x3", "mat4x4", "sampler2D");
-    static final Set<String> KEYWORDS = new HashSet<>(TYPES);
+    public static final Set<String> KEYWORDS = new HashSet<>(TYPES);
 
     static {
         KEYWORDS.addAll(List.of("const", "in", "out", "inout", "uniform", "struct", "if", "else", "for", "while", "do", "return",
@@ -49,14 +49,14 @@ final class Obfuscator {
     private static final String[] LOOKALIKES = {"lI1", "O0Q", "S5", "Il1i", "oO0", "vVwW", "Z2z", "B8"};
     private static final Pattern FLOAT = Pattern.compile("[0-9.]*[.eE][0-9.eE+-]*[fF]?");
 
-    record Token(String kind, String text) {
+    public record Token(String kind, String text) {
     }
 
-    record Result(String code, String entry, String kind) {
+    public record Result(String code, String entry, String kind) {
     }
 
     // which kind of effect a file is, going by the entry function it defines
-    static String kind(String src) {
+    public static String kind(String src) {
         if (MATERIAL_ENTRY.matcher(src).find()) return "material";
         if (OVERLAY_ENTRY.matcher(src).find()) return "overlay";
         if (SURFACE_ENTRY.matcher(src).find()) return "surface";
@@ -67,7 +67,7 @@ final class Obfuscator {
     private static final Pattern SHAPE = Pattern.compile("(?m)^[ \\t]*#pragma\\s+vessel\\s+shape\\s+(\\w+)[^\\n]*\\n?");
 
     // half the size of the item's box on each axis, for the shapes a surface effect can ask for
-    static float[] shapeSize(String src) {
+    public static float[] shapeSize(String src) {
         Matcher m = SHAPE.matcher(src);
         String name = m.find() ? m.group(1) : "cube";
         return switch (name) {
@@ -81,7 +81,7 @@ final class Obfuscator {
     private static final Pattern SCALE = Pattern.compile("(?m)^[ \\t]*#pragma\\s+vessel\\s+scale\\s+([\\d.]+)[^\\n]*\\n?");
 
     // how many blocks wide the item is. models can't reach past -16 and 32, so 3 is as big as it gets
-    static float scale(String src) {
+    public static float scale(String src) {
         Matcher m = SCALE.matcher(src);
         if (!m.find()) return 1f;
         try {
@@ -92,7 +92,7 @@ final class Obfuscator {
     }
 
     // the shape and scale lines are for the build, not the GPU, so they come out before compiling
-    static String withoutShape(String src) {
+    public static String withoutShape(String src) {
         return SCALE.matcher(SHAPE.matcher(src).replaceAll("\n")).replaceAll("\n");
     }
 
@@ -117,7 +117,7 @@ final class Obfuscator {
         shortest = 5 + rng.nextInt(5);
     }
 
-    String freshName() {
+    public String freshName() {
         while (true) {
             String starts = letters.replaceAll("[0-9]", "");
             StringBuilder b = new StringBuilder().append(starts.charAt(rng.nextInt(starts.length())));
@@ -128,7 +128,7 @@ final class Obfuscator {
         }
     }
 
-    static List<Token> tokenize(String src) {
+    public static List<Token> tokenize(String src) {
         List<Token> out = new ArrayList<>();
         Matcher m = TOKEN.matcher(src);
         while (m.find()) {
@@ -194,7 +194,7 @@ final class Obfuscator {
         }
     }
 
-    Result compile(String id, String src, Map<String, String> defines, boolean obfuscate) {
+    public Result compile(String id, String src, Map<String, String> defines, boolean obfuscate) {
         StringBuilder head = new StringBuilder();
         defines.forEach((k, v) -> head.append("#define ").append(k).append(' ').append(v).append('\n'));
         src = head + src;
@@ -304,7 +304,7 @@ final class Obfuscator {
 
     // every use of a number becomes two slots of the pool put back together with + - or *, split differently each time.
     // only splits that land on exactly the same float are used, so noise and hashes come out bit for bit the same
-    String seal(String body) {
+    public String seal(String body) {
         if (pool.isEmpty()) return body;
         if (poolName == null) poolName = freshName();
         Map<Integer, String> literal = new HashMap<>();
@@ -335,7 +335,7 @@ final class Obfuscator {
     }
 
     // {op, a, b} with a op b equal to the literal exactly, or {"", literal} when no exact split turns up
-    String[] split(String text) {
+    public String[] split(String text) {
         float f = Float.parseFloat(text.replaceAll("[fF]$", ""));
         if (!Float.isFinite(f)) return new String[]{"", text};
         double want = f;
@@ -362,7 +362,7 @@ final class Obfuscator {
 
     // fake constants and helpers. they're wired into a branch that never runs in game, so tools that strip unused code
     // keep them, and their numbers go through the pool like everything else
-    String decoys(int count) {
+    public String decoys(int count) {
         StringBuilder b = new StringBuilder();
         String[] kinds = {"float", "vec2", "vec3", "int"};
         for (int k = 0; k < count; k++) {
@@ -401,14 +401,14 @@ final class Obfuscator {
     }
 
     // the branch that keeps the decoys alive. time is never below zero in game, but nothing can prove that from the code
-    String decoyBranch(String pos, String time, String color) {
+    public String decoyBranch(String pos, String time, String color) {
         if (decoyUses.isEmpty()) return "";
         String sum = String.join("+", decoyUses).replace("%P", pos).replace("%T", time);
         return "if(" + time + "<-1.0){" + color + "=vec4(vec3(" + sum + "),1.0);return true;}";
     }
 
     // Shader IDE's own wrapper code gets the same treatment as the effects, with one set of names for every version
-    String scrub(String text, Set<String> names) {
+    public String scrub(String text, Set<String> names) {
         StringBuilder out = new StringBuilder();
         String prev = "";
         for (Token t : tokenize(text)) {
@@ -420,7 +420,7 @@ final class Obfuscator {
         return out.toString();
     }
 
-    static Set<String> declared(String src) {
+    public static Set<String> declared(String src) {
         Set<String> names = new HashSet<>(), fields = new HashSet<>();
         declarations(tokenize(src), names, fields);
         return names;
@@ -428,7 +428,7 @@ final class Obfuscator {
 
     // pastes one line helpers like hashes into wherever they're called, so there are fewer functions to recognise.
     // only helpers whose body is a single return, with plain types and nothing a call site could shadow
-    static String inline(List<Token> toks, String entry) {
+    public static String inline(List<Token> toks, String entry) {
         List<Token> sig = new ArrayList<>();
         for (Token t : toks) {
             if (t.kind.equals("ws") || t.kind.equals("comment")) continue;

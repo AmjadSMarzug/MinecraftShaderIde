@@ -1,11 +1,11 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.util;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class Json {
+public final class Json {
     private final String s;
     private int i;
 
@@ -13,7 +13,7 @@ final class Json {
         this.s = s;
     }
 
-    static Object parse(String text) {
+    public static Object parse(String text) {
         Json j = new Json(text);
         Object v = j.value();
         j.skip();
@@ -107,7 +107,7 @@ final class Json {
         return Long.parseLong(n);
     }
 
-    static String write(Object v) {
+    public static String write(Object v) {
         StringBuilder b = new StringBuilder();
         write(v, b, 0);
         return b.toString();

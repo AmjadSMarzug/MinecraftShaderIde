@@ -1,7 +1,9 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.presets;
 
-final class Templates {
-    record Example(String id, String name, String level, String blurb) {
+import me.thesnowbound.shaderIDE.ui.Gallery;
+
+public final class Templates {
+    public record Example(String id, String name, String level, String blurb) {
         java.awt.image.BufferedImage thumb() {
             try (var in = Templates.class.getResourceAsStream("/examples/thumbs/" + id + ".png")) {
                 return in == null ? null : javax.imageio.ImageIO.read(in);
@@ -10,11 +12,11 @@ final class Templates {
             }
         }
 
-        Gallery.Choice choice() {
+        public Gallery.Choice choice() {
             return new Gallery.Choice(id, name, level, blurb, source(), thumb());
         }
 
-        String source() {
+        public String source() {
             try (var in = Templates.class.getResourceAsStream("/examples/" + id + ".glsl")) {
                 return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             } catch (Exception e) {
@@ -23,7 +25,7 @@ final class Templates {
         }
     }
 
-    static final java.util.List<Example> EXAMPLES = java.util.List.of(
+    public static final java.util.List<Example> EXAMPLES = java.util.List.of(
             new Example("black_hole_object", "Black Hole", "Object", "a real one floating in the item"),
             new Example("hogyoku_crystal", "Hogyoku", "Object", "faceted crystal with energy inside"),
             new Example("hollow_purple", "Hollow Purple", "Object", "red and blue collide into purple"),
@@ -115,7 +117,7 @@ final class Templates {
             new Example("ink_wash", "Ink Wash", "Sky", "rice paper with drifting clouds of ink"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
-    static final String NEW_SURFACE = """
+    public static final String NEW_SURFACE = """
             // the line below picks the item's shape: cube, panel, pillar or floor
             #pragma vessel shape panel
 
@@ -130,7 +132,7 @@ final class Templates {
             }
             """;
 
-    static final String PREVIEW_SURFACE_TAIL = """
+    public static final String PREVIEW_SURFACE_TAIL = """
 
             vec2 previewBox(vec3 ro, vec3 rd) {
                 vec3 inv = 1.0 / rd;
@@ -164,7 +166,7 @@ final class Templates {
             }
             """;
 
-    static final String NEW_MATERIAL = """
+    public static final String NEW_MATERIAL = """
             // texel is the item's own pixel colour, uv goes 0 to 1 across the sprite, normal faces out of the item
             // and view is the direction you're looking. every pixel you can see on the item runs through this
             vec4 material(vec4 texel, vec2 uv, vec3 normal, vec3 view, float time) {
@@ -174,7 +176,7 @@ final class Templates {
             }
             """;
 
-    static final String NEW_OVERLAY = """
+    public static final String NEW_OVERLAY = """
             // screen goes from 0,0 in the bottom left corner to 1,1 in the top right, dir is where you're looking.
             // whatever you return is laid over the player's view, so keep alpha low where they still need to see
             vec4 overlay(vec2 screen, vec3 dir, float time) {
@@ -184,7 +186,7 @@ final class Templates {
             }
             """;
 
-    static final String PREVIEW_MATERIAL_TAIL = """
+    public static final String PREVIEW_MATERIAL_TAIL = """
 
             void main() {
                 float f = 1.0 / tan(radians(35.0));
@@ -205,7 +207,7 @@ final class Templates {
             }
             """;
 
-    static final String PREVIEW_OVERLAY_TAIL = """
+    public static final String PREVIEW_OVERLAY_TAIL = """
 
             void main() {
                 float f = 1.0 / tan(radians(35.0));
@@ -223,7 +225,7 @@ final class Templates {
             }
             """;
 
-    static final String NEW_OBJECT = """
+    public static final String NEW_OBJECT = """
             // origin is where the ray enters the item's box (-1 to 1 on every axis), dir is the ray direction.
             // return alpha 0 wherever there's nothing, so the world shows through
             vec4 object(vec3 origin, vec3 dir, float time) {
@@ -243,7 +245,7 @@ final class Templates {
             }
             """;
 
-    static final String NEW_EFFECT = """
+    public static final String NEW_EFFECT = """
             float hash(vec3 p) {
                 return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
             }
@@ -267,7 +269,7 @@ final class Templates {
             }
             """;
 
-    static final String PREVIEW_VERTEX = """
+    public static final String PREVIEW_VERTEX = """
             #version 330
             out vec2 screen;
             void main() {
@@ -277,7 +279,7 @@ final class Templates {
             }
             """;
 
-    static final String PREVIEW_HEAD = """
+    public static final String PREVIEW_HEAD = """
             #version 330
             in vec2 screen;
             out vec4 outColor;
@@ -287,7 +289,7 @@ final class Templates {
             float intro = 1.0;
             """;
 
-    static final String PREVIEW_TAIL = """
+    public static final String PREVIEW_TAIL = """
 
             void main() {
                 float f = 1.0 / tan(radians(35.0));
@@ -298,7 +300,7 @@ final class Templates {
             }
             """;
 
-    static final String PREVIEW_OBJECT_TAIL = """
+    public static final String PREVIEW_OBJECT_TAIL = """
 
             vec2 previewBox(vec3 ro, vec3 rd) {
                 vec3 inv = 1.0 / rd;
@@ -323,7 +325,7 @@ final class Templates {
             }
             """;
 
-    static int headLines(String defines) {
+    public static int headLines(String defines) {
         return (int) (PREVIEW_HEAD + defines).chars().filter(c -> c == '\n').count();
     }
 

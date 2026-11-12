@@ -1,4 +1,4 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.ui;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 // the "new effect" picker: a grid of cards with a rendered thumbnail of every example
-final class Gallery extends JDialog {
-    record Choice(String id, String name, String kind, String blurb, String source, BufferedImage thumb) {
+public final class Gallery extends JDialog {
+    public record Choice(String id, String name, String kind, String blurb, String source, BufferedImage thumb) {
     }
 
     private boolean closing;
@@ -94,7 +94,7 @@ final class Gallery extends JDialog {
         setLocation(owner.getX() + (owner.getWidth() - getWidth()) / 2, owner.getY() + (owner.getHeight() - getHeight()) / 2);
     }
 
-    static void show(JFrame owner, List<Choice> choices, Consumer<Choice> picked) {
+    public static void show(JFrame owner, List<Choice> choices, Consumer<Choice> picked) {
         Fx.fadeIn(new Gallery(owner, choices, picked), 12);
     }
 
@@ -105,7 +105,7 @@ final class Gallery extends JDialog {
     }
 
     // a thumbnail card that lifts and lights up its edge while the mouse is over it
-    static final class Card extends JComponent {
+    public static final class Card extends JComponent {
         private final Choice choice;
         private final int width;
         private float lift;

@@ -88,15 +88,21 @@ bash installer/build.sh owner/repo
 
 ## Layout
 
-| Path | What's there |
+The code lives in `src/me/thesnowbound/shaderIDE/`, one folder per job:
+
+| Folder | What's there |
 |---|---|
-| `src/me/thesnowbound/shaderIDE/Main.java` | the window, the workspace and everything that wires the parts together |
-| `Home.java`, `Chrome.java`, `Fx.java`, `Theme.java` | the home pages, the shared custom-painted parts, animation and themes |
-| `CodeEditor.java`, `Preview.java` | the editor and the live OpenGL preview |
-| `Forge.java`, `Obfuscator.java`, `Skript.java` | building the pack, the obfuscator and the Skript output |
-| `Project.java`, `ProjectForm.java`, `Json.java` | projects on disk and the form that makes them |
-| `Learn.java`, `Templates.java`, `Gallery.java`, `Palette.java` | lessons, starter code and examples, the example picker and the command palette |
-| `Discord.java` | Discord status |
+| `Main.java` | the window, the workspace and everything that wires the parts together |
+| `ui/` | the custom-painted parts (`Chrome`, `Fx`), the home pages (`Home`), the example picker (`Gallery`), the command palette (`Palette`) and themes (`Theme`) |
+| `editor/` | the code editor (`CodeEditor`) and the colour wheel (`ColorWheel`) |
+| `preview/` | the live OpenGL preview (`Preview`) |
+| `build/` | building the pack (`Forge`), the obfuscator (`Obfuscator`) and the Skript output (`Skript`) |
+| `project/` | projects on disk (`Project`) and the form that makes them (`ProjectForm`) |
+| `learn/` | the lessons (`Lessons`), the guides (`Guides`), the task checks (`Checks`) and the Learn panel (`Learn`) |
+| `presets/` | the starter effects and their thumbnails (`Templates`) |
+| `library/` | the built in shader functions (`Library`) |
+| `discord/` | Discord status (`Discord`) |
+| `util/` | the JSON reader (`Json`) |
 | `resources/tiers`, `resources/stubs` | the Minecraft shader templates for each version |
 | `resources/examples` | example effects and their thumbnails |
 | `site/` | the website, with a live shader editor that runs in the browser |

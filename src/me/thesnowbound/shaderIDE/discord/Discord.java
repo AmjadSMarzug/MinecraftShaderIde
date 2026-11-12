@@ -1,4 +1,8 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.discord;
+
+import me.thesnowbound.shaderIDE.Main;
+import me.thesnowbound.shaderIDE.build.Forge;
+import me.thesnowbound.shaderIDE.util.Json;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -15,8 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 // rich presence over the pipe the Discord app opens (a named pipe on Windows, a unix socket on Linux and Mac),
 // so it needs no library and does nothing when Discord isn't running
-final class Discord {
-    static final String CLIENT_ID = "1563622288698638446";
+public final class Discord {
+    public static final String CLIENT_ID = "1563622288698638446";
 
     private static final long STARTED = System.currentTimeMillis() / 1000;
     private static final ScheduledExecutorService WORKER = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -24,7 +28,7 @@ final class Discord {
         t.setDaemon(true);
         return t;
     });
-    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Discord.class);
+    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
     private static java.io.Closeable pipe;
     private static java.io.DataInputStream in;
     private static java.io.OutputStream out;
@@ -36,11 +40,11 @@ final class Discord {
     private Discord() {
     }
 
-    static boolean enabled() {
+    public static boolean enabled() {
         return PREFS.getBoolean("discord", true);
     }
 
-    static void enabled(boolean on) {
+    public static void enabled(boolean on) {
         PREFS.putBoolean("discord", on);
         if (on && wantDetails != null) show(wantDetails, wantState, wantLarge, wantLargeText, wantSmall);
         if (!on) WORKER.execute(() -> {
@@ -55,7 +59,7 @@ final class Discord {
 
     // Discord drops anything past about 5 updates in 20 seconds, so wait for things to settle and only send the newest
     // large is an asset key from the developer portal or an https link, small is optional and sits in its corner
-    static void show(String details, String state, String large, String largeText, String small) {
+    public static void show(String details, String state, String large, String largeText, String small) {
         wantDetails = details;
         wantState = state;
         wantLarge = large;
@@ -101,7 +105,7 @@ final class Discord {
     }
 
     // Discord only shows pictures from a link, so the icon goes up to catbox and the link comes back
-    static String upload(java.nio.file.Path png) throws IOException, InterruptedException {
+    public static String upload(java.nio.file.Path png) throws IOException, InterruptedException {
         String boundary = "vessel" + UUID.randomUUID().toString().replace("-", "");
         java.io.ByteArrayOutputStream body = new java.io.ByteArrayOutputStream();
         String nl = "\r\n";
@@ -123,7 +127,7 @@ final class Discord {
     }
 
     // catbox sometimes answers with a link to an empty file, Discord then shows a question mark
-    static boolean works(String link) {
+    public static boolean works(String link) {
         try {
             java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder(java.net.URI.create(link))
                     .timeout(java.time.Duration.ofSeconds(15))

@@ -1,4 +1,6 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.ui;
+
+import me.thesnowbound.shaderIDE.Main;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
@@ -15,13 +17,13 @@ import java.util.prefs.Preferences;
 
 // a colour scheme for the whole app. frame is behind the islands, island is the panels themselves,
 // the rest are roles every screen picks from instead of hard coding its own greys
-record Theme(String name, boolean dark,
+public record Theme(String name, boolean dark,
              Color frame, Color island, Color editor, Color border, Color hover, Color select, Color raised,
              Color accent, Color onAccent, Color strong, Color text, Color dim, Color faint, Color error, Color good,
              Color keyword, Color type, Color number, Color string, Color comment, Color call, Color builtin, Color preproc,
              Color currentLine, Color textSelect, Color gutter) {
 
-    static final List<Theme> ALL = List.of(
+    public static final List<Theme> ALL = List.of(
             new Theme("Shader IDE Black", true,
                     rgb(0x000000), rgb(0x0e0e0e), rgb(0x0e0e0e), rgb(0x1e1e1e), rgb(0x1c1c1c), rgb(0x2a2a2a), rgb(0x161616),
                     rgb(0xffffff), rgb(0x000000), rgb(0xffffff), rgb(0xd8d8d8), rgb(0x777777), rgb(0x4a4a4a), rgb(0xff5c5c), rgb(0x9ae6a0),
@@ -48,8 +50,8 @@ record Theme(String name, boolean dark,
                     rgb(0x00ccff), rgb(0x00ccff), rgb(0xffff00), rgb(0x00ff00), rgb(0xb0b0b0), rgb(0xff8000), rgb(0xff66ff), rgb(0xffffff),
                     rgb(0x1a1a1a), rgb(0x0a4bbf), rgb(0x9a9a9a)));
 
-    private static final Preferences PREFS = Preferences.userNodeForPackage(Theme.class);
-    static Theme current = ALL.get(0);
+    private static final Preferences PREFS = Preferences.userNodeForPackage(Main.class);
+    public static Theme current = ALL.get(0);
 
     // a stand in whose colours look up the current theme every time they're used, so whatever holds on to
     // one of them follows a theme switch on the next repaint without being rebuilt
@@ -168,12 +170,12 @@ record Theme(String name, boolean dark,
         return new Color(v);
     }
 
-    static void load() {
+    public static void load() {
         String saved = PREFS.get("theme.v2", ALL.get(0).name);
         current = ALL.stream().filter(t -> t.name.equals(saved)).findFirst().orElse(ALL.get(0));
     }
 
-    static void save(Theme t) {
+    public static void save(Theme t) {
         PREFS.put("theme.v2", t.name);
         current = t;
     }
@@ -189,7 +191,7 @@ record Theme(String name, boolean dark,
     }
 
     // sets up FlatLaf for the current theme. call before any window is built
-    static void apply() {
+    public static void apply() {
         Theme t = current;
         FlatLaf.setGlobalExtraDefaults(Map.of(
                 "@background", hex(t.island),

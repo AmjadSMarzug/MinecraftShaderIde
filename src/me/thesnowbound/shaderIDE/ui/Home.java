@@ -1,4 +1,17 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.ui;
+
+import me.thesnowbound.shaderIDE.learn.Lessons;
+import me.thesnowbound.shaderIDE.learn.Guides;
+import me.thesnowbound.shaderIDE.learn.Learn;
+import me.thesnowbound.shaderIDE.editor.CodeEditor;
+import me.thesnowbound.shaderIDE.build.Forge;
+import me.thesnowbound.shaderIDE.build.Obfuscator;
+import me.thesnowbound.shaderIDE.build.Skript;
+import me.thesnowbound.shaderIDE.presets.Templates;
+import me.thesnowbound.shaderIDE.project.Project;
+import me.thesnowbound.shaderIDE.project.ProjectForm;
+import me.thesnowbound.shaderIDE.discord.Discord;
+import me.thesnowbound.shaderIDE.learn.Learn.Lesson;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,8 +47,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 // everything that isn't the editor. the rail picks the page, home itself is a banner of the project and its effects
-final class Home extends Fx.Reveal {
-    record Hooks(Runnable newProject, Runnable openProject, Consumer<Path> openPath, Runnable newEffect, Runnable build,
+public final class Home extends Fx.Reveal {
+    public record Hooks(Runnable newProject, Runnable openProject, Consumer<Path> openPath, Runnable newEffect, Runnable build,
                  Consumer<Templates.Example> example, Consumer<Learn.Lesson> lesson, Runnable back, Runnable updates,
                  Runnable releases, Supplier<Project> project, Supplier<Boolean> editorOpen, Supplier<List<String>> recent,
                  JCheckBoxMenuItem obfuscate, JCheckBoxMenuItem check, JCheckBoxMenuItem skript, Consumer<Theme> theme,
@@ -51,7 +64,7 @@ final class Home extends Fx.Reveal {
     private final JPanel content = new JPanel();
     private String section = "home";
 
-    Home(Hooks hooks) {
+    public Home(Hooks hooks) {
         this.hooks = hooks;
         setLayout(new BorderLayout());
         setBackground(t.frame());
@@ -62,11 +75,11 @@ final class Home extends Fx.Reveal {
         refresh();
     }
 
-    void refresh() {
+    public void refresh() {
         show(section);
     }
 
-    void select(String name) {
+    public void select(String name) {
         section = name;
         show(name);
     }

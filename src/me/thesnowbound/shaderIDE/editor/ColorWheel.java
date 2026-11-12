@@ -1,4 +1,4 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.editor;
 
 import javax.swing.JComponent;
 import java.awt.BasicStroke;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 // a colour wheel: hue is the angle around the ring, saturation the distance from the middle, and a slider
 // underneath sets brightness. every change is handed back as r, g, b from 0 to 1
-final class ColorWheel extends JComponent {
+public final class ColorWheel extends JComponent {
     private static final int D = 180;
     private static final int PAD = 10;
 
@@ -49,7 +49,7 @@ final class ColorWheel extends JComponent {
     }
 
     // the colour as r, g, b from 0 to 1
-    float[] rgb() {
+    public float[] rgb() {
         int c = Color.HSBtoRGB(h, s, v);
         return new float[] {((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f};
     }
@@ -111,7 +111,7 @@ final class ColorWheel extends JComponent {
         g2.fillRect(vx - 1, sy - 2, 3, 20);
     }
 
-    static float clamp01(float x) {
+    public static float clamp01(float x) {
         return Math.max(0f, Math.min(1f, x));
     }
 }

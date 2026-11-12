@@ -1,4 +1,7 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.project;
+
+import me.thesnowbound.shaderIDE.presets.Templates;
+import me.thesnowbound.shaderIDE.util.Json;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -9,29 +12,29 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class Project {
-    record Effect(String id, String file, int alpha, String item, Map<String, String> defines) {
+public final class Project {
+    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines) {
     }
 
-    final Path dir;
-    String name = "My Skies";
-    String description = "Custom skies";
-    String author = "Thesnowbound";
-    String namespace = "skyboxes";
-    long seed = 4211;
-    String discordImage = "";
-    String discordImageFor = "";
-    final List<Effect> effects = new ArrayList<>();
+    public final Path dir;
+    public String name = "My Skies";
+    public String description = "Custom skies";
+    public String author = "Thesnowbound";
+    public String namespace = "skyboxes";
+    public long seed = 4211;
+    public String discordImage = "";
+    public String discordImageFor = "";
+    public final List<Effect> effects = new ArrayList<>();
 
     private Project(Path dir) {
         this.dir = dir;
     }
 
-    Path file() {
+    public Path file() {
         return dir.resolve("project.json");
     }
 
-    static Project load(Path dir) throws IOException {
+    public static Project load(Path dir) throws IOException {
         Project p = new Project(dir);
         @SuppressWarnings("unchecked")
         Map<String, Object> j = (Map<String, Object>) Json.parse(Files.readString(p.file(), StandardCharsets.UTF_8));
@@ -56,7 +59,7 @@ final class Project {
         return p;
     }
 
-    static Project create(Path dir, String name) throws IOException {
+    public static Project create(Path dir, String name) throws IOException {
         Files.createDirectories(dir.resolve("effects"));
         Project p = new Project(dir);
         p.name = name;
@@ -67,7 +70,7 @@ final class Project {
         return p;
     }
 
-    void save() throws IOException {
+    public void save() throws IOException {
         Map<String, Object> j = new LinkedHashMap<>();
         j.put("name", name);
         j.put("description", description);
@@ -90,7 +93,7 @@ final class Project {
         Files.writeString(file(), Json.write(j) + "\n", StandardCharsets.UTF_8);
     }
 
-    int freeAlpha() {
+    public int freeAlpha() {
         for (int a = 254; a > 200; a--) {
             final int c = a;
             if (effects.stream().noneMatch(e -> e.alpha == c)) return a;
@@ -98,20 +101,20 @@ final class Project {
         return 200;
     }
 
-    Effect effectFor(Path file) {
+    public Effect effectFor(Path file) {
         for (Effect e : effects) if (dir.resolve(e.file).normalize().equals(file.normalize())) return e;
         return null;
     }
 
     // the project's icon is its pack.png, the same picture players see in the resource pack list
-    static Path icon(Path dir) {
+    public static Path icon(Path dir) {
         return dir.resolve("pack.png");
     }
 
     private static final Map<String, Object[]> ICONS = new java.util.HashMap<>();
 
     // the icon scaled down, cached until the file changes
-    static java.awt.Image icon(Path dir, int size) {
+    public static java.awt.Image icon(Path dir, int size) {
         Path file = icon(dir);
         try {
             if (!Files.exists(file)) return null;
@@ -130,13 +133,13 @@ final class Project {
     }
 
     // what the preview last showed for an effect, the home screen and the effect bar use these as thumbnails
-    static Path shot(Path dir, String id) {
+    public static Path shot(Path dir, String id) {
         return dir.resolve(".vessel/shots").resolve(id + ".png");
     }
 
     private static final Map<Path, Object[]> PICTURES = new java.util.HashMap<>();
 
-    static java.awt.image.BufferedImage picture(Path file) {
+    public static java.awt.image.BufferedImage picture(Path file) {
         try {
             if (!Files.exists(file)) return null;
             long stamp = Files.getLastModifiedTime(file).toMillis();
@@ -151,7 +154,7 @@ final class Project {
     }
 
     // crops the picture to a square from the middle and saves it as the icon
-    static void setIcon(Path dir, java.io.File picture) throws IOException {
+    public static void setIcon(Path dir, java.io.File picture) throws IOException {
         java.awt.image.BufferedImage img = javax.imageio.ImageIO.read(picture);
         if (img == null) throw new IOException(picture.getName() + " isn't a picture Java can read");
         int side = Math.min(img.getWidth(), img.getHeight());

@@ -1,4 +1,4 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.library;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 // each module's code replaces its #import line, joined onto that one line, so the line numbers in the
 // editor and in any error stay the same. the code here has no // comments, since they would run past
 // the end of the joined line. put the imports at the top of the effect, before the functions that use them
-final class Library {
-    record Module(String[] needs, String code) {
+public final class Library {
+    public record Module(String[] needs, String code) {
     }
 
     static final Map<String, Module> MODULES = new LinkedHashMap<>();
@@ -124,7 +124,7 @@ final class Library {
 
     // swaps every #import line for the code it names, then adds any module whose functions are called
     // without an import. the line count never changes: auto imports go in front of the first code line
-    static String expand(String source) {
+    public static String expand(String source) {
         String[] lines = source.split("\n", -1);
         Set<String> loaded = new LinkedHashSet<>();
         for (int i = 0; i < lines.length; i++) {
@@ -180,11 +180,11 @@ final class Library {
         out.append(m.code().replace('\n', ' ')).append(' ');
     }
 
-    static java.util.Set<String> functions() {
+    public static java.util.Set<String> functions() {
         return OWNER.keySet();
     }
 
-    static String names() {
+    public static String names() {
         return String.join(", ", MODULES.keySet());
     }
 }

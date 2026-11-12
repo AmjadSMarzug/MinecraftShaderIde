@@ -1,4 +1,4 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.ui;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -31,19 +31,19 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 // the parts both the home screen and the workspace share
-final class Chrome {
-    static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
+public final class Chrome {
+    public static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
             .filter(Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames())::contains)
             .findFirst().orElse(null);
     private Chrome() {
     }
 
-    static String pretty(String id) {
+    public static String pretty(String id) {
         String s = id.replace('_', ' ').strip();
         return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    static Graphics2D smooth(Graphics g) {
+    public static Graphics2D smooth(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -52,7 +52,7 @@ final class Chrome {
     }
 
     // fills the shape with the picture, cropping whatever doesn't fit
-    static void cover(Graphics2D g, Image img, Shape shape) {
+    public static void cover(Graphics2D g, Image img, Shape shape) {
         java.awt.Rectangle b = shape.getBounds();
         double k = Math.max(b.width / (double) img.getWidth(null), b.height / (double) img.getHeight(null));
         int w = (int) Math.ceil(img.getWidth(null) * k), h = (int) Math.ceil(img.getHeight(null) * k);
@@ -62,7 +62,7 @@ final class Chrome {
         g.setClip(old);
     }
 
-    static JButton action(String text, int height, Runnable action) {
+    public static JButton action(String text, int height, Runnable action) {
         String label = ICONS != null ? "<html><font face='" + ICONS + "'>&#xE768;</font>&nbsp;&nbsp;" + text + "</html>" : text;
         JButton b = new Fx.Soft(label, true);
         b.setFont(b.getFont().deriveFont(Font.BOLD, 16f));
@@ -72,8 +72,8 @@ final class Chrome {
     }
 
     // the icon rail down the left of the window
-    static final class Rail extends JComponent {
-        record Item(String key, String glyph, String label, Runnable action) {
+    public static final class Rail extends JComponent {
+        public record Item(String key, String glyph, String label, Runnable action) {
         }
 
         private static final int ROW = 72, TOP = 74;
@@ -86,7 +86,7 @@ final class Chrome {
         private final Fx.Glide slide = new Fx.Glide(this, 1);
         private final java.util.Map<Item, Fx.Glide> hovers = new java.util.HashMap<>();
 
-        Rail(List<Item> items, Item bottom) {
+        public Rail(List<Item> items, Item bottom) {
             this.items = items;
             this.bottom = bottom;
             java.net.URL icon = Rail.class.getResource("/icon.png");
@@ -118,7 +118,7 @@ final class Chrome {
             addMouseMotionListener(mouse);
         }
 
-        void select(String key) {
+        public void select(String key) {
             if (key.equals(selected)) return;
             from = find(selected);
             selected = key;
@@ -194,8 +194,8 @@ final class Chrome {
     }
 
     // the row of effects above the editor. it stands in for tabs, so it also lists any other file that's open
-    static final class EffectBar extends JPanel {
-        record Entry(Path file, String label, Image thumb, boolean dirty, boolean closable) {
+    public static final class EffectBar extends JPanel {
+        public record Entry(Path file, String label, Image thumb, boolean dirty, boolean closable) {
         }
 
         private final Consumer<Path> open;
@@ -203,7 +203,7 @@ final class Chrome {
         private final BiConsumer<Path, MouseEvent> menu;
         private final Runnable add;
 
-        EffectBar(Consumer<Path> open, BiConsumer<Path, MouseEvent> menu, Runnable add) {
+        public EffectBar(Consumer<Path> open, BiConsumer<Path, MouseEvent> menu, Runnable add) {
             super(new FlowLayout(FlowLayout.LEFT, 6, 0));
             this.open = open;
             this.menu = menu;
@@ -212,11 +212,11 @@ final class Chrome {
             setBorder(BorderFactory.createEmptyBorder(8, 4, 8, 8));
         }
 
-        void onClose(Consumer<Path> close) {
+        public void onClose(Consumer<Path> close) {
             this.close = close;
         }
 
-        void set(List<Entry> entries, Path active) {
+        public void set(List<Entry> entries, Path active) {
             removeAll();
             for (Entry e : entries) add(new Chip(e, e.file().equals(active)));
             if (add != null) add(new Chip(null, false));
@@ -340,12 +340,12 @@ final class Chrome {
     }
 
     // white when there's something to save, a quiet outline once everything is
-    static final class SaveButton extends JComponent {
+    public static final class SaveButton extends JComponent {
         private final Runnable action;
         private int unsaved;
         private final Fx.Glide fill = new Fx.Glide(this, 0), glow = new Fx.Glide(this, 0);
 
-        SaveButton(Runnable action) {
+        public SaveButton(Runnable action) {
             this.action = action;
             setPreferredSize(new Dimension(104, 40));
             addMouseListener(new MouseAdapter() {
@@ -366,7 +366,7 @@ final class Chrome {
             });
         }
 
-        void unsaved(int count) {
+        public void unsaved(int count) {
             unsaved = count;
             fill.to(count > 0 ? 1 : 0);
             setCursor(Cursor.getPredefinedCursor(count > 0 ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
@@ -399,7 +399,7 @@ final class Chrome {
     }
 
     // a tabbed pane with no tabs, the effect bar does that job
-    static final class Bare extends JTabbedPane {
+    public static final class Bare extends JTabbedPane {
         @Override
         public void updateUI() {
             setUI(new BasicTabbedPaneUI() {

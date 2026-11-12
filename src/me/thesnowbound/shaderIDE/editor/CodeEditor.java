@@ -1,4 +1,11 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.editor;
+
+import me.thesnowbound.shaderIDE.Main;
+import me.thesnowbound.shaderIDE.ui.Fx;
+import me.thesnowbound.shaderIDE.ui.Theme;
+import me.thesnowbound.shaderIDE.preview.Preview;
+import me.thesnowbound.shaderIDE.build.Obfuscator;
+import me.thesnowbound.shaderIDE.library.Library;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -55,7 +62,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class CodeEditor extends JScrollPane {
+public final class CodeEditor extends JScrollPane {
     private final Theme theme = Fx.t();
 
     private static final Set<String> BUILTINS = Set.of("abs", "acos", "asin", "atan", "ceil", "clamp", "cos", "cross", "degrees",
@@ -115,7 +122,7 @@ final class CodeEditor extends JScrollPane {
     private int editFrom = Integer.MAX_VALUE;
     private int editTo = -1;
 
-    CodeEditor(Path file) throws IOException {
+    public CodeEditor(Path file) throws IOException {
         this.file = file;
         text.setBackground(theme.editor());
         text.setOpaque(false);
@@ -233,14 +240,14 @@ final class CodeEditor extends JScrollPane {
         }
     }
 
-    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(CodeEditor.class);
+    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
     private static final java.util.Set<CodeEditor> OPEN = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
-    static int textSize() {
+    public static int textSize() {
         return PREFS.getInt("text.size", 14);
     }
 
-    static void textSize(int size) {
+    public static void textSize(int size) {
         PREFS.putInt("text.size", size);
         for (CodeEditor ed : OPEN) {
             ed.text.setFont(mono(size));
@@ -250,7 +257,7 @@ final class CodeEditor extends JScrollPane {
         }
     }
 
-    static Font mono(int size) {
+    public static Font mono(int size) {
         return new Font(MONO, Font.PLAIN, size);
     }
 
@@ -550,7 +557,7 @@ final class CodeEditor extends JScrollPane {
         return s;
     }
 
-    void showProblems(List<Preview.Problem> list) {
+    public void showProblems(List<Preview.Problem> list) {
         problems = list;
         Highlighter h = text.getHighlighter();
         h.removeAllHighlights();
@@ -567,26 +574,26 @@ final class CodeEditor extends JScrollPane {
     }
 
     // colours that were worked out from the theme, like the lifted vec3 swatches, get worked out again
-    void retheme() {
+    public void retheme() {
         editFrom = Integer.MAX_VALUE;
         editTo = -1;
         highlight();
         repaint();
     }
 
-    void goToLine(int line) {
+    public void goToLine(int line) {
         Element root = doc.getDefaultRootElement();
         if (line < 1 || line > root.getElementCount()) return;
         text.setCaretPosition(root.getElement(line - 1).getStartOffset());
         SwingUtilities.invokeLater(text::requestFocusInWindow);
     }
 
-    void save() throws IOException {
+    public void save() throws IOException {
         Files.writeString(file, text.getText(), StandardCharsets.UTF_8);
         dirty = false;
     }
 
-    void reload() throws IOException {
+    public void reload() throws IOException {
         painting = true;
         text.setText(Files.readString(file, StandardCharsets.UTF_8).replace("\r\n", "\n"));
         painting = false;
@@ -594,43 +601,43 @@ final class CodeEditor extends JScrollPane {
         dirty = false;
     }
 
-    String source() {
+    public String source() {
         return text.getText();
     }
 
-    Path file() {
+    public Path file() {
         return file;
     }
 
-    void undo() {
+    public void undo() {
         if (undo.canUndo()) undo.undo();
     }
 
-    void redo() {
+    public void redo() {
         if (undo.canRedo()) undo.redo();
     }
 
-    boolean canUndo() {
+    public boolean canUndo() {
         return undo.canUndo();
     }
 
-    boolean canRedo() {
+    public boolean canRedo() {
         return undo.canRedo();
     }
 
-    boolean dirty() {
+    public boolean dirty() {
         return dirty;
     }
 
-    void onChange(Runnable r) {
+    public void onChange(Runnable r) {
         onChange = r;
     }
 
-    void onCaret(Runnable r) {
+    public void onCaret(Runnable r) {
         text.addCaretListener(e -> r.run());
     }
 
-    String position() {
+    public String position() {
         int dot = text.getCaretPosition();
         int line = lineAt(dot);
         return "Ln " + (line + 1) + ", Col " + (dot - doc.getDefaultRootElement().getElement(line).getStartOffset() + 1);

@@ -1,4 +1,6 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.ui;
+
+import me.thesnowbound.shaderIDE.Main;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -26,8 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 
-final class Fx {
-    static final Color BACKDROP = Theme.LIVE.frame(), BLACK = Theme.LIVE.island(), SIDE = Theme.LIVE.island(), LINE = Theme.LIVE.border(),
+public final class Fx {
+    public static final Color BACKDROP = Theme.LIVE.frame(), BLACK = Theme.LIVE.island(), SIDE = Theme.LIVE.island(), LINE = Theme.LIVE.border(),
             TEXT = Theme.LIVE.text(), DIM = Theme.LIVE.dim(), WHITE = Theme.LIVE.strong(), RED = Theme.LIVE.error();
 
     private static final List<JWindow> toasts = new ArrayList<>();
@@ -35,20 +37,20 @@ final class Fx {
     private Fx() {
     }
 
-    static Theme t() {
+    public static Theme t() {
         return Theme.LIVE;
     }
 
-    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Fx.class);
-    static boolean motion = PREFS.getBoolean("motion", true);
+    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
+    public static boolean motion = PREFS.getBoolean("motion", true);
 
-    static void motion(boolean on) {
+    public static void motion(boolean on) {
         motion = on;
         PREFS.putBoolean("motion", on);
     }
 
     // eased out, so things arrive fast and settle softly
-    static Timer animate(int ms, DoubleConsumer step, Runnable done) {
+    public static Timer animate(int ms, DoubleConsumer step, Runnable done) {
         if (!motion) {
             step.accept(1);
             if (done != null) done.run();
@@ -70,17 +72,17 @@ final class Fx {
     }
 
     // a number that slides toward wherever it's told to go and repaints its owner on the way
-    static final class Glide {
+    public static final class Glide {
         private final JComponent owner;
         private double value, target;
         private Timer timer;
 
-        Glide(JComponent owner, double start) {
+        public Glide(JComponent owner, double start) {
             this.owner = owner;
             value = target = start;
         }
 
-        double get() {
+        public double get() {
             return value;
         }
 
@@ -88,7 +90,7 @@ final class Fx {
             value = 0;
         }
 
-        void to(double t) {
+        public void to(double t) {
             target = t;
             if (!motion) {
                 value = t;
@@ -109,7 +111,7 @@ final class Fx {
         }
     }
 
-    static void opacity(Window w, float a) {
+    public static void opacity(Window w, float a) {
         try {
             w.setOpacity(Math.max(0f, Math.min(1f, a)));
         } catch (RuntimeException ignored) {
@@ -117,17 +119,17 @@ final class Fx {
         }
     }
 
-    static Color mix(Color a, Color b, double t) {
+    public static Color mix(Color a, Color b, double t) {
         return new Color((int) (a.getRed() + (b.getRed() - a.getRed()) * t), (int) (a.getGreen() + (b.getGreen() - a.getGreen()) * t),
                 (int) (a.getBlue() + (b.getBlue() - a.getBlue()) * t), (int) (a.getAlpha() + (b.getAlpha() - a.getAlpha()) * t));
     }
 
-    static void hover(AbstractButton b, Color idle, Color hot) {
+    public static void hover(AbstractButton b, Color idle, Color hot) {
         b.setForeground(idle);
         b.getModel().addChangeListener(e -> b.setForeground(b.getModel().isRollover() || b.isSelected() ? hot : idle));
     }
 
-    static void fadeIn(Window w, int dy) {
+    public static void fadeIn(Window w, int dy) {
         Point end = w.getLocation();
         opacity(w, 0f);
         w.setLocation(end.x, end.y + dy);
@@ -138,19 +140,19 @@ final class Fx {
         }, null);
     }
 
-    static void fadeOut(Window w, Runnable done) {
+    public static void fadeOut(Window w, Runnable done) {
         animate(120, p -> opacity(w, (float) (1 - p)), () -> {
             w.dispose();
             if (done != null) done.run();
         });
     }
 
-    static void round(Window w, int arc) {
+    public static void round(Window w, int arc) {
         w.setShape(new RoundRectangle2D.Double(0, 0, w.getWidth(), w.getHeight(), arc, arc));
     }
 
     // a real window, not a lightweight popup, because the GL preview would paint right over a lightweight one
-    static void toast(JFrame owner, String text, boolean bad, String actionText, Runnable action) {
+    public static void toast(JFrame owner, String text, boolean bad, String actionText, Runnable action) {
         Theme t = t();
         JWindow w = new JWindow(owner);
         JPanel box = new JPanel(new BorderLayout(14, 0));
@@ -192,16 +194,16 @@ final class Fx {
     }
 
     // thin bar that sweeps across while something is working
-    static final class Loader extends JComponent {
+    public static final class Loader extends JComponent {
         private final Timer tick = new Timer(15, e -> repaint());
         private long started;
 
-        Loader() {
+        public Loader() {
             setPreferredSize(new Dimension(0, 2));
             setOpaque(false);
         }
 
-        void busy(boolean on) {
+        public void busy(boolean on) {
             if (on) {
                 started = System.nanoTime();
                 tick.start();
@@ -222,7 +224,7 @@ final class Fx {
     }
 
     // the hogyoku gem on a rounded tile
-    static final class Badge extends JComponent {
+    public static final class Badge extends JComponent {
         private static final java.awt.image.BufferedImage GEM = loadGem();
 
         Badge() {
@@ -257,14 +259,14 @@ final class Fx {
     }
 
     // a rounded panel floating on the frame colour, the building block of the window
-    static final class Island extends JPanel {
+    public static final class Island extends JPanel {
         private final int arc;
 
-        Island(java.awt.Component content, int pad) {
+        public Island(java.awt.Component content, int pad) {
             this(content, pad, 12);
         }
 
-        Island(java.awt.Component content, int pad, int arc) {
+        public Island(java.awt.Component content, int pad, int arc) {
             super(new BorderLayout());
             this.arc = arc;
             setOpaque(false);
@@ -288,7 +290,7 @@ final class Fx {
 
     // wheel scrolling like IntelliJ's: every notch adds to a target and the view eases there over a fixed
     // short time, starting again from wherever it is, so fast scrolling stays smooth and stops right away
-    static void smooth(JScrollPane pane, boolean hideBars) {
+    public static void smooth(JScrollPane pane, boolean hideBars) {
         if (hideBars) {
             pane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             pane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -330,7 +332,7 @@ final class Fx {
     }
 
     // shortens text with an ellipsis so it never runs past the space it has
-    static String fit(Graphics2D g, String text, int width) {
+    public static String fit(Graphics2D g, String text, int width) {
         java.awt.FontMetrics fm = g.getFontMetrics();
         if (fm.stringWidth(text) <= width) return text;
         String dots = "…";
@@ -340,8 +342,8 @@ final class Fx {
     }
 
     // a button that's filled with the accent when it's the main one, outlined otherwise
-    static final class Soft extends JButton {
-        Soft(String text, boolean bold) {
+    public static final class Soft extends JButton {
+        public Soft(String text, boolean bold) {
             super(text);
             setFocusable(false);
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -353,28 +355,28 @@ final class Fx {
         }
     }
 
-    static String hex(Color c) {
+    public static String hex(Color c) {
         return String.format("#%06x", c.getRGB() & 0xffffff);
     }
 
-    static Font heading(float size) {
+    public static Font heading(float size) {
         return new Font("Segoe UI Semibold", Font.PLAIN, 12).deriveFont(size);
     }
 
     // fades and lifts its contents in when a page changes
-    static class Reveal extends JPanel {
+    public static class Reveal extends JPanel {
         private float alpha = 1f, lift;
         private Timer running;
 
-        Reveal() {
+        public Reveal() {
             setOpaque(true);
         }
 
-        void play() {
+        public void play() {
             play(260, 10);
         }
 
-        void play(int ms, float dy) {
+        public void play(int ms, float dy) {
             if (running != null) running.stop();
             running = animate(ms, p -> {
                 alpha = (float) p;

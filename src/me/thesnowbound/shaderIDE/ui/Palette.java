@@ -1,4 +1,4 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.ui;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -24,8 +24,8 @@ import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Locale;
 
-final class Palette extends JDialog {
-    record Item(String label, String hint, Runnable run) {
+public final class Palette extends JDialog {
+    public record Item(String label, String hint, Runnable run) {
     }
 
     private final List<Item> items;
@@ -99,7 +99,7 @@ final class Palette extends JDialog {
         setLocation(owner.getX() + (owner.getWidth() - getWidth()) / 2, owner.getY() + 64);
     }
 
-    static void show(JFrame owner, String placeholder, List<Item> items) {
+    public static void show(JFrame owner, String placeholder, List<Item> items) {
         Palette p = new Palette(owner, placeholder, items);
         Fx.fadeIn(p, -8);
         SwingUtilities.invokeLater(p.query::requestFocusInWindow);
@@ -123,7 +123,7 @@ final class Palette extends JDialog {
     }
 
     // letters in order, gaps allowed, so "bp" finds "Build Pack"
-    static boolean matches(String text, String q) {
+    public static boolean matches(String text, String q) {
         int at = 0;
         for (char c : q.toCharArray()) {
             if (c == ' ') continue;

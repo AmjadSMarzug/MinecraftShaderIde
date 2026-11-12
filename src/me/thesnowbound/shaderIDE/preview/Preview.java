@@ -1,4 +1,8 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.preview;
+
+import me.thesnowbound.shaderIDE.build.Obfuscator;
+import me.thesnowbound.shaderIDE.presets.Templates;
+import me.thesnowbound.shaderIDE.library.Library;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
@@ -18,8 +22,8 @@ import java.util.regex.Pattern;
 
 import static org.lwjgl.opengl.GL33.*;
 
-final class Preview extends AWTGLCanvas {
-    record Problem(int line, String message) {
+public final class Preview extends AWTGLCanvas {
+    public record Problem(int line, String message) {
     }
 
     private static final Pattern ERROR_LINE = Pattern.compile("(?:\\d+[:(](\\d+)\\)?|ERROR: \\d+:(\\d+))[^:]*:\\s*(.*)");
@@ -45,7 +49,7 @@ final class Preview extends AWTGLCanvas {
     private volatile Consumer<java.awt.image.BufferedImage> shot;
     private volatile long shotAt;
 
-    Preview(Consumer<List<Problem>> problems) {
+    public Preview(Consumer<List<Problem>> problems) {
         super(settings());
         this.problems = problems;
         MouseAdapter drag = new MouseAdapter() {
@@ -89,7 +93,7 @@ final class Preview extends AWTGLCanvas {
     }
 
     // the sky needs a moment to settle, a frame straight after compiling can still be the old shader
-    void shoot(Consumer<java.awt.image.BufferedImage> done) {
+    public void shoot(Consumer<java.awt.image.BufferedImage> done) {
         shotAt = System.nanoTime() + 1_500_000_000L;
         shot = done;
     }
@@ -107,7 +111,7 @@ final class Preview extends AWTGLCanvas {
         return img;
     }
 
-    void onStats(Consumer<String> listener) {
+    public void onStats(Consumer<String> listener) {
         stats = listener;
     }
 
@@ -122,7 +126,7 @@ final class Preview extends AWTGLCanvas {
         return data;
     }
 
-    void show(String effectSource, Map<String, String> defines) {
+    public void show(String effectSource, Map<String, String> defines) {
         effectSource = Library.expand(effectSource);
         StringBuilder head = new StringBuilder();
         defines.forEach((k, v) -> head.append("#define ").append(k).append(' ').append(v).append('\n'));

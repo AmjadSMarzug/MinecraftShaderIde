@@ -1,4 +1,6 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.build;
+
+import me.thesnowbound.shaderIDE.project.Project;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -9,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 // writes a Skript next to the pack with commands to put players in the skies and place the objects
-final class Skript {
+public final class Skript {
     private static final String TEMPLATE = """
             # made by @@TOOL@@ for @@PACK@@
             # players need the @@PACK@@ resource pack loaded for any of this to show up
@@ -300,7 +302,7 @@ final class Skript {
         return cmd.isEmpty() ? "vessel" : cmd;
     }
 
-    static Path write(Project project, Set<String> objects, Set<String> materials, Set<String> overlays, Path dir) throws IOException {
+    public static Path write(Project project, Set<String> objects, Set<String> materials, Set<String> overlays, Path dir) throws IOException {
         String cmd = command(project);
         StringBuilder items = new StringBuilder();
         StringBuilder kinds = new StringBuilder();

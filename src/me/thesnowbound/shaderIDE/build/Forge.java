@@ -1,4 +1,8 @@
-package me.thesnowbound.shaderIDE;
+package me.thesnowbound.shaderIDE.build;
+
+import me.thesnowbound.shaderIDE.project.Project;
+import me.thesnowbound.shaderIDE.util.Json;
+import me.thesnowbound.shaderIDE.library.Library;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,15 +24,15 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-final class Forge {
-    static final String TOOL = "Shader IDE";
-    static final String VERSION = "2.1.0";
+public final class Forge {
+    public static final String TOOL = "Shader IDE";
+    public static final String VERSION = "2.1.0";
 
-    record Tier(String name, int min, int max, String folder, List<String> files) {
+    public record Tier(String name, int min, int max, String folder, List<String> files) {
     }
 
     // 1.21 and 1.21.1 read the shader name without the core/ prefix, so they get their own json
-    static final List<Tier> TIERS = List.of(
+    public static final List<Tier> TIERS = List.of(
             new Tier("1_21", 34, 41, "overlay_1_21", List.of("rendertype_item_entity_translucent_cull.json")),
             new Tier("legacy", 34, 62, "", List.of("rendertype_item_entity_translucent_cull.vsh", "rendertype_item_entity_translucent_cull.fsh", "rendertype_item_entity_translucent_cull.json")),
             new Tier("ubo", 63, 83, "overlay_1_21_6", List.of("rendertype_item_entity_translucent_cull.vsh", "rendertype_item_entity_translucent_cull.fsh")),
@@ -63,18 +67,18 @@ final class Forge {
     private static final String INTRO_FRAME = "vec3 inrm=abs(normalize(cross(dFdx(viewPos),dFdy(viewPos))));float imax=max(inrm.x,max(inrm.y,inrm.z));"
             + "float iturn=acos(clamp((3.0*imax-1.0)*0.5,-1.0,1.0));float introNow=clamp(1.0-(iturn-0.035)/0.6631317,0.0,1.0);";
 
-    Forge(Project project, Consumer<String> log) {
+    public Forge(Project project, Consumer<String> log) {
         this.project = project;
         this.log = log;
     }
 
-    Path writeSkript(Path dir) throws IOException {
+    public Path writeSkript(Path dir) throws IOException {
         Path file = Skript.write(project, objects, materials, overlays, dir);
         log.accept("wrote " + file);
         return file;
     }
 
-    Path build(boolean obfuscate, boolean check) throws IOException {
+    public Path build(boolean obfuscate, boolean check) throws IOException {
         // a fresh seed every build, so names and the number pool never line up between two packs
         Obfuscator ob = new Obfuscator(project.seed ^ System.nanoTime());
         StringBuilder body = new StringBuilder();
@@ -380,7 +384,7 @@ final class Forge {
 
     private static Path cachedGlslang;
 
-    static synchronized Path glslang() throws IOException {
+    public static synchronized Path glslang() throws IOException {
         if (cachedGlslang != null) return cachedGlslang;
         // only the Windows build is bundled, Linux and Mac use the one their package manager installs
         if (!System.getProperty("os.name").toLowerCase().contains("win")) return cachedGlslang = onPath("glslangValidator", "glslang");
@@ -406,7 +410,7 @@ final class Forge {
         return null;
     }
 
-    static String resource(String path) throws IOException {
+    public static String resource(String path) throws IOException {
         try (InputStream in = Forge.class.getResourceAsStream(path)) {
             if (in == null) throw new IOException("missing resource " + path);
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);

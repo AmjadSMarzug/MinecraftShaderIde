@@ -43,7 +43,7 @@ jar cfm "out/dist/Shader IDE.jar" out/manifest.txt -C out/classes .
 echo "built out/dist/Shader IDE.jar"
 
 # a self contained app with its own Java for this platform, packed up for the GitHub release
-VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/me/thesnowbound/shaderIDE/Forge.java | cut -d'"' -f2)}
+VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/me/thesnowbound/shaderIDE/build/Forge.java | cut -d'"' -f2)}
 rm -rf out/jpkg out/app
 mkdir -p out/jpkg
 cp "out/dist/Shader IDE.jar" out/jpkg/

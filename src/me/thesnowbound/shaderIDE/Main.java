@@ -1,5 +1,23 @@
 package me.thesnowbound.shaderIDE;
 
+import me.thesnowbound.shaderIDE.learn.Lessons;
+import me.thesnowbound.shaderIDE.learn.Learn;
+import me.thesnowbound.shaderIDE.ui.Chrome;
+import me.thesnowbound.shaderIDE.ui.Fx;
+import me.thesnowbound.shaderIDE.ui.Theme;
+import me.thesnowbound.shaderIDE.ui.Home;
+import me.thesnowbound.shaderIDE.ui.Gallery;
+import me.thesnowbound.shaderIDE.ui.Palette;
+import me.thesnowbound.shaderIDE.editor.CodeEditor;
+import me.thesnowbound.shaderIDE.preview.Preview;
+import me.thesnowbound.shaderIDE.build.Forge;
+import me.thesnowbound.shaderIDE.build.Skript;
+import me.thesnowbound.shaderIDE.presets.Templates;
+import me.thesnowbound.shaderIDE.project.Project;
+import me.thesnowbound.shaderIDE.project.ProjectForm;
+import me.thesnowbound.shaderIDE.discord.Discord;
+import me.thesnowbound.shaderIDE.util.Json;
+
 import com.formdev.flatlaf.FlatLaf;
 
 import javax.swing.BorderFactory;
@@ -1807,7 +1825,7 @@ public final class Main extends JFrame {
         t.start();
     }
 
-    static boolean newer(String a, String b) {
+    public static boolean newer(String a, String b) {
         String[] x = a.split("\\."), y = b.split("\\.");
         for (int i = 0; i < Math.max(x.length, y.length); i++) {
             int p = i < x.length ? number(x[i]) : 0, q = i < y.length ? number(y[i]) : 0;
