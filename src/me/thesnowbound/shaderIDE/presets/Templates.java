@@ -99,6 +99,14 @@ public final class Templates {
             new Example("swirling_vignette_cyan", "Swirling Vignette Cyan", "Overlay", "cyan noise swirling in from the screen edges"),
             new Example("swirling_vignette_red", "Swirling Vignette Red", "Overlay", "red noise swirling in from the screen edges"),
             new Example("swirling_vignette_purple", "Swirling Vignette Purple", "Overlay", "purple noise swirling in from the screen edges"),
+            new Example("orb_aqua", "Orb Aqua", "Object", "a glowing aqua orb with bright streaks of light"),
+            new Example("orb_blue", "Orb Blue", "Object", "a glowing blue orb with bright streaks of light"),
+            new Example("orb_green", "Orb Green", "Object", "a glowing green orb with bright streaks of light"),
+            new Example("orb_grey", "Orb Grey", "Object", "a glowing grey orb with bright streaks of light"),
+            new Example("orb_orange", "Orb Orange", "Object", "a glowing orange orb with bright streaks of light"),
+            new Example("orb_purple", "Orb Purple", "Object", "a glowing purple orb with bright streaks of light"),
+            new Example("orb_red", "Orb Red", "Object", "a glowing red orb with bright streaks of light"),
+            new Example("orb_yellow", "Orb Yellow", "Object", "a glowing yellow orb with bright streaks of light"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """
