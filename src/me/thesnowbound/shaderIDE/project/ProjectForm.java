@@ -1,9 +1,8 @@
 package me.thesnowbound.shaderIDE.project;
 
 import me.thesnowbound.shaderIDE.Main;
-import me.thesnowbound.shaderIDE.ui.Fx;
-import me.thesnowbound.shaderIDE.build.Skript;
 import me.thesnowbound.shaderIDE.discord.Discord;
+import me.thesnowbound.shaderIDE.ui.Fx;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;

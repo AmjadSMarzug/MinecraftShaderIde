@@ -1,11 +1,11 @@
 package me.thesnowbound.shaderIDE.editor;
 
 import me.thesnowbound.shaderIDE.Main;
-import me.thesnowbound.shaderIDE.ui.Fx;
-import me.thesnowbound.shaderIDE.ui.Theme;
-import me.thesnowbound.shaderIDE.preview.Preview;
 import me.thesnowbound.shaderIDE.build.Obfuscator;
 import me.thesnowbound.shaderIDE.library.Library;
+import me.thesnowbound.shaderIDE.preview.Problem;
+import me.thesnowbound.shaderIDE.ui.Fx;
+import me.thesnowbound.shaderIDE.ui.Theme;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -65,15 +65,15 @@ import java.util.regex.Pattern;
 public final class CodeEditor extends JScrollPane {
     private final Theme theme = Fx.t();
 
-    private static final Set<String> BUILTINS = Set.of("abs", "acos", "asin", "atan", "ceil", "clamp", "cos", "cross", "degrees",
+    static final Set<String> BUILTINS = Set.of("abs", "acos", "asin", "atan", "ceil", "clamp", "cos", "cross", "degrees",
             "distance", "dot", "exp", "exp2", "floor", "fract", "inversesqrt", "length", "log", "log2", "max", "min", "mix", "mod",
             "normalize", "pow", "radians", "reflect", "refract", "round", "sign", "sin", "smoothstep", "sqrt", "step", "tan",
             "texture", "transpose", "inverse", "determinant", "fwidth", "dFdx", "dFdy", "floatBitsToUint", "uintBitsToFloat");
-    private static final Pattern TOKEN = Pattern.compile(
+    static final Pattern TOKEN = Pattern.compile(
             "(?<comment>//[^\\n]*|/\\*.*?(?:\\*/|$))|(?<pre>^[ \\t]*#[^\\n]*)|(?<word>[A-Za-z_]\\w*)(?<call>\\s*\\()?|(?<num>\\b\\d+\\.?\\d*(?:[eE][-+]?\\d+)?[fFuU]?\\b|\\.\\d+)",
             Pattern.DOTALL | Pattern.MULTILINE);
 
-    private static final Pattern COLOR = Pattern.compile("vec3\\(\\s*([0-9]*\\.?[0-9]+)\\s*,\\s*([0-9]*\\.?[0-9]+)\\s*,\\s*([0-9]*\\.?[0-9]+)\\s*\\)");
+    static final Pattern COLOR = Pattern.compile("vec3\\(\\s*([0-9]*\\.?[0-9]+)\\s*,\\s*([0-9]*\\.?[0-9]+)\\s*,\\s*([0-9]*\\.?[0-9]+)\\s*\\)");
 
     private final JTextPane text = new JTextPane() {
         @Override
@@ -99,7 +99,7 @@ public final class CodeEditor extends JScrollPane {
         @Override
         public String getToolTipText(MouseEvent e) {
             int line = lineAt(viewToModel2D(e.getPoint())) + 1;
-            for (Preview.Problem p : problems) if (p.line() == line) return p.message();
+            for (Problem p : problems) if (p.line() == line) return p.message();
             return null;
         }
     };
@@ -107,15 +107,13 @@ public final class CodeEditor extends JScrollPane {
     private final UndoManager undo = new UndoManager();
     private final Timer recolor = new Timer(150, e -> highlight());
     private final Highlighter.HighlightPainter squiggle = new Squiggle();
-    private record Suggestion(String text, String kind) {
-    }
     private final JPopupMenu suggest = new JPopupMenu();
     private final DefaultListModel<Suggestion> suggestModel = new DefaultListModel<>();
     private final JList<Suggestion> suggestList = new JList<>(suggestModel);
     private int wordStart;
     private boolean accepting;
     private final Path file;
-    private List<Preview.Problem> problems = List.of();
+    private List<Problem> problems = List.of();
     private boolean dirty;
     private boolean painting;
     private Runnable onChange = () -> { };
@@ -224,10 +222,10 @@ public final class CodeEditor extends JScrollPane {
         });
     }
 
-    private static final String MONO = loadMono();
+    static final String MONO = loadMono();
 
     // the styled document asks for bold and italic by family name, so every face has to be registered
-    private static String loadMono() {
+    static String loadMono() {
         try {
             for (String face : List.of("Regular", "Bold", "Italic")) {
                 try (var in = CodeEditor.class.getResourceAsStream("/fonts/JetBrainsMono-" + face + ".ttf")) {
@@ -240,8 +238,8 @@ public final class CodeEditor extends JScrollPane {
         }
     }
 
-    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
-    private static final java.util.Set<CodeEditor> OPEN = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+    static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
+    static final java.util.Set<CodeEditor> OPEN = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
     public static int textSize() {
         return PREFS.getInt("text.size", 14);
@@ -311,19 +309,12 @@ public final class CodeEditor extends JScrollPane {
     }
 
     // a vec3 written with plain numbers, like vec3(0.2, 0.5, 1.0). these get a colour chip and a picker
-    private static final Pattern VEC3 = Pattern.compile(
+    static final Pattern VEC3 = Pattern.compile(
             "vec3\\s*\\(\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*,\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*,\\s*([-+]?(?:\\d+\\.?\\d*|\\.\\d+))\\s*\\)");
-    private static final int CHIP_X = 20;
-
-    private record Literal(int start, int end, float[] rgb) {
-        Color color() {
-            return new Color(Math.round(ColorWheel.clamp01(rgb[0]) * 255), Math.round(ColorWheel.clamp01(rgb[1]) * 255),
-                    Math.round(ColorWheel.clamp01(rgb[2]) * 255));
-        }
-    }
+    static final int CHIP_X = 20;
 
     // the first literal in a piece of text, with its offsets moved to where the text starts in the document
-    private static Literal firstLiteral(String text, int offset) {
+    static Literal firstLiteral(String text, int offset) {
         Matcher m = VEC3.matcher(text);
         if (!m.find()) return null;
         return new Literal(offset + m.start(), offset + m.end(), new float[] {
@@ -345,7 +336,7 @@ public final class CodeEditor extends JScrollPane {
     }
 
     // numbers are written out with at most two decimals, trailing zeros dropped, so 0.50 becomes 0.5
-    private static String number(float x) {
+    static String number(float x) {
         String n = String.format(Locale.ROOT, "%.2f", ColorWheel.clamp01(x));
         n = n.replaceAll("0+$", "");
         return n.endsWith(".") ? n + "0" : n;
@@ -393,7 +384,7 @@ public final class CodeEditor extends JScrollPane {
         }
     }
 
-    private static boolean wordChar(char c) {
+    static boolean wordChar(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
     }
 
@@ -545,24 +536,24 @@ public final class CodeEditor extends JScrollPane {
         }
     }
 
-    private static AttributeSet italic(AttributeSet a) {
+    static AttributeSet italic(AttributeSet a) {
         SimpleAttributeSet s = new SimpleAttributeSet(a);
         StyleConstants.setItalic(s, true);
         return s;
     }
 
-    private static AttributeSet style(Color c) {
+    static AttributeSet style(Color c) {
         SimpleAttributeSet s = new SimpleAttributeSet();
         StyleConstants.setForeground(s, c);
         return s;
     }
 
-    public void showProblems(List<Preview.Problem> list) {
+    public void showProblems(List<Problem> list) {
         problems = list;
         Highlighter h = text.getHighlighter();
         h.removeAllHighlights();
         Element root = doc.getDefaultRootElement();
-        for (Preview.Problem p : list) {
+        for (Problem p : list) {
             if (p.line() < 1 || p.line() > root.getElementCount()) continue;
             Element line = root.getElement(p.line() - 1);
             try {
@@ -689,7 +680,7 @@ public final class CodeEditor extends JScrollPane {
                     Rectangle2D r = text.modelToView2D(root.getElement(i).getStartOffset());
                     int y = (int) r.getY();
                     boolean bad = false;
-                    for (Preview.Problem p : problems) if (p.line() == i + 1) bad = true;
+                    for (Problem p : problems) if (p.line() == i + 1) bad = true;
                     if (bad) {
                         g.setColor(theme.error());
                         g.fillOval(6, y + (int) r.getHeight() / 2 - 3, 6, 6);

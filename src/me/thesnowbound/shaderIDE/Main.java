@@ -1,21 +1,32 @@
 package me.thesnowbound.shaderIDE;
 
-import me.thesnowbound.shaderIDE.learn.Lessons;
-import me.thesnowbound.shaderIDE.learn.Learn;
-import me.thesnowbound.shaderIDE.ui.Chrome;
-import me.thesnowbound.shaderIDE.ui.Fx;
-import me.thesnowbound.shaderIDE.ui.Theme;
-import me.thesnowbound.shaderIDE.ui.Home;
-import me.thesnowbound.shaderIDE.ui.Gallery;
-import me.thesnowbound.shaderIDE.ui.Palette;
-import me.thesnowbound.shaderIDE.editor.CodeEditor;
-import me.thesnowbound.shaderIDE.preview.Preview;
 import me.thesnowbound.shaderIDE.build.Forge;
-import me.thesnowbound.shaderIDE.build.Skript;
+import me.thesnowbound.shaderIDE.discord.Discord;
+import me.thesnowbound.shaderIDE.editor.CodeEditor;
+import me.thesnowbound.shaderIDE.learn.Learn;
+import me.thesnowbound.shaderIDE.learn.Lesson;
+import me.thesnowbound.shaderIDE.learn.Panel;
+import me.thesnowbound.shaderIDE.presets.Example;
 import me.thesnowbound.shaderIDE.presets.Templates;
+import me.thesnowbound.shaderIDE.preview.Preview;
+import me.thesnowbound.shaderIDE.preview.Problem;
 import me.thesnowbound.shaderIDE.project.Project;
 import me.thesnowbound.shaderIDE.project.ProjectForm;
-import me.thesnowbound.shaderIDE.discord.Discord;
+import me.thesnowbound.shaderIDE.ui.Bare;
+import me.thesnowbound.shaderIDE.ui.Chrome;
+import me.thesnowbound.shaderIDE.ui.EffectBar;
+import me.thesnowbound.shaderIDE.ui.Fx;
+import me.thesnowbound.shaderIDE.ui.Gallery;
+import me.thesnowbound.shaderIDE.ui.Glide;
+import me.thesnowbound.shaderIDE.ui.Home;
+import me.thesnowbound.shaderIDE.ui.Hooks;
+import me.thesnowbound.shaderIDE.ui.Island;
+import me.thesnowbound.shaderIDE.ui.Loader;
+import me.thesnowbound.shaderIDE.ui.Palette;
+import me.thesnowbound.shaderIDE.ui.Rail;
+import me.thesnowbound.shaderIDE.ui.Reveal;
+import me.thesnowbound.shaderIDE.ui.SaveButton;
+import me.thesnowbound.shaderIDE.ui.Theme;
 import me.thesnowbound.shaderIDE.util.Json;
 
 import com.formdev.flatlaf.FlatLaf;
@@ -90,17 +101,17 @@ import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 public final class Main extends JFrame {
-    private static final Preferences PREFS = Preferences.userNodeForPackage(Main.class);
-    private static final String RELEASES = "AmjadSMarzug/shaderIDE";
-    private static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
+    static final Preferences PREFS = Preferences.userNodeForPackage(Main.class);
+    static final String RELEASES = "AmjadSMarzug/shaderIDE";
+    static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
             .filter(Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames())::contains)
             .findFirst().orElse(null);
 
     private final JTree tree = new JTree(new DefaultMutableTreeNode());
-    private final JTabbedPane tabs = new Chrome.Bare();
+    private final JTabbedPane tabs = new Bare();
     private final JTabbedPane panel = new JTabbedPane();
-    private final DefaultListModel<Preview.Problem> problems = new DefaultListModel<>();
-    private final JList<Preview.Problem> problemList = new JList<>(problems);
+    private final DefaultListModel<Problem> problems = new DefaultListModel<>();
+    private final JList<Problem> problemList = new JList<>(problems);
     private final JTextArea log = new JTextArea();
     private final JLabel explorerTitle = new JLabel();
     private final JLabel statusProblems = statusCell("");
@@ -109,23 +120,23 @@ public final class Main extends JFrame {
     private final JLabel statusFps = statusCell("");
     private final JLabel problemMark = new JLabel();
     private final JPanel previewSide = new JPanel(new BorderLayout());
-    private final Chrome.EffectBar effectBar = new Chrome.EffectBar(this::open, this::chipMenu, this::newEffect);
-    private final Chrome.SaveButton saveButton = new Chrome.SaveButton(this::saveAll);
+    private final EffectBar effectBar = new EffectBar(this::open, this::chipMenu, this::newEffect);
+    private final SaveButton saveButton = new SaveButton(this::saveAll);
     private final JButton undoButton = editIcon("\uE7A7", "Undo (Ctrl+Z)", () -> { if (current() != null) current().undo(); });
     private final JButton redoButton = editIcon("\uE7A6", "Redo (Ctrl+Y)", () -> { if (current() != null) current().redo(); });
-    private final Chrome.Rail rail = new Chrome.Rail(List.of(
-            new Chrome.Rail.Item("home", "\uE80F", "Home", () -> showHome("home")),
-            new Chrome.Rail.Item("work", "\uE943", "Editor", this::showWork),
-            new Chrome.Rail.Item("examples", "\uE7B3", "Examples", () -> showHome("examples")),
-            new Chrome.Rail.Item("learn", "\uE736", "Learn", () -> showHome("learn"))),
-            new Chrome.Rail.Item("settings", "\uE713", "Settings", () -> showHome("settings")));
+    private final Rail rail = new Rail(List.of(
+            new Rail.Item("home", "\uE80F", "Home", () -> showHome("home")),
+            new Rail.Item("work", "\uE943", "Editor", this::showWork),
+            new Rail.Item("examples", "\uE7B3", "Examples", () -> showHome("examples")),
+            new Rail.Item("learn", "\uE736", "Learn", () -> showHome("learn"))),
+            new Rail.Item("settings", "\uE713", "Settings", () -> showHome("settings")));
     private final JCheckBoxMenuItem obfuscate = new JCheckBoxMenuItem("Obfuscate", true);
     private final JCheckBoxMenuItem check = new JCheckBoxMenuItem("Check Shaders", true);
     private final JCheckBoxMenuItem skript = new JCheckBoxMenuItem("Also Make a Skript", false);
     private final CardLayout editorCards = new CardLayout();
-    private final Fx.Reveal editorArea = new Fx.Reveal();
+    private final Reveal editorArea = new Reveal();
     private Home home;
-    private final Fx.Loader loader = new Fx.Loader();
+    private final Loader loader = new Loader();
     private final Timer previewDelay = new Timer(350, e -> refreshPreview());
     private JSplitPane all;
     private JSplitPane editorAndPreview;
@@ -134,13 +145,13 @@ public final class Main extends JFrame {
     private final JPanel right = new JPanel(new BorderLayout());
     private final CardLayout sideCards = new CardLayout();
     private final JPanel sideStack = new JPanel(sideCards);
-    private final Fx.Island sideCard = new Fx.Island(sideStack, 2);
+    private final Island sideCard = new Island(sideStack, 2);
     private int filesWidth = 260;
-    private final Fx.Island editorCard = new Fx.Island(editorArea, 2);
-    private final Fx.Island previewCard = new Fx.Island(right, 2);
-    private final Fx.Island consoleCard = new Fx.Island(panel, 2);
+    private final Island editorCard = new Island(editorArea, 2);
+    private final Island previewCard = new Island(right, 2);
+    private final Island consoleCard = new Island(panel, 2);
     private Preview preview;
-    private Learn.Panel lessonPanel;
+    private Panel lessonPanel;
     private boolean homeShowing = true;
     private final CardLayout screenCards = new CardLayout();
     private final JPanel screens = new JPanel(screenCards);
@@ -210,7 +221,7 @@ public final class Main extends JFrame {
             presence();
             refreshBar();
         });
-                home = new Home(new Home.Hooks(this::newProject, this::openProject, this::openProject, this::newEffect, this::pickBuild,
+                home = new Home(new Hooks(this::newProject, this::openProject, this::openProject, this::newEffect, this::pickBuild,
                 this::startFrom, this::startLesson, this::backToEditor, () -> checkForUpdate(true),
                 () -> browse("https://github.com/" + RELEASES + "/releases"), () -> project, () -> project != null || tabs.getTabCount() > 0,
                 Main::recent, obfuscate, check, skript, t -> SwingUtilities.invokeLater(() -> changeTheme(t)), this::openEffect));
@@ -223,7 +234,7 @@ public final class Main extends JFrame {
         problemList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Preview.Problem p = problemList.getSelectedValue();
+                Problem p = problemList.getSelectedValue();
                 CodeEditor ed = current();
                 if (p != null && ed != null) ed.goToLine(p.line());
             }
@@ -413,7 +424,7 @@ public final class Main extends JFrame {
         return bar;
     }
 
-    private static JMenuItem item(String text, KeyStroke key, Runnable action) {
+    static JMenuItem item(String text, KeyStroke key, Runnable action) {
         JMenuItem i = new JMenuItem(text);
         if (key != null) i.setAccelerator(key);
         i.addActionListener(e -> action.run());
@@ -505,7 +516,7 @@ public final class Main extends JFrame {
     }
 
     // the project's own picture, or a coloured square with its initials like IntelliJ draws for projects without one
-    private static javax.swing.Icon projectIcon(Project p, int size) {
+    static javax.swing.Icon projectIcon(Project p, int size) {
         java.awt.Image img = p == null ? null : Project.icon(p.dir, size);
         String name = p == null ? "?" : p.name;
         return new javax.swing.Icon() {
@@ -578,7 +589,7 @@ public final class Main extends JFrame {
                 // a link typed in by hand is kept, clearing it hands the job back to the upload
                 project.discordImageFor = "";
             }), mc);
-            Fx.Glide open = new Fx.Glide(card, 0);
+            Glide open = new Glide(card, 0);
             JComponent drawer = new JComponent() {
                 {
                     setLayout(new BorderLayout());
@@ -686,35 +697,7 @@ public final class Main extends JFrame {
         menu.repaint();
     }
 
-    // a little arrow that turns from pointing right to pointing down as its glide goes from 0 to 1
-    private static final class Chevron extends JComponent {
-        private final Fx.Glide turn;
-
-        Chevron(Fx.Glide turn) {
-            this.turn = turn;
-            setPreferredSize(new Dimension(34, 0));
-        }
-
-        @Override
-        protected void paintComponent(java.awt.Graphics g) {
-            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
-            g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.translate(getWidth() / 2.0 - 4, getHeight() / 2.0);
-            g2.rotate(turn.get() * Math.PI / 2);
-            g2.setColor(Fx.t().dim());
-            g2.setStroke(new java.awt.BasicStroke(1.4f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
-            g2.draw(new java.awt.geom.Path2D.Float() {
-                {
-                    moveTo(-2.5f, -5f);
-                    lineTo(2.5f, 0f);
-                    lineTo(-2.5f, 5f);
-                }
-            });
-            g2.dispose();
-        }
-    }
-
-    private static JButton cardButton(String glyph, String text, Runnable action) {
+    static JButton cardButton(String glyph, String text, Runnable action) {
         String label = ICONS != null ? "<html><font face='" + ICONS + "'>" + glyph + "</font>&nbsp;&nbsp;" + text + "</html>" : text;
         JButton b = new JButton(label);
         b.setFocusable(false);
@@ -724,7 +707,7 @@ public final class Main extends JFrame {
     }
 
     // a flat clickable line: an optional picture or glyph, then the words
-    private static JComponent cardRow(javax.swing.Icon icon, String text, String glyph, Runnable action) {
+    static JComponent cardRow(javax.swing.Icon icon, String text, String glyph, Runnable action) {
         JButton b = new JButton(text, icon);
         b.putClientProperty("JButton.buttonType", "toolBarButton");
         b.setHorizontalAlignment(JButton.LEFT);
@@ -802,7 +785,7 @@ public final class Main extends JFrame {
         return h;
     }
 
-    private static JComponent toolActions(Runnable hide) {
+    static JComponent toolActions(Runnable hide) {
         JButton b = new JButton(Chrome.ICONS != null ? "" : "-");
         b.putClientProperty("JButton.buttonType", "toolBarButton");
         b.setFocusable(false);
@@ -869,12 +852,12 @@ public final class Main extends JFrame {
         JPanel f = new JPanel(new BorderLayout(0, 8));
         f.setOpaque(false);
         f.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-        f.add(new Fx.Island(line, 0, 10), BorderLayout.NORTH);
+        f.add(new Island(line, 0, 10), BorderLayout.NORTH);
         f.add(Chrome.action("Build pack", 58, this::build), BorderLayout.SOUTH);
         return f;
     }
 
-    private static JLabel statusCell(String text) {
+    static JLabel statusCell(String text) {
         JLabel l = new JLabel(text);
         l.setForeground(Fx.DIM);
         l.setFont(l.getFont().deriveFont(12f));
@@ -899,7 +882,7 @@ public final class Main extends JFrame {
         repaint();
     }
 
-    private static void launch(Path dir, String section) {
+    static void launch(Path dir, String section) {
         Theme.apply();
         // the preview is a native GL canvas, and menus drawn in Swing would end up hidden behind it
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -910,12 +893,12 @@ public final class Main extends JFrame {
         m.setVisible(true);
     }
 
-    private static <T extends JComponent> T borderless(T c) {
+    static <T extends JComponent> T borderless(T c) {
         c.setBorder(null);
         return c;
     }
 
-    private static JSplitPane split(int orientation, Component a, Component b, double weight) {
+    static JSplitPane split(int orientation, Component a, Component b, double weight) {
         JSplitPane s = new JSplitPane(orientation, a, b);
         s.setResizeWeight(weight);
         s.setBorder(null);
@@ -925,15 +908,15 @@ public final class Main extends JFrame {
         return s;
     }
 
-    private static String glyphHtml(String glyph, String color) {
+    static String glyphHtml(String glyph, String color) {
         return ICONS != null ? "<font face='" + ICONS + "' color='" + color + "'>" + glyph + "</font>" : "<font color='" + color + "'>x</font>";
     }
 
-    private static String escape(String s) {
+    static String escape(String s) {
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
-    private static String shorten(String path) {
+    static String shorten(String path) {
         return path.length() > 52 ? "..." + path.substring(path.length() - 49) : path;
     }
 
@@ -1054,7 +1037,7 @@ public final class Main extends JFrame {
         return p;
     }
 
-    private static List<String> recent() {
+    static List<String> recent() {
         List<String> list = new ArrayList<>();
         for (String dir : PREFS.get("recent", "").split("\n")) {
             if (!dir.isBlank() && Files.exists(Path.of(dir, "project.json"))) list.add(dir);
@@ -1062,7 +1045,7 @@ public final class Main extends JFrame {
         return list;
     }
 
-    private static void remember(Path dir) {
+    static void remember(Path dir) {
         List<String> list = recent();
         list.remove(dir.toString());
         list.add(0, dir.toString());
@@ -1181,18 +1164,18 @@ public final class Main extends JFrame {
     }
 
     private void refreshBar() {
-        List<Chrome.EffectBar.Entry> entries = new ArrayList<>();
+        List<EffectBar.Entry> entries = new ArrayList<>();
         java.util.Set<Path> shown = new java.util.HashSet<>();
         if (project != null) {
             for (Project.Effect e : project.effects) {
                 Path file = project.dir.resolve(e.file()).normalize();
                 shown.add(file);
-                entries.add(new Chrome.EffectBar.Entry(file, Chrome.pretty(e.id()), Project.picture(Project.shot(project.dir, e.id())), dirty(file), false));
+                entries.add(new EffectBar.Entry(file, Chrome.pretty(e.id()), Project.picture(Project.shot(project.dir, e.id())), dirty(file), false));
             }
         }
         for (int i = 0; i < tabs.getTabCount(); i++) {
             Path file = ((CodeEditor) tabs.getComponentAt(i)).file().normalize();
-            if (shown.add(file)) entries.add(new Chrome.EffectBar.Entry(file, file.getFileName().toString(), null, dirty(file), true));
+            if (shown.add(file)) entries.add(new EffectBar.Entry(file, file.getFileName().toString(), null, dirty(file), true));
         }
         CodeEditor ed = current();
         effectBar.set(entries, ed == null ? null : ed.file().normalize());
@@ -1207,7 +1190,7 @@ public final class Main extends JFrame {
         });
     }
 
-    private static JButton editIcon(String glyph, String tip, Runnable action) {
+    static JButton editIcon(String glyph, String tip, Runnable action) {
         JButton b = new JButton(Chrome.ICONS != null ? glyph : tip.substring(0, 1));
         if (Chrome.ICONS != null) b.setFont(new Font(Chrome.ICONS, Font.PLAIN, 15));
         b.putClientProperty("JButton.buttonType", "toolBarButton");
@@ -1394,7 +1377,7 @@ public final class Main extends JFrame {
         choices.add(new Gallery.Choice("my_surface", "Blank surface", "Surface", "an empty surface to start from", Templates.NEW_SURFACE, null));
         choices.add(new Gallery.Choice("my_material", "Blank material", "Material", "an empty material to start from", Templates.NEW_MATERIAL, null));
         choices.add(new Gallery.Choice("my_overlay", "Blank overlay", "Overlay", "an empty overlay to start from", Templates.NEW_OVERLAY, null));
-        for (Templates.Example ex : Templates.EXAMPLES) choices.add(ex.choice());
+        for (Example ex : Templates.EXAMPLES) choices.add(ex.choice());
         Gallery.show(this, choices, c -> createEffect(c.id(), c.source()));
     }
 
@@ -1403,7 +1386,7 @@ public final class Main extends JFrame {
     }
 
     // lessons live in their own project in Documents so they never clutter a real pack
-    private void startLesson(Learn.Lesson lesson) {
+    private void startLesson(Lesson lesson) {
         Path dir = Path.of(System.getProperty("user.home"), "Documents", "Shader IDE", "Lessons");
         try {
             if (project == null || !project.dir.equals(dir)) {
@@ -1430,7 +1413,7 @@ public final class Main extends JFrame {
             boolean wasOpen = lessonPanel != null;
             if (wasOpen) sideStack.remove(lessonPanel);
             lessonFile = file;
-            lessonPanel = new Learn.Panel(lesson, new Learn.Panel.Actions(
+            lessonPanel = new Panel(lesson, new Panel.Actions(
                     () -> resetLesson(lesson),
                     this::exitLesson,
                     () -> {
@@ -1465,7 +1448,7 @@ public final class Main extends JFrame {
         if (sideCard.isVisible()) toggle(sideCard, all);
     }
 
-    private void resetLesson(Learn.Lesson lesson) {
+    private void resetLesson(Lesson lesson) {
         if (lessonFile == null) return;
         int r = JOptionPane.showConfirmDialog(this, "Put the starter code back? Your changes to this lesson are lost.", "Reset code", JOptionPane.OK_CANCEL_OPTION);
         if (r != JOptionPane.OK_OPTION) return;
@@ -1486,7 +1469,7 @@ public final class Main extends JFrame {
     }
 
     // the welcome page cards work without a project too, they just make one first
-    private void startFrom(Templates.Example ex) {
+    private void startFrom(Example ex) {
         if (project == null) newProject();
         if (project != null) createEffect(ex.id(), ex.source());
     }
@@ -1697,7 +1680,7 @@ public final class Main extends JFrame {
         });
     }
 
-    private void showProblems(List<Preview.Problem> list) {
+    private void showProblems(List<Problem> list) {
         problems.clear();
         list.forEach(problems::addElement);
         CodeEditor ed = current();
@@ -1708,7 +1691,7 @@ public final class Main extends JFrame {
         if (list.isEmpty()) {
             statusProblems.setText("No problems");
         } else {
-            Preview.Problem p = list.get(0);
+            Problem p = list.get(0);
             statusProblems.setText((p.line() > 0 ? "Line " + p.line() + ": " : "") + p.message() + (list.size() > 1 ? "  (" + (list.size() - 1) + " more)" : ""));
         }
     }
@@ -1834,7 +1817,7 @@ public final class Main extends JFrame {
         return false;
     }
 
-    private static int number(String part) {
+    static int number(String part) {
         String digits = part.replaceAll("\\D.*", "");
         return digits.isEmpty() ? 0 : Integer.parseInt(digits);
     }

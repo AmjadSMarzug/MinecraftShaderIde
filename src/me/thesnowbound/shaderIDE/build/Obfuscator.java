@@ -22,15 +22,15 @@ public final class Obfuscator {
                 "case", "default", "precision", "attribute", "varying", "sample", "centroid", "invariant"));
     }
 
-    private static final Pattern TOKEN = Pattern.compile(
+    static final Pattern TOKEN = Pattern.compile(
             "(?<comment>//[^\\n]*|/\\*.*?\\*/)|(?<pre>^[ \\t]*#[^\\n]*)|(?<ident>[A-Za-z_]\\w*)"
                     + "|(?<num>\\d+\\.?\\d*(?:[eE][-+]?\\d+)?[fFuU]?|\\.\\d+(?:[eE][-+]?\\d+)?[fF]?)|(?<ws>\\s+)"
                     // two character operators stay one token, so "a - -b" (two tokens) and "a--" (one) can be told apart
                     + "|(?<op>\\+\\+|--|[-+*/<>=!]=|&&|\\|\\||\\^\\^|<<|>>|.)",
             Pattern.DOTALL | Pattern.MULTILINE);
-    private static final Pattern DEFINE = Pattern.compile("\\s*#\\s*define\\s+([A-Za-z_]\\w*)");
+    static final Pattern DEFINE = Pattern.compile("\\s*#\\s*define\\s+([A-Za-z_]\\w*)");
     // directives whose text is read by the game or the driver, not by us. nothing inside them may be renamed
-    private static final Pattern VERBATIM_DIRECTIVE = Pattern.compile("#\\s*(moj_import|version|extension|pragma|include|line|error)\\b");
+    static final Pattern VERBATIM_DIRECTIVE = Pattern.compile("#\\s*(moj_import|version|extension|pragma|include|line|error)\\b");
     // built-in functions. a variable that happens to share one of these names must not drag the real calls along with it
     static final Set<String> BUILTINS = Set.of("radians", "degrees", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh",
             "tanh", "asinh", "acosh", "atanh", "pow", "exp", "log", "exp2", "log2", "sqrt", "inversesqrt", "abs", "sign", "floor",
@@ -44,16 +44,10 @@ public final class Obfuscator {
             "textureQueryLod", "textureQueryLevels", "dFdx", "dFdy", "dFdxFine", "dFdyFine", "dFdxCoarse", "dFdyCoarse", "fwidth",
             "fwidthFine", "fwidthCoarse", "bitfieldExtract", "bitfieldInsert", "bitfieldReverse", "bitCount", "findLSB",
             "findMSB", "uaddCarry", "usubBorrow", "umulExtended", "imulExtended", "emitVertex", "endPrimitive");
-    private static final Pattern WORD = Pattern.compile("[A-Za-z_]\\w*");
+    static final Pattern WORD = Pattern.compile("[A-Za-z_]\\w*");
     // characters that look alike in most fonts. each build mixes two of these sets, so no two packs share a naming style
-    private static final String[] LOOKALIKES = {"lI1", "O0Q", "S5", "Il1i", "oO0", "vVwW", "Z2z", "B8"};
-    private static final Pattern FLOAT = Pattern.compile("[0-9.]*[.eE][0-9.eE+-]*[fF]?");
-
-    public record Token(String kind, String text) {
-    }
-
-    public record Result(String code, String entry, String kind) {
-    }
+    static final String[] LOOKALIKES = {"lI1", "O0Q", "S5", "Il1i", "oO0", "vVwW", "Z2z", "B8"};
+    static final Pattern FLOAT = Pattern.compile("[0-9.]*[.eE][0-9.eE+-]*[fF]?");
 
     // which kind of effect a file is, going by the entry function it defines
     public static String kind(String src) {
@@ -64,7 +58,7 @@ public final class Obfuscator {
         return "sky";
     }
 
-    private static final Pattern SHAPE = Pattern.compile("(?m)^[ \\t]*#pragma\\s+vessel\\s+shape\\s+(\\w+)[^\\n]*\\n?");
+    static final Pattern SHAPE = Pattern.compile("(?m)^[ \\t]*#pragma\\s+vessel\\s+shape\\s+(\\w+)[^\\n]*\\n?");
 
     // half the size of the item's box on each axis, for the shapes a surface effect can ask for
     public static float[] shapeSize(String src) {
@@ -78,7 +72,7 @@ public final class Obfuscator {
         };
     }
 
-    private static final Pattern SCALE = Pattern.compile("(?m)^[ \\t]*#pragma\\s+vessel\\s+scale\\s+([\\d.]+)[^\\n]*\\n?");
+    static final Pattern SCALE = Pattern.compile("(?m)^[ \\t]*#pragma\\s+vessel\\s+scale\\s+([\\d.]+)[^\\n]*\\n?");
 
     // how many blocks wide the item is. models can't reach past -16 and 32, so 3 is as big as it gets
     public static float scale(String src) {
@@ -96,10 +90,10 @@ public final class Obfuscator {
         return SCALE.matcher(SHAPE.matcher(src).replaceAll("\n")).replaceAll("\n");
     }
 
-    private static final Pattern OBJECT_ENTRY = Pattern.compile("\\bvec4\\s+object\\s*\\(");
-    private static final Pattern SURFACE_ENTRY = Pattern.compile("\\bvec4\\s+surface\\s*\\(");
-    private static final Pattern MATERIAL_ENTRY = Pattern.compile("\\bvec4\\s+material\\s*\\(");
-    private static final Pattern OVERLAY_ENTRY = Pattern.compile("\\bvec4\\s+overlay\\s*\\(");
+    static final Pattern OBJECT_ENTRY = Pattern.compile("\\bvec4\\s+object\\s*\\(");
+    static final Pattern SURFACE_ENTRY = Pattern.compile("\\bvec4\\s+surface\\s*\\(");
+    static final Pattern MATERIAL_ENTRY = Pattern.compile("\\bvec4\\s+material\\s*\\(");
+    static final Pattern OVERLAY_ENTRY = Pattern.compile("\\bvec4\\s+overlay\\s*\\(");
 
     private final Random rng;
     private final Set<String> used = new HashSet<>();
@@ -142,23 +136,23 @@ public final class Obfuscator {
         return out;
     }
 
-    private static void declarations(List<Token> all, Set<String> names, Set<String> fields) {
+    static void declarations(List<Token> all, Set<String> names, Set<String> fields) {
         Set<String> types = new HashSet<>(TYPES);
         List<Token> sig = new ArrayList<>();
-        for (Token t : all) if (!t.kind.equals("ws") && !t.kind.equals("comment")) sig.add(t);
+        for (Token t : all) if (!t.kind().equals("ws") && !t.kind().equals("comment")) sig.add(t);
         int depth = 0, brace = 0, declDepth = 0;
         boolean declActive = false;
         Integer structBrace = null;
         for (int i = 0; i < sig.size(); i++) {
             Token t = sig.get(i);
-            if (t.kind.equals("pre")) {
-                Matcher m = DEFINE.matcher(t.text);
+            if (t.kind().equals("pre")) {
+                Matcher m = DEFINE.matcher(t.text());
                 if (m.lookingAt()) names.add(m.group(1));
                 continue;
             }
             Token prev = i > 0 ? sig.get(i - 1) : new Token("", "");
             Token next = i + 1 < sig.size() ? sig.get(i + 1) : new Token("", "");
-            switch (t.text) {
+            switch (t.text()) {
                 case "(" -> depth++;
                 case ")" -> {
                     depth--;
@@ -174,20 +168,20 @@ public final class Obfuscator {
                 }
                 case ";" -> declActive = false;
                 default -> {
-                    if (!t.kind.equals("ident")) break;
-                    if (prev.text.equals("struct")) {
-                        types.add(t.text);
-                        names.add(t.text);
-                        if (next.text.equals("{")) structBrace = brace + 1;
+                    if (!t.kind().equals("ident")) break;
+                    if (prev.text().equals("struct")) {
+                        types.add(t.text());
+                        names.add(t.text());
+                        if (next.text().equals("{")) structBrace = brace + 1;
                         break;
                     }
-                    if (KEYWORDS.contains(t.text)) break;
-                    boolean afterType = prev.kind.equals("ident") && types.contains(prev.text);
-                    boolean afterComma = prev.text.equals(",") && declActive && depth == declDepth;
+                    if (KEYWORDS.contains(t.text())) break;
+                    boolean afterType = prev.kind().equals("ident") && types.contains(prev.text());
+                    boolean afterComma = prev.text().equals(",") && declActive && depth == declDepth;
                     if (!afterType && !afterComma) break;
-                    if (structBrace != null && brace == structBrace) fields.add(t.text);
-                    else names.add(t.text);
-                    declActive = !next.text.equals("(");
+                    if (structBrace != null && brace == structBrace) fields.add(t.text());
+                    else names.add(t.text());
+                    declActive = !next.text().equals("(");
                     declDepth = depth;
                 }
             }
@@ -222,16 +216,16 @@ public final class Obfuscator {
     }
 
     // text of the nearest token before (step -1) or after (step 1) index from, skipping whitespace and comments
-    private static String sigText(List<Token> toks, int from, int step) {
+    static String sigText(List<Token> toks, int from, int step) {
         for (int k = from + step; k >= 0 && k < toks.size(); k += step) {
             Token t = toks.get(k);
-            if (!t.kind.equals("ws") && !t.kind.equals("comment")) return t.text;
+            if (!t.kind().equals("ws") && !t.kind().equals("comment")) return t.text();
         }
         return "";
     }
 
     // "a - -b" and "a + +b" must keep their space when squeezed, or they turn into the decrement and increment operators
-    private static boolean signClash(String prev, String next) {
+    static boolean signClash(String prev, String next) {
         return (prev.endsWith("+") && next.startsWith("+")) || (prev.endsWith("-") && next.startsWith("-"));
     }
 
@@ -242,23 +236,23 @@ public final class Obfuscator {
         boolean inConst = false;
         for (int ti = 0; ti < toks.size(); ti++) {
             Token t = toks.get(ti);
-            if (t.text.equals("{")) depth++;
-            else if (t.text.equals("}")) depth--;
-            else if (t.text.equals("const")) inConst = true;
-            else if (t.text.equals(";")) inConst = false;
+            if (t.text().equals("{")) depth++;
+            else if (t.text().equals("}")) depth--;
+            else if (t.text().equals("const")) inConst = true;
+            else if (t.text().equals(";")) inConst = false;
             // numbers inside functions go into one shared array. globals and consts have to stay literal,
             // GLSL wants constant expressions there and an array lookup doesn't count
-            if (minify && t.kind.equals("num") && depth > 0 && !inConst && FLOAT.matcher(t.text).matches()) {
-                out.append('\u0000').append(pool.computeIfAbsent(t.text, k -> pool.size())).append('\u0000');
-                prevSig = t.text;
+            if (minify && t.kind().equals("num") && depth > 0 && !inConst && FLOAT.matcher(t.text()).matches()) {
+                out.append('\u0000').append(pool.computeIfAbsent(t.text(), k -> pool.size())).append('\u0000');
+                prevSig = t.text();
                 continue;
             }
-            switch (t.kind) {
+            switch (t.kind()) {
                 case "comment" -> {
-                    if (!minify) out.append(t.text);
+                    if (!minify) out.append(t.text());
                 }
                 case "pre" -> {
-                    String directive = t.text.strip();
+                    String directive = t.text().strip();
                     StringBuilder line = new StringBuilder();
                     if (VERBATIM_DIRECTIVE.matcher(directive).lookingAt()) {
                         line.append(directive);
@@ -271,19 +265,19 @@ public final class Obfuscator {
                     prevSig = "";
                 }
                 case "ws" -> {
-                    if (!minify) out.append(t.text);
+                    if (!minify) out.append(t.text());
                     else out.append(signClash(sigText(toks, ti, -1), sigText(toks, ti, 1)) ? '\u0001' : ' ');
                 }
                 case "ident" -> {
-                    String v = t.text;
+                    String v = t.text();
                     if (prevSig.equals(".")) v = fields.contains(v) ? map.getOrDefault(v, v) : v;
                     else v = map.getOrDefault(v, v);
                     out.append(v);
                     prevSig = v;
                 }
                 default -> {
-                    out.append(t.text);
-                    prevSig = t.text;
+                    out.append(t.text());
+                    prevSig = t.text();
                 }
             }
         }
@@ -355,7 +349,7 @@ public final class Obfuscator {
         return new String[]{"", text};
     }
 
-    private static String lit(float v) {
+    static String lit(float v) {
         String s = Float.toString(v);
         return s.contains(".") || s.contains("E") ? s : s + ".0";
     }
@@ -412,10 +406,10 @@ public final class Obfuscator {
         StringBuilder out = new StringBuilder();
         String prev = "";
         for (Token t : tokenize(text)) {
-            String v = t.text;
-            if (t.kind.equals("ident") && !prev.equals(".") && names.contains(v)) v = wrapper.computeIfAbsent(v, k -> freshName());
+            String v = t.text();
+            if (t.kind().equals("ident") && !prev.equals(".") && names.contains(v)) v = wrapper.computeIfAbsent(v, k -> freshName());
             out.append(v);
-            if (!t.kind.equals("ws") && !t.kind.equals("comment")) prev = v;
+            if (!t.kind().equals("ws") && !t.kind().equals("comment")) prev = v;
         }
         return out.toString();
     }
@@ -431,7 +425,7 @@ public final class Obfuscator {
     public static String inline(List<Token> toks, String entry) {
         List<Token> sig = new ArrayList<>();
         for (Token t : toks) {
-            if (t.kind.equals("ws") || t.kind.equals("comment")) continue;
+            if (t.kind().equals("ws") || t.kind().equals("comment")) continue;
             sig.add(t);
         }
         for (int round = 0; round < 6; round++) {
@@ -442,13 +436,13 @@ public final class Obfuscator {
                 Helper h = helper(sig, i, entry, local, text);
                 if (h == null) continue;
                 List<Token> next = new ArrayList<>(sig.subList(0, i));
-                next.addAll(sig.subList(h.end, sig.size()));
+                next.addAll(sig.subList(h.end(), sig.size()));
                 List<Token> done = new ArrayList<>();
                 int calls = 0;
                 for (int k = 0; k < next.size(); k++) {
                     Token t = next.get(k);
-                    boolean call = t.text.equals(h.name) && k + 1 < next.size() && next.get(k + 1).text.equals("(")
-                            && (k == 0 || !next.get(k - 1).text.equals("."));
+                    boolean call = t.text().equals(h.name()) && k + 1 < next.size() && next.get(k + 1).text().equals("(")
+                            && (k == 0 || !next.get(k - 1).text().equals("."));
                     if (!call) {
                         done.add(t);
                         continue;
@@ -460,7 +454,7 @@ public final class Obfuscator {
                         done = null;
                         break;
                     }
-                    done.addAll(tokenize(body).stream().filter(x -> !x.kind.equals("ws")).toList());
+                    done.addAll(tokenize(body).stream().filter(x -> !x.kind().equals("ws")).toList());
                     calls++;
                     k = close;
                 }
@@ -473,116 +467,88 @@ public final class Obfuscator {
         return join(sig);
     }
 
-    private record Helper(String name, String type, List<String[]> params, List<Token> expr, int end) {
-        // null when an argument would have to be pasted twice and isn't a plain name or number
-        String substitute(List<List<Token>> args) {
-            if (args.size() != params.size()) return null;
-            StringBuilder b = new StringBuilder(type).append("((");
-            for (int ei = 0; ei < expr.size(); ei++) {
-                Token t = expr.get(ei);
-                // a name right after a dot is a field or swizzle (v.x), not the parameter that happens to be called x
-                boolean member = ei > 0 && expr.get(ei - 1).text.equals(".");
-                int p = -1;
-                for (int k = 0; k < params.size(); k++) if (params.get(k)[1].equals(t.text)) p = k;
-                if (p < 0 || !t.kind.equals("ident") || member) {
-                    b.append(t.text).append(' ');
-                    continue;
-                }
-                List<Token> arg = args.get(p);
-                String param = params.get(p)[1];
-                long uses = 0;
-                for (int k = 0; k < expr.size(); k++) {
-                    if (expr.get(k).text.equals(param) && !(k > 0 && expr.get(k - 1).text.equals("."))) uses++;
-                }
-                if (uses > 1 && !(arg.size() == 1 && !arg.get(0).kind.equals("op"))) return null;
-                b.append(params.get(p)[0]).append("(").append(join(arg)).append(")");
-            }
-            return b.append("))").toString();
-        }
-    }
-
-    private static Helper helper(List<Token> sig, int i, String entry, Set<String> local, String text) {
-        if (depthAt(sig, i) != 0 || !TYPES.contains(sig.get(i).text) || sig.get(i).text.equals("void")) return null;
-        if (i > 0 && !List.of(";", "}").contains(sig.get(i - 1).text) && !sig.get(i - 1).kind.equals("pre")) return null;
-        String name = sig.get(i + 1).text;
-        if (!sig.get(i + 1).kind.equals("ident") || !sig.get(i + 2).text.equals("(") || KEYWORDS.contains(name)) return null;
+    static Helper helper(List<Token> sig, int i, String entry, Set<String> local, String text) {
+        if (depthAt(sig, i) != 0 || !TYPES.contains(sig.get(i).text()) || sig.get(i).text().equals("void")) return null;
+        if (i > 0 && !List.of(";", "}").contains(sig.get(i - 1).text()) && !sig.get(i - 1).kind().equals("pre")) return null;
+        String name = sig.get(i + 1).text();
+        if (!sig.get(i + 1).kind().equals("ident") || !sig.get(i + 2).text().equals("(") || KEYWORDS.contains(name)) return null;
         if (name.equals("main") || name.equals(entry)) return null;
         List<String[]> params = new ArrayList<>();
         int k = i + 3;
-        while (!sig.get(k).text.equals(")")) {
-            if (sig.get(k).text.equals("in")) k++;
-            if (!TYPES.contains(sig.get(k).text) || !sig.get(k + 1).kind.equals("ident")) return null;
-            params.add(new String[]{sig.get(k).text, sig.get(k + 1).text});
+        while (!sig.get(k).text().equals(")")) {
+            if (sig.get(k).text().equals("in")) k++;
+            if (!TYPES.contains(sig.get(k).text()) || !sig.get(k + 1).kind().equals("ident")) return null;
+            params.add(new String[]{sig.get(k).text(), sig.get(k + 1).text()});
             k += 2;
-            if (sig.get(k).text.equals(",")) k++;
-            else if (!sig.get(k).text.equals(")")) return null;
+            if (sig.get(k).text().equals(",")) k++;
+            else if (!sig.get(k).text().equals(")")) return null;
         }
-        if (!sig.get(k + 1).text.equals("{") || !sig.get(k + 2).text.equals("return")) return null;
+        if (!sig.get(k + 1).text().equals("{") || !sig.get(k + 2).text().equals("return")) return null;
         int semi = k + 3, depth = 0;
-        while (semi < sig.size() && !(depth == 0 && sig.get(semi).text.equals(";"))) {
-            String s = sig.get(semi).text;
+        while (semi < sig.size() && !(depth == 0 && sig.get(semi).text().equals(";"))) {
+            String s = sig.get(semi).text();
             if (s.equals("(")) depth++;
             if (s.equals(")")) depth--;
             if (s.equals("{") || s.equals("}")) return null;
             semi++;
         }
-        if (semi + 1 >= sig.size() || !sig.get(semi + 1).text.equals("}")) return null;
+        if (semi + 1 >= sig.size() || !sig.get(semi + 1).text().equals("}")) return null;
         List<Token> expr = new ArrayList<>(sig.subList(k + 3, semi));
         Set<String> own = new HashSet<>();
         for (String[] p : params) own.add(p[1]);
         for (Token t : expr) {
-            if (t.kind.equals("pre") || t.text.equals(name)) return null;
-            if (t.kind.equals("ident") && !own.contains(t.text) && local.contains(t.text)) return null;
+            if (t.kind().equals("pre") || t.text().equals(name)) return null;
+            if (t.kind().equals("ident") && !own.contains(t.text()) && local.contains(t.text())) return null;
         }
         // overloads, prototypes and macros that mention it would all break
         int defs = 0;
         for (int d = 0; d + 2 < sig.size(); d++) {
-            if (sig.get(d + 1).text.equals(name) && sig.get(d + 2).text.equals("(") && TYPES.contains(sig.get(d).text)) defs++;
-            if (sig.get(d).kind.equals("pre") && WORD.matcher(sig.get(d).text).results().anyMatch(r -> r.group().equals(name))) return null;
+            if (sig.get(d + 1).text().equals(name) && sig.get(d + 2).text().equals("(") && TYPES.contains(sig.get(d).text())) defs++;
+            if (sig.get(d).kind().equals("pre") && WORD.matcher(sig.get(d).text()).results().anyMatch(r -> r.group().equals(name))) return null;
         }
         if (defs != 1) return null;
-        return new Helper(name, sig.get(i).text, params, expr, semi + 2);
+        return new Helper(name, sig.get(i).text(), params, expr, semi + 2);
     }
 
     // every name declared inside a function, parameters included
-    private static Set<String> locals(List<Token> sig) {
+    static Set<String> locals(List<Token> sig) {
         Set<String> out = new HashSet<>();
         int brace = 0, paren = 0;
         for (int i = 1; i < sig.size(); i++) {
-            String s = sig.get(i).text;
+            String s = sig.get(i).text();
             if (s.equals("{")) brace++;
             else if (s.equals("}")) brace--;
             else if (s.equals("(")) paren++;
             else if (s.equals(")")) paren--;
-            else if ((brace > 0 || paren > 0) && sig.get(i).kind.equals("ident") && TYPES.contains(sig.get(i - 1).text)) out.add(s);
+            else if ((brace > 0 || paren > 0) && sig.get(i).kind().equals("ident") && TYPES.contains(sig.get(i - 1).text())) out.add(s);
         }
         return out;
     }
 
-    private static int depthAt(List<Token> sig, int i) {
+    static int depthAt(List<Token> sig, int i) {
         int d = 0;
         for (int k = 0; k < i; k++) {
-            if (sig.get(k).text.equals("{")) d++;
-            if (sig.get(k).text.equals("}")) d--;
+            if (sig.get(k).text().equals("{")) d++;
+            if (sig.get(k).text().equals("}")) d--;
         }
         return d;
     }
 
-    private static int matching(List<Token> sig, int open) {
+    static int matching(List<Token> sig, int open) {
         int d = 0;
         for (int k = open; k < sig.size(); k++) {
-            if (sig.get(k).text.equals("(")) d++;
-            if (sig.get(k).text.equals(")") && --d == 0) return k;
+            if (sig.get(k).text().equals("(")) d++;
+            if (sig.get(k).text().equals(")") && --d == 0) return k;
         }
         throw new IllegalArgumentException("unbalanced brackets");
     }
 
-    private static List<List<Token>> arguments(List<Token> sig, int from, int close) {
+    static List<List<Token>> arguments(List<Token> sig, int from, int close) {
         List<List<Token>> args = new ArrayList<>();
         List<Token> cur = new ArrayList<>();
         int d = 0;
         for (int k = from; k < close; k++) {
-            String s = sig.get(k).text;
+            String s = sig.get(k).text();
             if (s.equals("(") || s.equals("[")) d++;
             if (s.equals(")") || s.equals("]")) d--;
             if (d == 0 && s.equals(",")) {
@@ -596,11 +562,11 @@ public final class Obfuscator {
         return args;
     }
 
-    private static String join(List<Token> sig) {
+    static String join(List<Token> sig) {
         StringBuilder b = new StringBuilder();
         for (Token t : sig) {
-            if (t.kind.equals("pre")) b.append('\n').append(t.text.strip()).append('\n');
-            else b.append(t.text).append(' ');
+            if (t.kind().equals("pre")) b.append('\n').append(t.text().strip()).append('\n');
+            else b.append(t.text()).append(' ');
         }
         return b.toString();
     }

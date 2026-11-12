@@ -3,7 +3,6 @@ package me.thesnowbound.shaderIDE.learn;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import me.thesnowbound.shaderIDE.learn.Learn.Step;
 
 // the small checks that lesson tasks are written with: has, count, uses, lacks and step
 public final class Checks {

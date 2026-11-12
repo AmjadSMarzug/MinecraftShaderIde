@@ -1,8 +1,8 @@
 package me.thesnowbound.shaderIDE.preview;
 
 import me.thesnowbound.shaderIDE.build.Obfuscator;
-import me.thesnowbound.shaderIDE.presets.Templates;
 import me.thesnowbound.shaderIDE.library.Library;
+import me.thesnowbound.shaderIDE.presets.Templates;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
@@ -23,10 +23,7 @@ import java.util.regex.Pattern;
 import static org.lwjgl.opengl.GL33.*;
 
 public final class Preview extends AWTGLCanvas {
-    public record Problem(int line, String message) {
-    }
-
-    private static final Pattern ERROR_LINE = Pattern.compile("(?:\\d+[:(](\\d+)\\)?|ERROR: \\d+:(\\d+))[^:]*:\\s*(.*)");
+    static final Pattern ERROR_LINE = Pattern.compile("(?:\\d+[:(](\\d+)\\)?|ERROR: \\d+:(\\d+))[^:]*:\\s*(.*)");
 
     private final Consumer<List<Problem>> problems;
     private final long started = System.nanoTime();
@@ -115,7 +112,7 @@ public final class Preview extends AWTGLCanvas {
         stats = listener;
     }
 
-    private static GLData settings() {
+    static GLData settings() {
         GLData data = new GLData();
         data.majorVersion = 3;
         data.minorVersion = 3;
@@ -257,7 +254,7 @@ public final class Preview extends AWTGLCanvas {
         SwingUtilities.invokeLater(() -> problems.accept(found));
     }
 
-    private static int shader(int type, String src, int headLines, List<Problem> found) {
+    static int shader(int type, String src, int headLines, List<Problem> found) {
         int s = glCreateShader(type);
         glShaderSource(s, src);
         glCompileShader(s);

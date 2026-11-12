@@ -1,11 +1,10 @@
 package me.thesnowbound.shaderIDE.learn;
 
-import me.thesnowbound.shaderIDE.preview.Preview;
 import me.thesnowbound.shaderIDE.build.Skript;
+import me.thesnowbound.shaderIDE.preview.Preview;
 import me.thesnowbound.shaderIDE.project.Project;
 
 import java.util.List;
-import me.thesnowbound.shaderIDE.learn.Learn.Guide;
 
 // the reference pages in the Learn section, each with a practice list at the end
 public final class Guides {

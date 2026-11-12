@@ -32,7 +32,7 @@ public final class Fx {
     public static final Color BACKDROP = Theme.LIVE.frame(), BLACK = Theme.LIVE.island(), SIDE = Theme.LIVE.island(), LINE = Theme.LIVE.border(),
             TEXT = Theme.LIVE.text(), DIM = Theme.LIVE.dim(), WHITE = Theme.LIVE.strong(), RED = Theme.LIVE.error();
 
-    private static final List<JWindow> toasts = new ArrayList<>();
+    static final List<JWindow> toasts = new ArrayList<>();
 
     private Fx() {
     }
@@ -41,7 +41,7 @@ public final class Fx {
         return Theme.LIVE;
     }
 
-    private static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
+    static final java.util.prefs.Preferences PREFS = java.util.prefs.Preferences.userNodeForPackage(Main.class);
     public static boolean motion = PREFS.getBoolean("motion", true);
 
     public static void motion(boolean on) {
@@ -69,46 +69,6 @@ public final class Fx {
         step.accept(0);
         t.start();
         return t;
-    }
-
-    // a number that slides toward wherever it's told to go and repaints its owner on the way
-    public static final class Glide {
-        private final JComponent owner;
-        private double value, target;
-        private Timer timer;
-
-        public Glide(JComponent owner, double start) {
-            this.owner = owner;
-            value = target = start;
-        }
-
-        public double get() {
-            return value;
-        }
-
-        void value0() {
-            value = 0;
-        }
-
-        public void to(double t) {
-            target = t;
-            if (!motion) {
-                value = t;
-                owner.repaint();
-                return;
-            }
-            if (timer != null || value == target) return;
-            timer = new Timer(1000 / 60, e -> {
-                value += (target - value) * 0.22;
-                if (Math.abs(target - value) < 0.004) {
-                    value = target;
-                    timer.stop();
-                    timer = null;
-                }
-                owner.repaint();
-            });
-            timer.start();
-        }
     }
 
     public static void opacity(Window w, float a) {
@@ -189,103 +149,8 @@ public final class Fx {
         life.start();
     }
 
-    private static void close(JWindow w) {
+    static void close(JWindow w) {
         if (toasts.remove(w)) w.dispose();
-    }
-
-    // thin bar that sweeps across while something is working
-    public static final class Loader extends JComponent {
-        private final Timer tick = new Timer(15, e -> repaint());
-        private long started;
-
-        public Loader() {
-            setPreferredSize(new Dimension(0, 2));
-            setOpaque(false);
-        }
-
-        public void busy(boolean on) {
-            if (on) {
-                started = System.nanoTime();
-                tick.start();
-            } else {
-                tick.stop();
-            }
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            if (!tick.isRunning()) return;
-            double p = ((System.nanoTime() - started) / 1e9 * 0.8) % 1.0;
-            int w = getWidth(), seg = w / 4;
-            g.setColor(t().accent());
-            g.fillRect((int) (p * (w + seg)) - seg, 0, seg, 2);
-        }
-    }
-
-    // the hogyoku gem on a rounded tile
-    public static final class Badge extends JComponent {
-        private static final java.awt.image.BufferedImage GEM = loadGem();
-
-        Badge() {
-            setPreferredSize(new Dimension(150, 150));
-            setMaximumSize(getPreferredSize());
-            setOpaque(false);
-        }
-
-        private static java.awt.image.BufferedImage loadGem() {
-            try {
-                return javax.imageio.ImageIO.read(Fx.class.getResource("/icon.png"));
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            int w = getWidth(), h = getHeight();
-            float arc = Math.min(28f, Math.min(w, h) * 0.26f);
-            g2.setColor(t().dark() ? new Color(0x1a1a1a) : new Color(0x2b2d30));
-            g2.fill(new RoundRectangle2D.Float(0, 0, w, h, arc, arc));
-            if (GEM != null) {
-                int size = (int) (Math.min(w, h) * 0.78);
-                g2.drawImage(GEM, (w - size) / 2, (h - size) / 2, size, size, null);
-            }
-            g2.dispose();
-        }
-    }
-
-    // a rounded panel floating on the frame colour, the building block of the window
-    public static final class Island extends JPanel {
-        private final int arc;
-
-        public Island(java.awt.Component content, int pad) {
-            this(content, pad, 12);
-        }
-
-        public Island(java.awt.Component content, int pad, int arc) {
-            super(new BorderLayout());
-            this.arc = arc;
-            setOpaque(false);
-            setBorder(BorderFactory.createEmptyBorder(pad, pad, pad, pad));
-            add(content);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(t().island());
-            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc));
-            if (!t().dark() || t().name().equals("High Contrast")) {
-                g2.setColor(t().border());
-                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth() - 1, getHeight() - 1, arc, arc));
-            }
-            g2.dispose();
-        }
     }
 
     // wheel scrolling like IntelliJ's: every notch adds to a target and the view eases there over a fixed
@@ -341,20 +206,6 @@ public final class Fx {
         return text.substring(0, end).stripTrailing() + dots;
     }
 
-    // a button that's filled with the accent when it's the main one, outlined otherwise
-    public static final class Soft extends JButton {
-        public Soft(String text, boolean bold) {
-            super(text);
-            setFocusable(false);
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            putClientProperty("FlatLaf.style", "margin: 5,16,5,16");
-            if (bold) {
-                setBackground(t().accent());
-                setForeground(t().onAccent());
-            }
-        }
-    }
-
     public static String hex(Color c) {
         return String.format("#%06x", c.getRGB() & 0xffffff);
     }
@@ -363,41 +214,4 @@ public final class Fx {
         return new Font("Segoe UI Semibold", Font.PLAIN, 12).deriveFont(size);
     }
 
-    // fades and lifts its contents in when a page changes
-    public static class Reveal extends JPanel {
-        private float alpha = 1f, lift;
-        private Timer running;
-
-        public Reveal() {
-            setOpaque(true);
-        }
-
-        public void play() {
-            play(260, 10);
-        }
-
-        public void play(int ms, float dy) {
-            if (running != null) running.stop();
-            running = animate(ms, p -> {
-                alpha = (float) p;
-                lift = (float) (dy * (1 - p));
-                repaint();
-            }, null);
-        }
-
-        @Override
-        public void paint(Graphics g) {
-            if (alpha >= 1f) {
-                super.paint(g);
-                return;
-            }
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setColor(getBackground());
-            g2.fillRect(0, 0, getWidth(), getHeight());
-            g2.setComposite(java.awt.AlphaComposite.SrcOver.derive(alpha));
-            g2.translate(0, Math.round(lift));
-            super.paint(g2);
-            g2.dispose();
-        }
-    }
 }

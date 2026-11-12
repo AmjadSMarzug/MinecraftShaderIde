@@ -1,17 +1,19 @@
 package me.thesnowbound.shaderIDE.ui;
 
-import me.thesnowbound.shaderIDE.learn.Lessons;
-import me.thesnowbound.shaderIDE.learn.Guides;
-import me.thesnowbound.shaderIDE.learn.Learn;
-import me.thesnowbound.shaderIDE.editor.CodeEditor;
 import me.thesnowbound.shaderIDE.build.Forge;
 import me.thesnowbound.shaderIDE.build.Obfuscator;
 import me.thesnowbound.shaderIDE.build.Skript;
+import me.thesnowbound.shaderIDE.discord.Discord;
+import me.thesnowbound.shaderIDE.editor.CodeEditor;
+import me.thesnowbound.shaderIDE.learn.Guide;
+import me.thesnowbound.shaderIDE.learn.Learn;
+import me.thesnowbound.shaderIDE.learn.Lesson;
+import me.thesnowbound.shaderIDE.learn.Page;
+import me.thesnowbound.shaderIDE.learn.Progress;
+import me.thesnowbound.shaderIDE.presets.Example;
 import me.thesnowbound.shaderIDE.presets.Templates;
 import me.thesnowbound.shaderIDE.project.Project;
 import me.thesnowbound.shaderIDE.project.ProjectForm;
-import me.thesnowbound.shaderIDE.discord.Discord;
-import me.thesnowbound.shaderIDE.learn.Learn.Lesson;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -47,15 +49,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 // everything that isn't the editor. the rail picks the page, home itself is a banner of the project and its effects
-public final class Home extends Fx.Reveal {
-    public record Hooks(Runnable newProject, Runnable openProject, Consumer<Path> openPath, Runnable newEffect, Runnable build,
-                 Consumer<Templates.Example> example, Consumer<Learn.Lesson> lesson, Runnable back, Runnable updates,
-                 Runnable releases, Supplier<Project> project, Supplier<Boolean> editorOpen, Supplier<List<String>> recent,
-                 JCheckBoxMenuItem obfuscate, JCheckBoxMenuItem check, JCheckBoxMenuItem skript, Consumer<Theme> theme,
-                 java.util.function.BiConsumer<Path, Path> openEffect) {
-    }
-
-    private static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
+public final class Home extends Reveal {
+    static final String ICONS = Stream.of("Segoe Fluent Icons", "Segoe MDL2 Assets")
             .filter(Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames())::contains)
             .findFirst().orElse(null);
     private final Hooks hooks;
@@ -100,17 +95,17 @@ public final class Home extends Fx.Reveal {
         content.repaint();
     }
 
-    private static JComponent boxed(JPanel page) {
+    static JComponent boxed(JPanel page) {
         JPanel holder = new JPanel(new BorderLayout());
         holder.setOpaque(false);
         holder.setBorder(BorderFactory.createEmptyBorder(10, 12, 12, 12));
-        holder.add(new Fx.Island(Learn.scroller(centered(page)), 0));
+        holder.add(new Island(Learn.scroller(centered(page)), 0));
         return holder;
     }
 
     // on wide screens the pages stop growing and sit in the middle
-    private static JPanel centered(JPanel page) {
-        JPanel holder = new Learn.Page();
+    static JPanel centered(JPanel page) {
+        JPanel holder = new Page();
         holder.setLayout(new java.awt.LayoutManager() {
             public void addLayoutComponent(String name, Component c) { }
             public void removeLayoutComponent(Component c) { }
@@ -135,7 +130,7 @@ public final class Home extends Fx.Reveal {
     }
 
     private JPanel page(String title) {
-        JPanel p = new Learn.Page();
+        JPanel p = new Page();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(BorderFactory.createEmptyBorder(22, 28, 28, 28));
         if (title != null) {
@@ -156,14 +151,14 @@ public final class Home extends Fx.Reveal {
         return left(l);
     }
 
-    private static JPanel grid(int columns) {
+    static JPanel grid(int columns) {
         JPanel g = new JPanel(new GridLayout(0, columns, 12, 12));
         g.setOpaque(false);
         return g;
     }
 
     // a grid inside a vertical box keeps asking for more room unless its height is pinned to what it needs
-    private static JComponent pinned(JComponent c) {
+    static JComponent pinned(JComponent c) {
         c.setAlignmentX(Component.LEFT_ALIGNMENT);
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, c.getPreferredSize().height));
         return c;
@@ -183,7 +178,7 @@ public final class Home extends Fx.Reveal {
             }
         }
 
-        JPanel page = new Learn.Page();
+        JPanel page = new Page();
         page.setLayout(new BoxLayout(page, BoxLayout.Y_AXIS));
         page.setBorder(BorderFactory.createEmptyBorder(30, 36, 36, 36));
 
@@ -239,9 +234,9 @@ public final class Home extends Fx.Reveal {
         page.add(section("Keep learning"));
         JPanel lessons = new JPanel(new GridLayout(1, 3, 14, 0));
         lessons.setOpaque(false);
-        List<Learn.Lesson> next = Learn.LESSONS.stream().filter(l -> !Learn.finished(l)).limit(3).toList();
+        List<Lesson> next = Learn.LESSONS.stream().filter(l -> !Learn.finished(l)).limit(3).toList();
         if (next.isEmpty()) next = Learn.LESSONS.stream().limit(3).toList();
-        for (Learn.Lesson l : next) lessons.add(new LessonCard(l, () -> reader(Learn.lessonHtml(l), l)));
+        for (Lesson l : next) lessons.add(new LessonCard(l, () -> reader(Learn.lessonHtml(l), l)));
         lessons.setPreferredSize(new Dimension(0, 88));
         page.add(pinned(lessons));
         return Learn.scroller(page);
@@ -255,14 +250,14 @@ public final class Home extends Fx.Reveal {
         return left(l);
     }
 
-    private static JButton wide(JButton b, Runnable action) {
+    static JButton wide(JButton b, Runnable action) {
         b.setFont(b.getFont().deriveFont(Font.BOLD, 15f));
         b.setPreferredSize(new Dimension(Math.max(170, b.getPreferredSize().width + 40), 50));
         b.addActionListener(e -> action.run());
         return b;
     }
 
-    private static java.awt.Image shotOf(Project p, Project.Effect e) {
+    static java.awt.Image shotOf(Project p, Project.Effect e) {
         return Project.picture(Project.shot(p.dir, e.id()));
     }
 
@@ -276,7 +271,7 @@ public final class Home extends Fx.Reveal {
         String[][] kinds = {{"Object", "Objects"}, {"Surface", "Surfaces"}, {"Material", "Materials"}, {"Overlay", "Overlays"}, {"Sky", "Skies"}};
         for (String[] kind : kinds) {
             JPanel g = grid(3);
-            for (Templates.Example ex : Templates.EXAMPLES) {
+            for (Example ex : Templates.EXAMPLES) {
                 if (ex.level().equals(kind[0])) g.add(new Gallery.Card(ex.choice(), 220, () -> hooks.example().accept(ex)));
             }
             page.add(heading(kind[1]));
@@ -292,7 +287,7 @@ public final class Home extends Fx.Reveal {
         sub.setForeground(t.dim());
         page.add(left(sub));
         page.add(Box.createVerticalStrut(8));
-        Learn.Progress bar = new Learn.Progress();
+        Progress bar = new Progress();
         bar.set(Learn.finishedCount() / (float) Learn.LESSONS.size());
         bar.setMaximumSize(new Dimension(360, 4));
         page.add(left(bar));
@@ -300,7 +295,7 @@ public final class Home extends Fx.Reveal {
 
         page.add(heading("Lessons"));
         JPanel lessons = column();
-        for (Learn.Lesson l : Learn.LESSONS) {
+        for (Lesson l : Learn.LESSONS) {
             int number = Learn.LESSONS.indexOf(l) + 1;
             String meta = l.steps().size() + " tasks · " + l.minutes() + " min" + (Learn.finished(l) ? " · done" : "");
             lessons.add(pinned(new Row(number + ".  " + l.title(), l.blurb(), meta, false, () -> reader(Learn.lessonHtml(l), l))));
@@ -309,13 +304,13 @@ public final class Home extends Fx.Reveal {
         page.add(Box.createVerticalStrut(22));
         page.add(heading("Guides"));
         JPanel guides = column();
-        for (Learn.Guide g : Learn.GUIDES) guides.add(pinned(new Row(g.title(), g.blurb(), null, false, () -> reader(g.html(), null))));
+        for (Guide g : Learn.GUIDES) guides.add(pinned(new Row(g.title(), g.blurb(), null, false, () -> reader(g.html(), null))));
         page.add(guides);
         return page;
     }
 
     // a guide or lesson page shown in place of the learn list, with a way back
-    private void reader(String html, Learn.Lesson lesson) {
+    private void reader(String html, Lesson lesson) {
         JPanel page = page(null);
         JPanel bar = new JPanel(new BorderLayout());
         bar.setOpaque(false);
@@ -370,7 +365,7 @@ public final class Home extends Fx.Reveal {
         }
         page.add(nav, BorderLayout.WEST);
 
-        JPanel body = new Learn.Page();
+        JPanel body = new Page();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBorder(BorderFactory.createEmptyBorder(34, 40, 34, 40));
         if (!picked[0].equals("about")) {
@@ -442,10 +437,10 @@ public final class Home extends Fx.Reveal {
             }
         }
 
-        Fx.Reveal panel = new Fx.Reveal();
+        Reveal panel = new Reveal();
         panel.setLayout(new BorderLayout());
         panel.setOpaque(false);
-        panel.add(new Fx.Island(Learn.scroller(body), 0, 16));
+        panel.add(new Island(Learn.scroller(body), 0, 16));
         page.add(panel, BorderLayout.CENTER);
         if (fadeSection) {
             fadeSection = false;
@@ -521,7 +516,7 @@ public final class Home extends Fx.Reveal {
         JPanel page = page(null);
         JPanel hero = new JPanel(new BorderLayout(20, 0));
         hero.setOpaque(false);
-        Fx.Badge gem = new Fx.Badge();
+        Badge gem = new Badge();
         gem.setPreferredSize(new Dimension(96, 96));
         hero.add(gem, BorderLayout.WEST);
         JPanel words = column();
@@ -586,14 +581,14 @@ public final class Home extends Fx.Reveal {
         return page;
     }
 
-    private static JPanel column() {
+    static JPanel column() {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setOpaque(false);
         return p;
     }
 
-    private static <T extends JComponent> T left(T c) {
+    static <T extends JComponent> T left(T c) {
         c.setAlignmentX(Component.LEFT_ALIGNMENT);
         return c;
     }
@@ -695,7 +690,7 @@ public final class Home extends Fx.Reveal {
     // a little picture of a theme's colours that switches to it when clicked
     private final class Swatch extends JComponent {
         private final Theme option;
-        private final Fx.Glide glow = new Fx.Glide(this, 0);
+        private final Glide glow = new Glide(this, 0);
 
         Swatch(Theme option, Runnable action) {
             this.option = option;
@@ -751,7 +746,7 @@ public final class Home extends Fx.Reveal {
     // an on/off switch whose knob slides across
     private final class Switch extends JComponent {
         private boolean on;
-        private final Fx.Glide knob;
+        private final Glide knob;
 
         Switch(JCheckBoxMenuItem item) {
             this(item.isSelected(), v -> {
@@ -761,7 +756,7 @@ public final class Home extends Fx.Reveal {
 
         Switch(boolean start, Consumer<Boolean> changed) {
             on = start;
-            knob = new Fx.Glide(this, start ? 1 : 0);
+            knob = new Glide(this, start ? 1 : 0);
             setPreferredSize(new Dimension(48, 28));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             addMouseListener(new MouseAdapter() {
@@ -792,7 +787,7 @@ public final class Home extends Fx.Reveal {
     private final class NavRow extends JComponent {
         private final String glyph, label;
         private final boolean on;
-        private final Fx.Glide glow = new Fx.Glide(this, 0);
+        private final Glide glow = new Glide(this, 0);
 
         NavRow(String glyph, String label, boolean on, Runnable action) {
             this.glyph = glyph;
@@ -843,7 +838,7 @@ public final class Home extends Fx.Reveal {
         private final Project project;
         private final boolean now;
         private final java.awt.Image image;
-        private final Fx.Glide glow = new Fx.Glide(this, 0);
+        private final Glide glow = new Glide(this, 0);
 
         ProjectCard(Project p, boolean now, Runnable action) {
             project = p;
@@ -916,10 +911,10 @@ public final class Home extends Fx.Reveal {
 
     // the next lesson: its number in a square, the title, and how long it takes
     private final class LessonCard extends JComponent {
-        private final Learn.Lesson lesson;
-        private final Fx.Glide glow = new Fx.Glide(this, 0);
+        private final Lesson lesson;
+        private final Glide glow = new Glide(this, 0);
 
-        LessonCard(Learn.Lesson lesson, Runnable action) {
+        LessonCard(Lesson lesson, Runnable action) {
             this.lesson = lesson;
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setToolTipText(lesson.blurb());

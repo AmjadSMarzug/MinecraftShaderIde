@@ -1,30 +1,6 @@
 package me.thesnowbound.shaderIDE.presets;
 
-import me.thesnowbound.shaderIDE.ui.Gallery;
-
 public final class Templates {
-    public record Example(String id, String name, String level, String blurb) {
-        java.awt.image.BufferedImage thumb() {
-            try (var in = Templates.class.getResourceAsStream("/examples/thumbs/" + id + ".png")) {
-                return in == null ? null : javax.imageio.ImageIO.read(in);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
-        public Gallery.Choice choice() {
-            return new Gallery.Choice(id, name, level, blurb, source(), thumb());
-        }
-
-        public String source() {
-            try (var in = Templates.class.getResourceAsStream("/examples/" + id + ".glsl")) {
-                return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                return NEW_EFFECT;
-            }
-        }
-    }
-
     public static final java.util.List<Example> EXAMPLES = java.util.List.of(
             new Example("black_hole_object", "Black Hole", "Object", "a real one floating in the item"),
             new Example("hogyoku_crystal", "Hogyoku", "Object", "faceted crystal with energy inside"),
@@ -115,6 +91,14 @@ public final class Templates {
             new Example("desert_dusk", "Desert Dusk", "Sky", "an orange sky over dark dune silhouettes"),
             new Example("polar_day", "Polar Day", "Sky", "a sun that never sets, circling the horizon"),
             new Example("ink_wash", "Ink Wash", "Sky", "rice paper with drifting clouds of ink"),
+            new Example("web_sky_aqua", "Web Sky Aqua", "Sky", "a cyan web of light cells drifting past the stars"),
+            new Example("web_sky_red", "Web Sky Red", "Sky", "a red web of light cells drifting past the stars"),
+            new Example("web_sky_purple", "Web Sky Purple", "Sky", "a purple web of light cells drifting past the stars"),
+            new Example("eclipse_sky", "Eclipse Sky", "Sky", "a dark moon crossing the sun's corona under violet"),
+            new Example("fiery_sky", "Fiery Sky", "Sky", "flames rolling across the whole sky"),
+            new Example("swirling_vignette_cyan", "Swirling Vignette Cyan", "Overlay", "cyan noise swirling in from the screen edges"),
+            new Example("swirling_vignette_red", "Swirling Vignette Red", "Overlay", "red noise swirling in from the screen edges"),
+            new Example("swirling_vignette_purple", "Swirling Vignette Purple", "Overlay", "purple noise swirling in from the screen edges"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """

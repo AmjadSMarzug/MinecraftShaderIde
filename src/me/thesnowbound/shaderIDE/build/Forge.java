@@ -1,8 +1,8 @@
 package me.thesnowbound.shaderIDE.build;
 
+import me.thesnowbound.shaderIDE.library.Library;
 import me.thesnowbound.shaderIDE.project.Project;
 import me.thesnowbound.shaderIDE.util.Json;
-import me.thesnowbound.shaderIDE.library.Library;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -28,9 +28,6 @@ public final class Forge {
     public static final String TOOL = "Shader IDE";
     public static final String VERSION = "2.1.0";
 
-    public record Tier(String name, int min, int max, String folder, List<String> files) {
-    }
-
     // 1.21 and 1.21.1 read the shader name without the core/ prefix, so they get their own json
     public static final List<Tier> TIERS = List.of(
             new Tier("1_21", 34, 41, "overlay_1_21", List.of("rendertype_item_entity_translucent_cull.json")),
@@ -40,7 +37,7 @@ public final class Forge {
             new Tier("26_2", 88, 96, "overlay_26_2", List.of("item.vsh", "item.fsh")),
             new Tier("26_3", 97, 99, "overlay_26_3", List.of("item.vsh", "item.fsh")));
 
-    private static final Pattern INCLUDE = Pattern.compile("#(?:moj_import|include)\\s*<([^>]+)>");
+    static final Pattern INCLUDE = Pattern.compile("#(?:moj_import|include)\\s*<([^>]+)>");
 
     private final Project project;
     private final Consumer<String> log;
@@ -51,7 +48,7 @@ public final class Forge {
 
     // works out where the item's cube is from how the view position and texture position change across the screen,
     // then gives the object effects a ray that starts on the cube's surface in -1..1 box space
-    private static final String OBJECT_FRAME = "vec3 dpx=dFdx(viewPos),dpy=dFdy(viewPos);vec2 dux=dFdx(atlasPx)/15.0,duy=dFdy(atlasPx)/15.0;"
+    static final String OBJECT_FRAME = "vec3 dpx=dFdx(viewPos),dpy=dFdy(viewPos);vec2 dux=dFdx(atlasPx)/15.0,duy=dFdy(atlasPx)/15.0;"
             + "float det=dux.x*duy.y-duy.x*dux.y;if(abs(det)<1e-12)det=1e-12;"
             + "vec3 tu=(dpx*duy.y-dpy*dux.y)/det,tv=(dpy*dux.x-dpx*duy.x)/det;"
             + "vec2 face=(floor(texel.rg*255.0/16.0)+fract(atlasPx)-0.5)/15.0;"
@@ -59,12 +56,12 @@ public final class Forge {
             + "vec3 boxCenter=viewPos-tu*face.x-tv*face.y+(tu+tv)*0.5+inward*halfSize;vec3 boxOrigin=(viewPos-boxCenter)/halfSize;";
 
     // shortcut: uv assumes the item's sprite is 16px and sits on a 16px boundary in the atlas, bigger textures would tile
-    private static final String MATERIAL_FRAME = "vec3 flatNormal=normalize(cross(dFdx(viewPos),dFdy(viewPos)));if(dot(flatNormal,viewPos)>0.0)flatNormal=-flatNormal;";
+    static final String MATERIAL_FRAME = "vec3 flatNormal=normalize(cross(dFdx(viewPos),dFdy(viewPos)));if(dot(flatNormal,viewPos)>0.0)flatNormal=-flatNormal;";
 
     // the Skript spawns the sky cube turned 40 degrees around its corner to corner diagonal and rotates it straight over
     // a few seconds, the game smooths that out for the player. that turn tilts every wall by the same amount, so the
     // wall's direction gives the turn back. unlike the wall distance it doesn't change when the player runs ahead of the cube
-    private static final String INTRO_FRAME = "vec3 inrm=abs(normalize(cross(dFdx(viewPos),dFdy(viewPos))));float imax=max(inrm.x,max(inrm.y,inrm.z));"
+    static final String INTRO_FRAME = "vec3 inrm=abs(normalize(cross(dFdx(viewPos),dFdy(viewPos))));float imax=max(inrm.x,max(inrm.y,inrm.z));"
             + "float iturn=acos(clamp((3.0*imax-1.0)*0.5,-1.0,1.0));float introNow=clamp(1.0-(iturn-0.035)/0.6631317,0.0,1.0);";
 
     public Forge(Project project, Consumer<String> log) {
@@ -90,7 +87,7 @@ public final class Forge {
             float scale = Obfuscator.scale(raw);
             shapes.put(e.id(), new float[]{box[0] * scale, box[1] * scale, box[2] * scale});
             String src = Obfuscator.withoutShape(raw);
-            Obfuscator.Result r = ob.compile(e.id(), src, e.defines(), obfuscate);
+            Result r = ob.compile(e.id(), src, e.defines(), obfuscate);
             body.append(r.code()).append('\n');
             if (obfuscate) body.append(ob.decoys(4));
             dispatch.append("if(abs(skyAlpha-").append(e.alpha()).append(".0)<0.5){");
@@ -124,10 +121,10 @@ public final class Forge {
         Path out = project.dir.resolve("build").resolve(project.name);
         wipe(out);
         for (Tier t : TIERS) {
-            Path core = (t.folder.isEmpty() ? out : out.resolve(t.folder)).resolve("assets/minecraft/shaders/core");
+            Path core = (t.folder().isEmpty() ? out : out.resolve(t.folder())).resolve("assets/minecraft/shaders/core");
             Files.createDirectories(core);
-            for (String f : t.files) {
-                String text = resource("/tiers/" + t.name + "/" + f);
+            for (String f : t.files()) {
+                String text = resource("/tiers/" + t.name() + "/" + f);
                 if (f.endsWith(".fsh")) text = text.replace("//%SKY%", sky);
                 if (f.endsWith(".fsh") && obfuscate) text = ob.scrub(text, wrapperNames);
                 if (f.endsWith(".fsh") || f.endsWith(".vsh")) text = stamp(text);
@@ -192,7 +189,7 @@ public final class Forge {
         }
     }
 
-    private static Map<String, Object> cubeModel(String ref, float[] box) {
+    static Map<String, Object> cubeModel(String ref, float[] box) {
         Map<String, Object> face = new LinkedHashMap<>();
         face.put("uv", List.of(0.5, 0.5, 15.5, 15.5));
         face.put("texture", "#sky");
@@ -222,7 +219,7 @@ public final class Forge {
 
     // an overlay is one huge flat sheet held in the hand. the hand is drawn last on a cleared depth buffer,
     // so the sheet lands on top of everything, and the shader colours it by screen position
-    private static Map<String, Object> overlayModel(String ref) {
+    static Map<String, Object> overlayModel(String ref) {
         Map<String, Object> face = new LinkedHashMap<>();
         face.put("uv", List.of(0.5, 0.5, 15.5, 15.5));
         face.put("texture", "#sky");
@@ -289,12 +286,12 @@ public final class Forge {
         pack.put("max_format", 99);
         List<Object> entries = new ArrayList<>();
         for (Tier t : TIERS) {
-            if (t.folder.isEmpty()) continue;
+            if (t.folder().isEmpty()) continue;
             Map<String, Object> e = new LinkedHashMap<>();
-            e.put("directory", t.folder);
-            e.put("formats", Map.of("min_inclusive", t.min, "max_inclusive", t.max));
-            e.put("min_format", t.min);
-            e.put("max_format", t.max);
+            e.put("directory", t.folder());
+            e.put("formats", Map.of("min_inclusive", t.min(), "max_inclusive", t.max()));
+            e.put("min_format", t.min());
+            e.put("max_format", t.max());
             entries.add(e);
         }
         Map<String, Object> meta = new LinkedHashMap<>();
@@ -321,21 +318,21 @@ public final class Forge {
         int failed = 0;
         try {
             for (Tier t : TIERS) {
-                Path core = (t.folder.isEmpty() ? out : out.resolve(t.folder)).resolve("assets/minecraft/shaders/core");
-                for (String f : t.files) {
+                Path core = (t.folder().isEmpty() ? out : out.resolve(t.folder())).resolve("assets/minecraft/shaders/core");
+                for (String f : t.files()) {
                     if (f.endsWith(".json")) continue;
                     String stage = f.endsWith(".vsh") ? "vert" : "frag";
                     String src = Files.readString(core.resolve(f), StandardCharsets.UTF_8);
-                    for (List<String> defs : modes.get(t.name)) {
+                    for (List<String> defs : modes.get(t.name())) {
                         Path file = tmp.resolve("check." + stage);
-                        Files.writeString(file, expand(src, t.name, defs), StandardCharsets.UTF_8);
+                        Files.writeString(file, expand(src, t.name(), defs), StandardCharsets.UTF_8);
                         String gl = run(List.of(glslang.toString(), "-S", stage, file.toString()));
                         if (gl != null) {
                             failed++;
-                            log.accept("FAILED " + t.name + " " + f + " " + String.join(" ", defs) + "\n" + gl);
+                            log.accept("FAILED " + t.name() + " " + f + " " + String.join(" ", defs) + "\n" + gl);
                         }
                         // 26.3 can run on Vulkan, which wants valid SPIR-V on top of plain GLSL
-                        if (t.name.equals("26_3")) {
+                        if (t.name().equals("26_3")) {
                             String vk = run(List.of(glslang.toString(), "-V", "--amb", "--aml", "-S", stage, file.toString(), "-o", tmp.resolve("out.spv").toString()));
                             if (vk != null) {
                                 failed++;
@@ -369,7 +366,7 @@ public final class Forge {
         return text.substring(0, cut) + head + text.substring(cut);
     }
 
-    private static String run(List<String> cmd) throws IOException {
+    static String run(List<String> cmd) throws IOException {
         Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
         String out = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         try {
@@ -382,7 +379,7 @@ public final class Forge {
         return p.exitValue() == 0 && errors.isEmpty() ? null : errors.toString().strip();
     }
 
-    private static Path cachedGlslang;
+    static Path cachedGlslang;
 
     public static synchronized Path glslang() throws IOException {
         if (cachedGlslang != null) return cachedGlslang;
@@ -398,7 +395,7 @@ public final class Forge {
         }
     }
 
-    private static Path onPath(String... names) {
+    static Path onPath(String... names) {
         String path = System.getenv("PATH");
         if (path == null) return null;
         for (String name : names) {
@@ -417,19 +414,19 @@ public final class Forge {
         }
     }
 
-    private static void write(Path file, Object json) throws IOException {
+    static void write(Path file, Object json) throws IOException {
         Files.createDirectories(file.getParent());
         Files.writeString(file, Json.write(json) + "\n", StandardCharsets.UTF_8);
     }
 
-    private static void wipe(Path dir) throws IOException {
+    static void wipe(Path dir) throws IOException {
         if (!Files.exists(dir)) return;
         try (Stream<Path> walk = Files.walk(dir)) {
             for (Path p : walk.sorted(Comparator.reverseOrder()).toList()) Files.delete(p);
         }
     }
 
-    private static void zip(Path dir, Path zip) throws IOException {
+    static void zip(Path dir, Path zip) throws IOException {
         try (OutputStream os = Files.newOutputStream(zip); ZipOutputStream z = new ZipOutputStream(os);
              Stream<Path> walk = Files.walk(dir)) {
             for (Path p : walk.filter(Files::isRegularFile).toList()) {
