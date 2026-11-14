@@ -12,38 +12,29 @@ public final class LessonWarp {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_warp", "Domain warping", "noise that bends itself", 12, """
-                    <p>fbm on its own looks like fog. To get swirls and gas that looks like it's flowing, you
-                    <b>warp</b> the position before you look up the noise. You compute a few fbm values first, use them as an
-                    offset, and feed the shifted position into fbm again.</p>
-                    <p>Because the offset itself is smooth noise, the result stays smooth but gets twisted into shapes that
-                    plain noise never makes. Animate the offset and the shapes start to churn.</p>
+                    <p>fbm on its own looks like fog. To get swirls, or gas that looks like it's flowing, you <b>warp</b> the position before looking up the noise. Compute a few fbm values first, use them to shift the position, then run fbm again on the shifted position.</p>
+                    <p>The shift is smooth noise too, so the result stays smooth. But it gets twisted into shapes plain noise never makes. Animate the shift and the shapes start to churn.</p>
                     <h2>What the offset does</h2>
-                    <p>Warping moves the point before the noise is looked up, so the pattern gets dragged along with it. How far it moves
-                    decides the look:</p>
+                    <p>The warp moves the point before the noise is read, so the pattern gets dragged along with it. How far it moves decides the look:</p>
                     <table>
                     <tr><td><code>warp * 0.3</code></td><td>a gentle wobble, like heat haze</td></tr>
                     <tr><td><code>warp * 1.5</code></td><td>proper swirls and folds</td></tr>
                     <tr><td><code>warp * 4.0</code></td><td>chaotic, almost marbled</td></tr>
                     </table>
                     <h2>Three different offsets</h2>
-                    <p>Each axis of the warp gets its own fbm with its own shift, like <code>p + vec3(5.2, 1.3, 2.8)</code>. If all three
-                    used the same position they'd always be equal, and the pattern would just slide along one diagonal.</p>
+                    <p>Each axis of the warp gets its own fbm with its own shift, like <code>p + vec3(5.2, 1.3, 2.8)</code>. If all three used the same position, they'd match, and the pattern would just slide along one diagonal.</p>
                     <h2>Going two levels deep</h2>
-                    <p>You can warp the warp: build a first offset, use it to build a second, and feed the second into the final lookup.
-                    Each level adds another layer of folding, and two levels is usually enough for a smoky, folded look.</p>
-                    <h2>Color from the warp</h2>
-                    <p><code>length(warp)</code> is large where the space was pushed hardest, and mixing
-                    colors by it lights up the edges of the swirls, which reads as veins or filaments.</p>
+                    <p>You can warp the warp: build a first offset, use it to build a second, and feed the second into the final lookup. Each level adds another layer of folding. Two levels is usually enough for a smoky, folded look.</p>
+                    <h2>Colour from the warp</h2>
+                    <p><code>length(warp)</code> is large where the space was pushed hardest. Mixing colours by it lights up the edges of the swirls, which looks like veins or filaments.</p>
                     <h2>Cost</h2>
-                    <p>Every fbm is five noise calls, and every noise call is eight hashes. Three fbms for the warp plus the final one is
-                    160 hashes per pixel. That's fine for a sky, but it adds up fast if you go two levels deep, so give the warp fewer
-                    octaves than the final lookup.</p>
+                    <p>Each fbm is five noise calls, and each noise call uses eight hashes. Three fbms for the warp plus the final one comes to 160 hashes per pixel. That's fine for a sky, but it grows fast with two levels, so give the warp fewer octaves than the final lookup.</p>
                     <h2>Common mistakes</h2>
                     <ul>
                     <li>Animating everything turns it to mush. Move only the warp and let the final pattern follow.</li>
                     <li>A huge strength makes the pattern noisy rather than swirly.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>The first tasks build one warp, feed it into the final lookup and make it move. The new tasks warp the warp a second
                     time, which makes folds inside folds, and color the result by how far the space was pushed, so the folds show up
                     as veins.</p>

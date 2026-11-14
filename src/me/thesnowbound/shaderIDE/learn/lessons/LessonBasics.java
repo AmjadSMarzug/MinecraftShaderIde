@@ -12,39 +12,28 @@ public final class LessonBasics {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_basics", "GLSL basics", "semicolons, floats, vectors and functions", 6, """
-                    <p>Shaders are written in <b>GLSL</b>. It looks a lot like C or Java, and it's strict: every line that does
-                    something ends with a <code>;</code>, and when one is missing the whole shader stops working. The error
-                    shows up under the preview with the line it's on.</p>
-                    <p>Numbers come in two kinds. <code>1</code> is a whole number (an int) and <code>1.0</code> is a decimal
-                    (a float). Shaders almost always want floats, and GLSL won't quietly turn one into the other:
-                    <code>float x = 1;</code> is an error, and <code>1 / 2</code> is 0 because it's whole number division.
-                    Writing <code>1.0</code> and <code>0.5</code> avoids both problems.</p>
-                    <p><code>vec2</code>, <code>vec3</code> and <code>vec4</code> hold 2, 3 or 4 floats. You can pick parts out of
-                    them by name, <code>.x .y .z .w</code> or <code>.r .g .b .a</code>, and even reorder them:
-                    <code>color.bgr</code> is the same color with red and blue swapped. That's called <b>swizzling</b>.</p>
-                    <p>A <b>function</b> takes some values and gives one back. <code>sky</code> is a function, and you can write
-                    your own above it to keep things tidy.</p>
+                    <p>Shaders are written in <b>GLSL</b>. It looks a bit like Java or C. Every line that does something ends with a <code>;</code>. If one is missing, the shader stops working, and the error shows under the preview.</p>
+                    <p>There are two kinds of number. <code>1</code> is a whole number. <code>1.0</code> is a decimal. Shaders usually need decimals, and GLSL won't change one into the other for you. <code>float x = 1;</code> is an error, so write <code>float x = 1.0;</code>. Also, <code>1 / 2</code> gives 0, because whole-number division throws away the part after the point.</p>
+                    <p><code>vec2</code>, <code>vec3</code> and <code>vec4</code> hold 2, 3 or 4 numbers together. Read the parts with <code>.x .y .z .w</code> or <code>.r .g .b .a</code>. You can also reorder them: <code>color.bgr</code> is the same colour with red and blue swapped. This is called <b>swizzling</b>.</p>
+                    <p>A <b>function</b> takes some values and gives one back. <code>sky</code> is a function, and you can write your own above it to keep the code tidy.</p>
                     <h2>Reading an error</h2>
-                    <p>When the code breaks, the line under the preview names a line number and a short message. The message often points at the line after the real mistake: a missing <code>;</code> is only noticed when GLSL reaches the next line and
-                    can't make sense of the two together. So check the named line and the one above it.</p>
+                    <p>The error under the preview names a line and gives a short message. The real mistake is often on the line above, because GLSL only notices a missing <code>;</code> when it reaches the next line. So check the named line and the one above it.</p>
                     <table>
                     <tr><td><code>syntax error</code></td><td>a missing <code>;</code>, bracket or comma</td></tr>
-                    <tr><td><code>undeclared identifier</code></td><td>a name spelled differently from where it was made, or used before it's made</td></tr>
+                    <tr><td><code>undeclared identifier</code></td><td>a name spelled differently from where it was made, or used before it was made</td></tr>
                     <tr><td><code>cannot convert</code></td><td>mixing an int with a float, or a vec2 with a vec3</td></tr>
-                    <tr><td><code>no matching function</code></td><td>a function given the wrong number or types of values</td></tr>
+                    <tr><td><code>no matching function</code></td><td>a function was given the wrong number or types of values</td></tr>
                     </table>
                     <h2>The types you'll use</h2>
                     <table>
                     <tr><td><code>float</code></td><td>a decimal number, like <code>0.5</code></td></tr>
                     <tr><td><code>int</code></td><td>a whole number, mostly for loop counters</td></tr>
                     <tr><td><code>bool</code></td><td><code>true</code> or <code>false</code></td></tr>
-                    <tr><td><code>vec2 vec3 vec4</code></td><td>2, 3 or 4 floats: positions, directions and colors</td></tr>
+                    <tr><td><code>vec2 vec3 vec4</code></td><td>2, 3 or 4 floats together: positions, directions and colours</td></tr>
                     </table>
                     <h2>Maths on whole vectors</h2>
-                    <p>Most maths works on every part of a vector at once. <code>vec3(1.0, 0.5, 0.2) * 2.0</code> doubles all three parts,
-                    and adding two vec3s adds them part by part. Functions like <code>sin</code>, <code>max</code> and <code>mix</code>
-                    work part by part too. Both sides have to be the same size: you can't add a vec2 to a vec3.</p>
-<h2>Working through the tasks</h2>
+                    <p>Most maths works on all the parts of a vector at once. <code>vec3(1.0, 0.5, 0.2) * 2.0</code> doubles all three parts. Adding two vec3s adds them part by part. Functions like <code>sin</code>, <code>max</code> and <code>mix</code> also work part by part. The two sides must be the same size, so you can't add a vec2 to a vec3.</p>
+                    <h2>Working through the tasks</h2>
                     <p>The first tasks fix a broken line and then use the value that was worked out but never used. Next you make a
                     float of your own and a vector from parts. The last two cover <code>if</code>, which only runs code when a
                     condition is true, and writing your own function. Each one builds on the last, so keep the shader working as you go.</p>

@@ -12,43 +12,36 @@ public final class LessonObject {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_object", "Your first object", "raymarching inside the item", 10, """
-                    <p>An object draws a 3D shape inside the item's box, which goes from -1 to 1 on every axis. For every pixel
-                    you get a ray: <code>origin</code> is where it enters the box and <code>dir</code> is where it's heading.</p>
-                    <p>To find what the ray hits you use a <b>distance function</b>: give it a point and it says how far that
-                    point is from the surface. For a sphere that's just <code>length(p) - radius</code>. You step along the ray
-                    by exactly that distance, because nothing can be closer. Near the surface the steps get tiny, and when
-                    they're small enough you've hit it. This is called <b>raymarching</b>.</p>
-                    <p>Return alpha 1 for solid, 0 for empty space so the world shows through, or anything between for glass and glow.</p>
+                    <p>An object draws a 3D shape inside the item's box, which runs from -1 to 1 on every axis. Each pixel gets a ray. <code>origin</code> is where the ray enters the box, and <code>dir</code> is the way it travels.</p>
+                    <p>To find what the ray hits, you use a <b>distance function</b>. Give it a point and it returns how far that point is from the surface. For a sphere it's <code>length(p) - radius</code>. The ray moves forward by exactly that distance, since nothing can be closer. Near the surface the steps get smaller, and when they're tiny enough you've hit it. This is called <b>raymarching</b>.</p>
+                    <p>Return alpha 1 for solid things, 0 for empty space so the world shows through, or something in between for glass and glow.</p>
                     <h2>What a distance function returns</h2>
-                    <p>A distance function gives a positive number outside the shape, zero on its surface and a negative number inside.
-                    As long as it never says a surface is further away than it really is, stepping forward by that amount can't skip past anything. Raymarching depends on that rule.</p>
+                    <p>The distance is positive outside the shape, zero on its surface and negative inside. As long as it never says a surface is further away than it really is, stepping forward by that distance can't skip past anything. Raymarching depends on that rule.</p>
                     <h2>The loop, line by line</h2>
                     <ul>
                     <li><code>t</code> is how far along the ray you've walked.</li>
                     <li><code>p = origin + dir * t</code> is where that puts you.</li>
                     <li><code>d</code> is how far the closest surface is from there.</li>
-                    <li>If d is tiny you've hit it. If not, walk d further and try again.</li>
-                    <li>Once t passes 3.5 you've left the box, so the ray missed.</li>
+                    <li>If d is tiny, you've hit it. If not, walk d further and try again.</li>
+                    <li>Once t passes 3.5, the ray has left the box and missed.</li>
                     </ul>
                     <h2>Moving, turning and scaling</h2>
-                    <p>To move a shape, you move the space it's measured in instead. To put a sphere to the right, measure from a point
-                    to the right: <code>length(p - vec3(0.3, 0.0, 0.0)) - 0.2</code>. To turn it, turn <code>p</code> the other way. To
-                    scale it, divide p and multiply the result: <code>shape(p / s) * s</code>.</p>
+                    <p>To move a shape, move the space it's measured in instead. To put a sphere to the right, measure from a point to the right: <code>length(p - vec3(0.3, 0.0, 0.0)) - 0.2</code>. To turn it, turn <code>p</code> the other way. To scale it, divide <code>p</code> by the size and multiply the result: <code>shape(p / s) * s</code>.</p>
                     <h2>Shapes to know</h2>
                     <table>
                     <tr><td>sphere</td><td><code>length(p) - r</code></td></tr>
                     <tr><td>box</td><td><code>length(max(abs(p) - size, 0.0))</code></td></tr>
                     <tr><td>torus</td><td><code>length(vec2(length(p.xz) - R, p.y)) - r</code></td></tr>
-                    <tr><td>capsule</td><td>distance to a line segment, minus the radius</td></tr>
+                    <tr><td>capsule</td><td>the distance to a line segment, minus the radius</td></tr>
                     </table>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>Too few steps leaves holes around the edges where rays brush past.</li>
+                    <li>Too few steps leave holes around the edges where rays brush past.</li>
                     <li>A hit threshold that's too big makes shapes look swollen and blobby.</li>
                     <li>A shape bigger than the box gets cut off flat at its walls.</li>
-                    <li>Returning a color with alpha 1 when the ray misses draws a black box around everything.</li>
+                    <li>Returning a colour with alpha 1 when the ray misses draws a black box around everything.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>Each task changes one part of the ray march: the shape, its size, how it spins and how it's lit. The new tasks add
                     a pattern across the surface and a fog that thickens with distance, so the object sits in the air instead of
                     floating in a void.</p>

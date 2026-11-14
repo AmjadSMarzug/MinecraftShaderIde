@@ -12,41 +12,30 @@ public final class LessonOverlay {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_overlay", "Your first overlay", "vignettes, pulses and the aspect trap", 10, """
-                    <p>An overlay is laid over everything the player sees, like rain on the lens or the red edges you get at low
-                    health. <code>screen</code> is where the pixel is on the window, 0,0 in the bottom left to 1,1 in the top right.</p>
-                    <p>Here alpha is how much of the world you cover. 0 leaves the view clear,
-                    1 hides it completely. Keep the middle of the screen low or the player can't play.</p>
-                    <p>One trap: <code>screen</code> is squashed into a square, but windows are wide, so a circle measured with it
-                    comes out as an oval. Stretch x by about 1.8 before measuring and circles stay round.</p>
-                    <p><code>dir</code> is the direction the pixel looks into the world. Things placed with <code>screen</code>
-                    stick to your view, things placed with <code>dir</code> stay put when you turn your head.</p>
+                    <p>An overlay is laid over everything the player sees, like rain on a lens or the red edges you get at low health. <code>screen</code> is where the pixel sits on the window: 0,0 is the bottom left and 1,1 is the top right.</p>
+                    <p>Alpha is how much of the view the overlay covers. 0 leaves the view clear and 1 hides it completely. Keep the middle of the screen mostly clear so the player can still see and aim.</p>
+                    <p>There's one trap. <code>screen</code> is squashed into a square, but windows are wide. A circle measured with it comes out as an oval. Stretch x by about 1.8 before you measure, and circles stay round.</p>
+                    <p><code>dir</code> is the direction the pixel looks into the world. Things placed with <code>screen</code> stick to your view. Things placed with <code>dir</code> stay put when you turn your head.</p>
                     <h2>Two ways to place things</h2>
-                    <p>Anything built from <code>screen</code> sticks to the glass, like rain on goggles, and moves with your head. Anything
-                    built from <code>dir</code> stays in the world: turn around and it's behind you. Mixing both is how a domain effect
-                    can tint your view and also have embers hanging in the air.</p>
+                    <p>Anything built from <code>screen</code> sticks to the glass, like rain on goggles, and moves with your head. Anything built from <code>dir</code> stays in the world: turn around and it's behind you. A domain effect can tint your view with <code>screen</code> and place embers in the air with <code>dir</code>.</p>
                     <h2>The aspect trap, exactly</h2>
-                    <p>A normal window is about 16 by 9, so screen x covers 1.78 times as much space as screen y. Multiplying x by about
-                    1.8 before measuring makes circles round on most screens. It's not exact on unusual monitors, but it's close enough
-                    for soft effects.</p>
+                    <p>A normal window is about 16 by 9, so x covers about 1.78 times as much space as y. Multiplying x by about 1.8 makes circles round on most screens. It isn't exact on every monitor, but it's close enough for soft effects.</p>
                     <h2>Keep it playable</h2>
                     <ul>
                     <li>Keep alpha under about 0.15 in the middle of the screen, where the player aims.</li>
                     <li>Edges can go much higher, up to around 0.8, without getting in the way.</li>
-                    <li>Avoid flashing faster than three times a second. Fast flashing is uncomfortable and can be dangerous for people
-                    with photosensitive epilepsy.</li>
+                    <li>Avoid flashing faster than three times a second. Fast flashing is uncomfortable and can trigger seizures in people with photosensitive epilepsy.</li>
                     </ul>
                     <h2>Textures on the glass</h2>
-                    <p>Noise and cells from the sky lessons work on screen coordinates too: cells make raindrops, noise makes frost and
-                    grime. Scale <code>screen</code> up, around 10 to 30, for detail that matches the size of the window.</p>
+                    <p>Noise and cells from the sky lessons also work on <code>screen</code>. Cells can make raindrops, and noise can make frost or grime. Scale <code>screen</code> up, around 10 to 30, for detail the size of a window.</p>
                     <h2>Fading in</h2>
-                    <p><code>clamp(time / 2.0, 0.0, 1.0)</code> grows from 0 to 1 over two seconds. Multiply your alpha by it so the
-                    overlay eases in instead of snapping on.</p>
+                    <p><code>clamp(time / 2.0, 0.0, 1.0)</code> rises from 0 to 1 over two seconds. Multiply your alpha by it so the overlay eases in instead of snapping on.</p>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>Returning a color with alpha 1 everywhere covers the whole world.</li>
+                    <li>Returning a colour with alpha 1 everywhere covers the whole world.</li>
                     <li>Forgetting the aspect fix stretches every circle into an oval.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>An overlay covers the screen. The first tasks darken the edges, keep the shape round on a wide window, pulse it,
                     tint it and pin a spot to the world. The new tasks fade the whole effect in when it starts and add raindrops on the
                     glass, made from cells on <code>screen</code>.</p>

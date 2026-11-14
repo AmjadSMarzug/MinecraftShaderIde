@@ -12,38 +12,25 @@ public final class LessonMaterial {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_material", "Your first material", "repainting an item's pixels", 10, """
-                    <p>A material keeps the item's normal flat sprite and repaints every pixel of it. <code>texel</code> is that
-                    pixel's own color from the texture, so you can keep the outline and shading of the item and change
-                    everything else. <code>uv</code> goes 0 to 1 across the sprite.</p>
-                    <p>Item sprites are 16 by 16 pixels. If your effect is smooth it looks out of place next to them, so it's
-                    common to snap uv to the sprite's grid first: <code>(floor(uv * 16.0) + 0.5) / 16.0</code> gives the middle of
-                    whichever pixel you're in, and everything you draw with it comes out blocky.</p>
-                    <p>Without a png of your own the preview uses a plain gem. Put a png with the same name beside the effect
-                    and it'll use that.</p>
+                    <p>A material keeps the item's flat sprite and repaints each of its pixels. <code>texel</code> is the colour of that pixel from the texture, so you can keep the outline and shading and change everything else. <code>uv</code> goes from 0 to 1 across the sprite.</p>
+                    <p>Item sprites are 16 by 16 pixels. Smooth effects can look out of place next to them, so it's common to snap <code>uv</code> to the pixel grid. <code>(floor(uv * 16.0) + 0.5) / 16.0</code> gives the centre of whichever pixel you're in, and anything drawn with it looks blocky, like the game's own art.</p>
+                    <p>The preview uses a plain gem if you don't have your own image. To use your own, put a PNG with the same name beside the effect file.</p>
                     <h2>What runs through it</h2>
-                    <p>Only the pixels you can see on the item run through the material. See-through pixels around the sprite stay
-                    see-through as long as you pass <code>texel.a</code> along as the alpha. Return alpha 1 for everything and those
-                    empty pixels turn into solid squares.</p>
+                    <p>Only the item's visible pixels go through the material. Empty pixels around the sprite stay see-through as long as you pass <code>texel.a</code> along as the alpha. If you return alpha 1 everywhere, those empty pixels turn into solid squares.</p>
                     <h2>Brightness that looks right</h2>
-                    <p>Eyes see green as much brighter than blue. For a brightness that matches what you see, weight the channels:
-                    <code>dot(texel.rgb, vec3(0.299, 0.587, 0.114))</code>. Use it to keep the sprite's shading, or as a mask.</p>
+                    <p>Eyes see green as much brighter than blue. To get a brightness that matches what you see, weight the channels: <code>dot(texel.rgb, vec3(0.299, 0.587, 0.114))</code>. Use it to keep the sprite's shading, or as a mask.</p>
                     <h2>Masks</h2>
-                    <p>A mask decides where the effect goes. <code>smoothstep(0.6, 0.8, brightness)</code> picks only the bright pixels,
-                    so a sword's blade can glow while its dark handle stays put. <code>uv.y</code> works as a mask too, for an effect
-                    that only covers the top of the item.</p>
+                    <p>A mask decides where the effect goes. <code>smoothstep(0.6, 0.8, brightness)</code> picks only the bright pixels, so a sword's blade can glow while its dark handle stays the same. <code>uv.y</code> can be a mask too, for an effect that only covers the top of the item.</p>
                     <h2>Staying blocky</h2>
-                    <p>Snapping to the 16 by 16 grid makes the effect move a whole pixel at a time, like vanilla textures do. You can snap
-                    time as well, <code>floor(time * 8.0) / 8.0</code>, for choppy animation in the style of the game's own animated
-                    blocks.</p>
+                    <p>Snapping to the 16 by 16 grid moves the effect one whole pixel at a time, like the game's own textures. You can also snap time with <code>floor(time * 8.0) / 8.0</code> for choppy animation, like the game's animated blocks.</p>
                     <h2>Depth as you turn</h2>
-                    <p>Offsetting uv by <code>view.xz * depth</code> moves a layer as the item turns. Several layers at different depths
-                    slide past each other and give the item depth, like the end portal.</p>
+                    <p>Offsetting uv by <code>view.xz * depth</code> moves a layer as the item turns. Several layers at different depths slide past each other and give the item depth, like the end portal.</p>
                     <h2>Common mistakes</h2>
                     <ul>
                     <li>Returning alpha 1 everywhere turns the transparent area into a solid square.</li>
                     <li>Smooth, unsnapped effects look out of place next to blocky vanilla items.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>A material keeps the item's own pixels and repaints them. The first tasks tint, snap, animate and shade the pixels, then add
                     a glint. The new tasks use the sprite's brightness as a mask, so only the bright pixels glow, and sweep a glint diagonally
                     across the item.</p>

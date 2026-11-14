@@ -12,40 +12,29 @@ public final class LessonGlow {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_glow", "Glow and see-through", "light that isn't a surface", 10, """
-                    <p>Not everything has a surface. Plasma, magic and energy are light floating in the air. Instead of stopping
-                    when the ray hits something, you walk the ray in small steps and add up how much light there is at each
-                    point. That's <b>volumetric glow</b>.</p>
-                    <p><code>exp(-distance * k)</code> is the go to shape for it: 1 right at the source and fading smoothly away.
-                    A big <code>k</code> gives a tight hot core, a small one a wide haze.</p>
-                    <p>Glow doesn't block the world behind it, so it needs an alpha. A simple one is the brightest color channel,
-                    and dividing the color by that alpha keeps it from going dim when it's blended in.</p>
+                    <p>Not everything is a solid surface. Plasma, magic and energy are light floating in the air. Instead of stopping at a surface, the ray takes small steps through the air and adds up the light at each step. This is called <b>volumetric glow</b>.</p>
+                    <p><code>exp(-distance * k)</code> is the usual shape. It's brightest at the source and fades smoothly away. A big <code>k</code> gives a tight, hot core. A small <code>k</code> gives a wide haze.</p>
+                    <p>Glow adds light but doesn't hide what's behind it, so it needs an alpha. A simple choice is the brightest colour channel. Dividing the colour by that alpha stops the glow from looking dim when it's blended.</p>
                     <h2>Walking through a volume</h2>
-                    <p>With a surface you stop at the first hit. With glow there's nothing to hit, so the ray takes fixed steps through the
-                    whole box and adds a little light at each one. 90 steps of 0.04 cover 3.6 units, just enough to cross the box. Smaller
-                    steps give finer detail and cost more.</p>
+                    <p>A solid object stops the ray at the first hit. Glow has nothing to hit, so the ray takes fixed steps across the whole box and adds a little light at each one. 90 steps of 0.04 cover 3.6 units, enough to cross the box. Smaller steps look smoother but cost more.</p>
                     <h2>Shapes of glow</h2>
                     <table>
-                    <tr><td><code>exp(-d * k)</code></td><td>smooth falloff, the usual choice</td></tr>
+                    <tr><td><code>exp(-d * k)</code></td><td>a smooth fade-out, the usual choice</td></tr>
                     <tr><td><code>1.0 / (1.0 + d * d * k)</code></td><td>a bright core with a long tail, like real light</td></tr>
-                    <tr><td>noise times either</td><td>broken up glow for plasma, smoke and fire</td></tr>
+                    <tr><td>noise times either</td><td>broken-up glow for plasma, smoke and fire</td></tr>
                     </table>
                     <h2>Glow that hides the background</h2>
-                    <p>Pure glow only adds. Real smoke also hides what's behind it. Keep a running <code>transmittance</code> that starts
-                    at 1 and shrinks with every step, <code>transmittance *= exp(-density * step)</code>, and multiply the light you add
-                    by it. That makes thick parts look solid and lets clouds and fire have a shape.</p>
+                    <p>Pure glow only adds light. Smoke also blocks what's behind it. Keep a running <code>transmittance</code> that starts at 1. At each step, multiply it by <code>exp(-density * step)</code>, and multiply the light you add by it too. Thick parts then look solid, which gives clouds and fire a shape.</p>
                     <h2>Scale by the step</h2>
-                    <p>Multiply what you add at each step by the step size. Then changing the step size changes the detail but not the
-                    brightness. Without it, halving the step doubles the glow.</p>
+                    <p>Multiply the light you add at each step by the step size. Then changing the step size changes the detail but not the brightness. Without this, halving the step doubles the glow.</p>
                     <h2>Hiding the rings</h2>
-                    <p>Fixed steps leave rings where the samples line up. Start each ray at a slightly different spot, by adding a random
-                    fraction of a step to <code>t</code> from a hash of <code>gl_FragCoord.xy</code>, and the rings turn into fine grain
-                    that's much harder to see.</p>
+                    <p>Fixed steps can leave rings where the samples line up. Start each ray at a slightly different point by adding a random fraction of a step to <code>t</code>, using a hash of <code>gl_FragCoord.xy</code>. The rings turn into fine grain that's much harder to see.</p>
                     <h2>Common mistakes</h2>
                     <ul>
                     <li>Too few steps make the glow look like stacked slices.</li>
                     <li>Forgetting to tone map turns the core into a flat white blob.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>Glow is built by adding light at many points along the ray. The first tasks add a core, a ring and a pulse, then
                     tone map the result. The new tasks add a long soft halo, and a fine grain so the glow doesn't show bands.</p>
                     <h2>Try this</h2>

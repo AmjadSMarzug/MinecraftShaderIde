@@ -12,36 +12,28 @@ public final class LessonFirstSky {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_first_sky", "Your first sky", "colors, mix and the horizon", 6, """
-                    <p>Everything in a sky effect happens inside one function, <code>sky</code>. Minecraft calls it once for
-                    every pixel of the sky, every frame, and paints that pixel whatever color you give back.</p>
-                    <p>The only thing that changes from pixel to pixel is <code>dir</code>, the direction that pixel looks in.
-                    It's a vector of length 1, so <code>dir.y</code> is 1 when you look straight up, 0 at the horizon and -1
-                    straight down. <code>dir.y</code> alone is enough for a simple sky.</p>
-                    <p>Colors are <code>vec3(red, green, blue)</code> with each part from 0 to 1. <code>mix(a, b, t)</code> blends
-                    two of them: all <code>a</code> when t is 0, all <code>b</code> when t is 1.</p>
+                    <p>A sky effect works through one function, <code>sky</code>. Minecraft calls it for every pixel of the sky, every frame, and paints each pixel with the colour you return.</p>
+                    <p>Each pixel has a direction, called <code>dir</code>. It always has length 1. <code>dir.y</code> is 1 when you look straight up, 0 at the horizon, and -1 when you look straight down. That one number is enough for a simple sky.</p>
+                    <p>Colours are <code>vec3(red, green, blue)</code>, with each part from 0 to 1. <code>mix(a, b, t)</code> blends two colours. It gives <code>a</code> when t is 0, <code>b</code> when t is 1, and a mix of the two in between.</p>
                     <h2>Why one number is enough</h2>
-                    <p>The sky is the inside of a huge ball around you. Every pixel is one point on that ball, and
-                    <code>dir</code> is the arrow from you to that point. Because the arrow always has length 1, its <code>y</code> part
-                    says exactly how high up the point is, no matter which way you face.</p>
+                    <p>Think of the sky as a giant ball around you. Each pixel is one point on that ball, and <code>dir</code> is the arrow from you to that point. The arrow always has length 1, so its height part tells you how high the point is, whichever way you face.</p>
                     <h2>What mix really does</h2>
-                    <p><code>mix(a, b, t)</code> is <code>a * (1.0 - t) + b * t</code>. At t = 0.5 you get the color halfway between. If t
-                    goes outside 0 to 1, mix keeps going past the colors you gave it, which is where the odd colors under the horizon
-                    come from. <code>max</code> or <code>clamp</code> keeps t in range.</p>
+                    <p><code>mix(a, b, t)</code> is the same as <code>a * (1.0 - t) + b * t</code>. If t goes past 0 or 1, the result goes past your two colours. That's why colours can look odd below the horizon. Use <code>max</code> or <code>clamp</code> to keep t between 0 and 1.</p>
                     <h2>Shaping the gradient</h2>
-                    <p>A straight fade looks flat. Bend it before mixing:</p>
+                    <p>A straight fade can look flat. Bend the number before you mix with it:</p>
                     <table>
-                    <tr><td><code>pow(up, 0.5)</code></td><td>the top color reaches down further</td></tr>
-                    <tr><td><code>pow(up, 2.0)</code></td><td>the horizon color climbs higher</td></tr>
-                    <tr><td><code>smoothstep(0.0, 0.3, up)</code></td><td>a quick band at the horizon, then even color above</td></tr>
+                    <tr><td><code>pow(up, 0.5)</code></td><td>the top colour reaches further down</td></tr>
+                    <tr><td><code>pow(up, 2.0)</code></td><td>the horizon colour climbs higher</td></tr>
+                    <tr><td><code>smoothstep(0.0, 0.3, up)</code></td><td>a quick band at the horizon, then an even colour above it</td></tr>
                     </table>
-                    <p>Try each one on the lesson's gradient and compare.</p>
+                    <p>Try each one on the lesson's gradient and compare them.</p>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>Colors above 1.0 all show as the same white, so a bright mix loses its detail.</li>
-                    <li><code>float up = 1;</code> is an error, write <code>1.0</code>.</li>
-                    <li>Without its own ground color, everything below the horizon is just the horizon color again.</li>
+                    <li>Colours above 1.0 all show as the same white, so a bright mix loses its detail.</li>
+                    <li><code>float up = 1;</code> is an error. Write <code>1.0</code>.</li>
+                    <li>Without its own ground colour, everything below the horizon just shows the horizon colour again.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>You start with one color mix and finish with a sky that has a ground, a glow on the horizon and a slow change
                     over time. Each task changes only one thing, so when something breaks you know which change caused it. Keep <code>dir.y</code>
                     in mind: almost every trick on this page is just a different way of bending that one number.</p>

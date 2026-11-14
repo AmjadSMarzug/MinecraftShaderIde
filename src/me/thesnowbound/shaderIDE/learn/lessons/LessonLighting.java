@@ -12,39 +12,25 @@ public final class LessonLighting {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_lighting", "Lighting objects", "diffuse, specular, rim and occlusion", 10, """
-                    <p>The <b>normal</b> is the direction a surface faces. You can get it from any distance function by checking
-                    how the distance changes when you nudge the point a tiny bit along each axis.</p>
-                    <p>With a normal you can light anything. <b>Diffuse</b> is <code>dot(normal, light)</code>, bright where the
-                    surface faces the light. <b>Specular</b> is the shiny highlight, found by reflecting the view ray and seeing
-                    how close it bounces toward the light. A <b>rim</b> or fresnel term brightens edges that face away from
-                    you, which makes things pop off the background.</p>
-                    <p>The number of steps the march took is a decent stand in for <b>ambient occlusion</b>,
-                    because rays that brush past creases take more steps.</p>
+                    <p>The <b>normal</b> is the direction a surface faces. You can find it for any shape by checking how the distance changes when you nudge the point slightly along each axis.</p>
+                    <p>With a normal you can light anything. <b>Diffuse</b> is the matte brightness: a surface is bright where it faces the light, found with <code>dot(normal, light)</code>. <b>Specular</b> is the shiny highlight. A <b>rim</b> light brightens the edges that face away from you, so the shape stands out from the background.</p>
+                    <p>The number of steps the ray took is a rough guide to <b>ambient occlusion</b>, which darkens creases. A ray that passes close to a crease takes more steps, so the step count shows where those spots are.</p>
                     <h2>How the normal is found</h2>
-                    <p>Move the point a tiny bit along x and measure the distance on both sides. The difference says how fast the
-                    distance grows in that direction. Do it for y and z too and you have the direction the distance grows fastest, which
-                    points straight out of the surface. The nudge <code>e</code> matters: too small and the normal gets noisy, too big
-                    and sharp edges go soft.</p>
+                    <p>Nudge the point a tiny bit along x and measure the distance on both sides. The difference tells you how fast the distance grows that way. Do the same for y and z, and you get the direction pointing straight out of the surface. The nudge matters: too small and the normal gets noisy, too big and sharp edges go soft.</p>
                     <h2>Diffuse</h2>
-                    <p>A surface turned away from the light catches less of it, because the same light spreads over more area.
-                    <code>dot(n, light)</code> is exactly that falloff: 1 facing the light, 0 side on.</p>
+                    <p>A surface turned away from the light gets less of it. <code>dot(n, light)</code> gives that: 1 when the surface faces the light, 0 when it's sideways, and below 0 when it faces away.</p>
                     <h2>Specular</h2>
-                    <p>Bounce the view ray off the surface with <code>reflect(dir, n)</code> and see how close it lands to the light. The
-                    power is the shininess: 8 looks like rough plastic, 64 like polished metal. A common alternative uses the
-                    <b>half vector</b>, <code>normalize(light - dir)</code>, against the normal.</p>
+                    <p>Bounce the view ray off the surface with <code>reflect(dir, n)</code>, then check how close the bounce points to the light. The power sets the shininess: 8 looks like rough plastic, 64 like polished metal. Another common method uses the <b>half vector</b>, <code>normalize(light - dir)</code>.</p>
                     <h2>Fresnel</h2>
-                    <p>Almost everything reflects more at grazing angles. Glass looks clear face on and like a mirror side on. A good
-                    approximation is <code>f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0)</code>, with f0 around 0.04 for most materials.</p>
+                    <p>Almost every surface reflects more at a shallow angle. Glass looks clear when you face it and like a mirror when you look at it from the side. A good approximation is <code>f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0)</code>, with f0 about 0.04 for most materials.</p>
                     <h2>Shadows</h2>
-                    <p>From the point you hit, march a second ray toward the light. If it hits something, the point is in shadow. For
-                    soft shadows, keep the smallest <code>k * d / t</code> seen along the way and use it as the amount of light.</p>
+                    <p>From the point you hit, send a second ray toward the light. If it hits something, the point is in shadow. For soft shadows, keep the smallest <code>k * d / t</code> you pass along the way and use it as the amount of light.</p>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>A shadow ray that starts exactly on the surface hits that surface straight away and shadows everything. Start a
-                    little outside it: <code>p + n * 0.01</code>.</li>
+                    <li>A shadow ray that starts exactly on the surface hits that surface straight away and shadows everything. Start it a little outside: <code>p + n * 0.01</code>.</li>
                     <li>Forgetting ambient light makes the dark side pure black.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>Lighting is layers added together: diffuse for the main light, ambient so nothing is pure black, specular for the
                     shine, rim for the edges and a fake occlusion to darken creases. The new tasks add a warm light bouncing up from the
                     ground and a tighter shine for polished metal.</p>

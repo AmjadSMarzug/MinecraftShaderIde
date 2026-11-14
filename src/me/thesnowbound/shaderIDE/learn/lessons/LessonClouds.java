@@ -12,36 +12,23 @@ public final class LessonClouds {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_clouds", "Noise clouds", "noise, octaves and a cloud ceiling", 12, """
-                    <p>Random numbers per pixel only give you static. <b>Value noise</b> picks random numbers at the corners of a
-                    grid and blends smoothly between them, so neighbouring pixels get similar values.</p>
-                    <p>One layer of noise looks like blurry blobs. Add a second layer at twice the detail and half the
-                    strength, then a third, and so on. That stack is called <b>fbm</b>, and it's the usual starting point for clouds and smoke. Each layer is one <b>octave</b>.</p>
-                    <p>Real clouds sit on a ceiling above you, so near the horizon you see a lot of them squashed together.
-                    Dividing <code>dir.xz</code> by <code>dir.y</code> gives you exactly that: positions on a flat ceiling.</p>
+                    <p>Random numbers for each pixel just look like static. <b>Value noise</b> places random numbers at the corners of a grid and blends smoothly between them. Pixels next to each other then get similar values, which gives soft blobs.</p>
+                    <p>One layer of noise looks like blurry blobs. Add a second layer with twice the detail and half the strength, then a third, and so on. This stack is called <b>fbm</b>. Each layer is an <b>octave</b>. Clouds and smoke are usually built this way.</p>
+                    <p>Real clouds sit on a ceiling above you. Near the horizon you see many of them squashed together. Dividing <code>dir.xz</code> by <code>dir.y</code> gives that same effect, because it turns directions into positions on a flat ceiling.</p>
                     <h2>Inside the noise</h2>
-                    <p><code>hash</code> turns a position into a number that looks random: a sine wave squeezed so hard that its digits
-                    jump around. <code>noise</code> asks hash for a value at the eight corners of the grid cube around the point, then
-                    blends them with the curve <code>f * f * (3.0 - 2.0 * f)</code>, which eases in and out so there are no creases along
-                    the grid lines.</p>
+                    <p><code>hash</code> turns a position into a number that looks random. <code>noise</code> asks the hash for values at the eight corners of the grid cube around a point, then blends them. The blend uses <code>f * f * (3.0 - 2.0 * f)</code>, which eases in and out, so there are no sharp lines along the grid.</p>
                     <h2>Scale and octaves</h2>
-                    <p>Multiplying the position zooms the noise: <code>noise(p * 8.0)</code> has smaller blobs than
-                    <code>noise(p * 2.0)</code>. Each octave doubles the scale and halves the strength, so big shapes stay big and the
-                    small ones only add detail. Five octaves add up to almost 1.0. More octaves mean more detail but cost more, and four
-                    to six is plenty for a sky.</p>
+                    <p>Multiplying the position zooms the noise in. <code>noise(p * 8.0)</code> has smaller blobs than <code>noise(p * 2.0)</code>. Each octave doubles the zoom and halves the strength, so the big shapes stay big and the small ones only add detail. Four to six octaves is enough for a sky. More looks better but costs more.</p>
                     <h2>Why the ceiling trick works</h2>
-                    <p>Near the horizon <code>dir.y</code> is tiny, so <code>dir.xz / dir.y</code> becomes huge. Clouds far away get
-                    squashed together like a real cloud layer seen from the ground. Right at the horizon they squash so much that they
-                    flicker, which is why the lesson fades them out there. <code>max(dir.y, 0.05)</code> stops a division by zero.</p>
+                    <p>Near the horizon <code>dir.y</code> is tiny, so the division makes clouds stretch out and flicker. That's why the lesson fades them out near the horizon. <code>max(dir.y, 0.05)</code> stops the division from hitting zero.</p>
                     <h2>Coverage and softness</h2>
-                    <p>In <code>smoothstep(a, b, n)</code>, raising <code>a</code> means fewer clouds, and moving <code>a</code> and
-                    <code>b</code> closer gives harder edges. For a lit look, look the noise up a second time a little toward the sun:
-                    where the second value is lower, the cloud's edge faces the light.</p>
+                    <p>In <code>smoothstep(a, b, n)</code>, a bigger <code>a</code> gives fewer clouds. Putting <code>a</code> and <code>b</code> close together gives sharper edges. For a lit look, read the noise a second time a little toward the sun. Where that second value is lower, the edge faces the light.</p>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>No horizon fade leaves a shimmering line where the clouds meet the ground.</li>
-                    <li>Adding time inside the loop makes every octave drift at a different speed. Sometimes that looks good, but it's easy to do by accident.</li>
+                    <li>Without a horizon fade, the clouds shimmer in a line where they meet the ground.</li>
+                    <li>Adding time inside the loop makes every octave drift at a different speed. That can look good, but it's easy to do by accident.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>The tasks go from one noise call, to a stack of octaves, to a cloud ceiling, to drifting and cutting out shapes. The new
                     tasks add lighting that fakes sunlight on one side of a cloud and a second, faster layer above the first.</p>
                     <h2>Try this</h2>

@@ -12,36 +12,26 @@ public final class LessonStars {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_stars", "Stars", "cells, floor and fract", 10, """
-                    <p>Stars are a different kind of random: a few sharp points scattered across the sky. The trick is to cut
-                    space into <b>cells</b>. <code>floor(dir * 80.0)</code> gives every little patch of sky its own whole number
-                    id, and <code>fract(dir * 80.0)</code> tells you where inside that patch the pixel sits.</p>
-                    <p>Run the id through a <b>hash</b>, a function that turns any input into a random looking number between
-                    0 and 1, and only light the cells whose number lands above 0.97. About 3 cells in 100 get a star.</p>
-                    <p>The same hash is handy for anything that should differ star by star: brightness, color, twinkle speed.</p>
+                    <p>Stars are a different kind of random: a few sharp points scattered across the sky. The trick is to split the sky into <b>cells</b>, like squares on graph paper. <code>floor(dir * 80.0)</code> gives each cell its own whole-number id. <code>fract(dir * 80.0)</code> tells you where the pixel sits inside its cell.</p>
+                    <p>A <b>hash</b> is a function that turns any input into a number that looks random, between 0 and 1. Run each cell's id through it, and only light the cells where the number is above 0.97. About 3 cells in 100 get a star.</p>
+                    <p>The same hash can decide anything else that should differ from star to star, like brightness, colour or how fast it twinkles.</p>
                     <h2>Why cells?</h2>
-                    <p>Every pixel runs on its own and can't see the others. Checking a list of a thousand stars for every pixel would be
-                    far too slow. Cells solve it: each pixel works out which cell it's in, asks that one cell whether it has a star, and
-                    is done.</p>
+                    <p>Each pixel runs on its own and can't check every star in the sky. Cells fix that. Each pixel works out which cell it's in, asks that one cell whether it has a star, and is done.</p>
                     <h2>Size and density</h2>
-                    <p>The number in <code>floor(dir * 80.0)</code> sets how big the cells are. A bigger number means smaller cells, so
-                    smaller and more numerous stars. The threshold sets how many cells get a star: 0.97 lights about 3 in 100, 0.99
-                    about 1 in 100.</p>
+                    <p>The number in <code>floor(dir * 80.0)</code> sets the cell size. A bigger number means smaller cells, so more and smaller stars. The threshold sets how many cells get a star: 0.97 lights about 3 in 100, and 0.99 about 1 in 100.</p>
                     <h2>Hiding the grid</h2>
-                    <p>A star always sitting in the middle of its cell lines up in rows you can spot. Move it to a random spot inside the
-                    cell with three more hashes:</p>
+                    <p>A star always sitting in the middle of its cell lines up in rows you can spot. Move it to a random spot inside the cell with three more hashes:</p>
                     <pre>vec3 jitter = vec3(hash(cell + 1.0),
                         hash(cell + 2.0), hash(cell + 3.0)) - 0.5;</pre>
-                    <p>Then measure the distance from the cell's middle plus <code>jitter * 0.6</code> instead of from the middle
-                    itself.</p>
+                    <p>Then measure the distance from the cell's centre plus <code>jitter * 0.6</code>, rather than from the centre itself.</p>
                     <h2>One hash per property</h2>
-                    <p>Use a different offset for each thing a star needs: whether it exists, how bright it is, its color, how fast it
-                    twinkles. Reusing the same hash links them, so for example only the brightest cells would ever get stars.</p>
+                    <p>Use a different offset for each thing a star needs: whether it exists, how bright it is, its colour, how fast it twinkles. If you reuse the same hash, those properties get linked. For example, only the brightest cells would ever get stars.</p>
                     <h2>Common mistakes</h2>
                     <ul>
                     <li>Stars that look like a grid: add jitter.</li>
                     <li>Stars that blink together: each one needs its own phase from the hash.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>Each star is decided by its own cell, so the tasks are about changing that decision: which cells get a star, how
                     big it is, what color, and whether it twinkles. The new tasks fade the stars toward the horizon and add a rare set of
                     big, bright ones.</p>

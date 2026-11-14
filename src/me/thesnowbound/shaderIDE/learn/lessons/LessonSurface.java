@@ -12,40 +12,29 @@ public final class LessonSurface {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_surface", "Your first surface", "uv, grids, holes and edge glow", 10, """
-                    <p>A surface paints the faces of the item itself, so the item becomes a screen, a sign, a portal or a wall.
-                    Instead of a direction like a sky, every pixel gets <code>uv</code>: where it sits on the face, from 0 to 1
-                    across and 0 to 1 up, like coordinates on a sheet of paper.</p>
-                    <p>Patterns come from repeating uv. <code>fract(uv * 8.0)</code> counts from 0 to 1 eight times across the
-                    face, so anything you draw with it repeats in an 8 by 8 grid.</p>
-                    <p>Alpha cuts holes: return 0 and that pixel is gone, so a square panel can become a round portal.
-                    The <code>#pragma vessel shape</code> line picks the item's shape: <code>cube</code>, <code>panel</code>,
-                    <code>pillar</code> or <code>floor</code>.</p>
+                    <p>A surface paints the faces of the item, so the item can act as a screen, a sign, a portal or a wall. Instead of a direction, each pixel gets <code>uv</code>: where it sits on the face, from 0 to 1 across and 0 to 1 up, like coordinates on a sheet of paper.</p>
+                    <p>Patterns repeat <code>uv</code>. <code>fract(uv * 8.0)</code> counts from 0 to 1 eight times across the face, so anything drawn with it repeats in an 8 by 8 grid.</p>
+                    <p>Alpha cuts holes. Return 0 and that pixel disappears, so a square panel can become a round portal. The <code>#pragma vessel shape</code> line picks the item's shape: <code>cube</code>, <code>panel</code>, <code>pillar</code> or <code>floor</code>.</p>
                     <h2>uv or pos?</h2>
-                    <p><code>uv</code> starts over on every face, so a pattern drawn with it repeats the same way on all six sides.
-                    <code>pos</code> is the point's place in the item's box, which carries on across the corners. Use uv for screens,
-                    signs and anything that belongs on one face. Use pos for patterns that should wrap round the whole item without
-                    seams.</p>
+                    <p><code>uv</code> starts over on every face, so a pattern drawn with it repeats the same way on all six sides. <code>pos</code> is the point's place in the item's box, and it carries on across the corners. Use uv for screens, signs and anything that belongs on one face. Use pos for patterns that should wrap round the whole item without seams.</p>
                     <h2>Drawing with distances</h2>
-                    <p>Flat shapes work just like the 3D ones in the object lessons, only in 2D:</p>
+                    <p>Flat shapes work like the 3D ones in the object lesson, but in 2D:</p>
                     <table>
                     <tr><td>circle</td><td><code>length(uv - 0.5) - r</code></td></tr>
                     <tr><td>ring</td><td><code>abs(length(uv - 0.5) - r) - thickness</code></td></tr>
                     <tr><td>box</td><td><code>max(abs(uv.x - 0.5), abs(uv.y - 0.5)) - size</code></td></tr>
                     </table>
-                    <p>Turn a distance into a shape with <code>smoothstep</code>: negative inside, positive outside.</p>
+                    <p>Turn a distance into a shape with <code>smoothstep</code>. Negative means inside and positive means outside.</p>
                     <h2>Smooth edges</h2>
-                    <p><code>step</code> makes jagged pixel stairs. <code>fwidth(d)</code> tells you how much d changes from one pixel to
-                    the next, so <code>smoothstep(w, -w, d)</code> with <code>w = fwidth(d)</code> gives an edge exactly one pixel soft at
-                    any distance from the camera.</p>
+                    <p><code>step</code> makes jagged stairs. <code>fwidth(d)</code> tells you how much d changes from one pixel to the next. Using <code>smoothstep(w, -w, d)</code> with <code>w = fwidth(d)</code> gives an edge exactly one pixel soft, at any distance from the camera.</p>
                     <h2>Fake depth</h2>
-                    <p>Look something up at <code>pos + view * depth</code> and it seems to sit behind the face. Stack a few at different
-                    depths and the item looks hollow, like a window into a room.</p>
+                    <p>Look something up at <code>pos + view * depth</code> and it seems to sit behind the face. Stack a few at different depths and the item looks hollow, like a window into a room.</p>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>A pattern flipped on some faces: that face's uv runs the other way, use pos for it instead.</li>
+                    <li>A pattern that's flipped on some faces: that face's uv runs the other way, so use pos for it instead.</li>
                     <li>On panel and floor shapes the thin edges are skipped, so don't put anything important there.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>A surface is a flat picture on the face of the item, drawn from <code>uv</code>. The first tasks draw a grid, scroll
                     it, cut the face into a circle, add an edge glow and make it see-through. The new tasks add ripples that spread from the
                     middle and a frame around the edge of the face.</p>

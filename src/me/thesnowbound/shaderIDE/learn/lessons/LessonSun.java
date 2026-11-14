@@ -12,33 +12,23 @@ public final class LessonSun {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_sun", "A sun", "dot, pow and glow", 8, """
-                    <p><code>dot(a, b)</code> of two directions tells you how much they agree: 1 when they point the same way,
-                    0 when they're at a right angle, -1 when they're opposite. Take the dot of <code>dir</code> with the
-                    direction of the sun and you get a value that's 1 right on the sun and falls off around it.</p>
-                    <p>That falloff is far too wide to look like a sun, so you sharpen it with <code>pow</code>. Raising a number
-                    a bit under 1 to a big power crushes it toward 0, and only the pixels almost exactly on the sun survive.
-                    A big power gives a small disc and a small power gives a wide glow.</p>
+                    <p><code>dot(a, b)</code> tells you how much two directions agree. It's 1 when they point the same way, 0 at a right angle, and -1 when they're opposite. Take the dot of <code>dir</code> with the sun's direction, and you get a value that's 1 right on the sun and fades away around it.</p>
+                    <p>That fade is much too wide to look like a sun, so you sharpen it with <code>pow</code>. Raising a number just under 1 to a big power pushes it close to 0, so only the pixels almost exactly on the sun stay bright. A big power gives a small disc. A small power gives a wide glow.</p>
                     <p>Light adds up, so suns, glows and halos are usually added on top of the sky with <code>+=</code>.</p>
                     <h2>Directions must have length 1</h2>
-                    <p><code>dot</code> only means "how much two directions agree" when both have length 1, so the sun's direction goes through <code>normalize</code> first. In the preview, <code>-z</code> is straight ahead and <code>y</code> is up, so
-                    <code>vec3(0.0, 0.3, -1.0)</code> is ahead and a little above the horizon.</p>
+                    <p><code>dot</code> only tells you how much two directions agree when both have length 1. So the sun's direction goes through <code>normalize</code> first. In the preview, <code>-z</code> is straight ahead and <code>y</code> is up. So <code>vec3(0.0, 0.3, -1.0)</code> is ahead and a little above the horizon.</p>
                     <h2>How big is the sun?</h2>
-                    <p>The power decides the size. <code>pow(sun, 500.0)</code> is still half bright about 3 degrees from the center, which
-                    reads as a big soft sun. The real sun is half a degree across, which would be a power near 20000. For a disc with a
-                    hard edge instead of a soft one, use <code>smoothstep(0.9995, 0.9998, sun)</code>.</p>
+                    <p>The power decides the size. <code>pow(sun, 500.0)</code> is still half bright about 3 degrees from the centre, which reads as a big soft sun. The real sun is half a degree across, which would need a power near 20000. For a disc with a hard edge instead of a soft one, use <code>smoothstep(0.9995, 0.9998, sun)</code>.</p>
                     <h2>Light stacks up</h2>
-                    <p>A convincing sun is several layers added together: a small bright disc, a halo around it and a wide warm glow. Each
-                    layer is dimmer and wider than the last. Adding them can push colors past 1.0, which lesson 7 fixes with tone
-                    mapping.</p>
+                    <p>A convincing sun is several layers added together: a small bright disc, a halo around it and a wide warm glow. Each layer is dimmer and wider than the last. Adding them can push colours past 1.0, which tone mapping in lesson 7 fixes.</p>
                     <h2>A sky that reacts</h2>
-                    <p><code>sunDir.y</code> says how high the sun is, so the rest of the sky can follow it, getting darker and warmer as the sun goes down, with stars once it's gone. Mixing the sky color toward orange by how low the sun is makes a simple sunset in one line.</p>
+                    <p><code>sunDir.y</code> tells you how high the sun is. The rest of the sky can follow it, getting darker and warmer as the sun sinks and showing stars once it's gone. Mixing the sky colour toward orange by how low the sun is makes a simple sunset in one line.</p>
                     <h2>Common mistakes</h2>
                     <ul>
-                    <li>Behind you, <code>dot</code> is negative, and <code>pow</code> of a negative number is undefined, which shows up as
-                    black or flickering pixels. Keeping it above zero with <code>max</code> prevents that.</li>
+                    <li>Behind you, <code>dot</code> is negative. <code>pow</code> of a negative number isn't defined, so it shows as black or flickering pixels. Keep the value above zero with <code>max</code>.</li>
                     <li>Forgetting <code>normalize</code> makes the sun the wrong size, or missing completely.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>The sun is built in layers: the measure of closeness, then a tight disc, then two softer glows, then the color of the
                     sky around it. Once it works, the last tasks move it through the sky and darken the world when it sets. The new tasks add
                     a moon on the far side, and a sun with a hard edge instead of a soft one.</p>

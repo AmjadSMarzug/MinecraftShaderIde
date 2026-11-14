@@ -12,39 +12,29 @@ public final class LessonShapes {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_shapes", "Combining shapes", "union, cut and smooth blends", 12, """
-                    <p>Distance functions combine with plain math. <code>min(a, b)</code> keeps whichever surface is closer,
-                    which glues two shapes together. <code>max(a, -b)</code> keeps <code>a</code> only where you're outside
-                    <code>b</code>, which carves <code>b</code> out of it.</p>
-                    <p>A plain min leaves a hard crease where shapes meet. A <b>smooth min</b> blends the two distances over a
-                    small range, so the shapes melt into each other like clay.</p>
-                    <p>Keeping the shape in its own function means the normal and the march both use the same thing.</p>
+                    <p>Distance functions can be combined with simple maths. <code>min(a, b)</code> keeps whichever surface is closer, which joins two shapes together. <code>max(a, -b)</code> keeps <code>a</code> only where you're outside <code>b</code>, which cuts <code>b</code> out of <code>a</code>.</p>
+                    <p>A plain min leaves a sharp crease where two shapes meet. A <b>smooth min</b> blends the two distances over a small range, so the shapes melt into each other like clay.</p>
+                    <p>Keep each shape in its own function. Then the normal and the march both use the same shape.</p>
                     <h2>The three ways to combine</h2>
                     <table>
                     <tr><td><code>min(a, b)</code></td><td>both shapes together</td></tr>
                     <tr><td><code>max(a, b)</code></td><td>only where they overlap</td></tr>
-                    <tr><td><code>max(a, -b)</code></td><td>a with b carved out of it</td></tr>
+                    <tr><td><code>max(a, -b)</code></td><td>a, with b carved out of it</td></tr>
                     </table>
                     <h2>Smooth min, explained</h2>
-                    <p><code>k</code> is how wide the blend is, measured in the same units as the shapes. 0.05 rounds the joint like a
-                    fillet, 0.3 melts the shapes into one blob. There's a smooth version of carving too: <code>-smin(-a, b, k)</code>
-                    cuts with a soft, rounded edge.</p>
+                    <p><code>k</code> is how wide the blend is, in the same units as the shapes. 0.05 rounds the joint like a fillet. 0.3 melts the shapes into one blob. There's a smooth cut too: <code>-smin(-a, b, k)</code> carves with a soft, rounded edge.</p>
                     <h2>Repeating a shape</h2>
-                    <p>Folding space repeats whatever you measure in it. <code>q = mod(p + 0.5 * c, c) - 0.5 * c</code> makes copies every
-                    <code>c</code> units along each axis, all for the price of one shape. Keep the result inside the box with a
-                    <code>max</code> against a big box, or the copies fill everything.</p>
+                    <p>Folding space repeats whatever you measure in it. <code>q = mod(p + 0.5 * c, c) - 0.5 * c</code> makes a copy every <code>c</code> units along each axis, for the cost of one shape. Keep the copies inside a box with a <code>max</code> against a big box, or they fill everything.</p>
                     <h2>Twisting and bending</h2>
-                    <p>Turning <code>p.xz</code> by an angle that depends on <code>p.y</code> twists the shape like a towel. Deformations
-                    like this break the "never too far" rule a little, so step by <code>d * 0.7</code> instead of the full d, or you'll
-                    see holes.</p>
+                    <p>Turning <code>p.xz</code> by an angle that depends on <code>p.y</code> twists the shape like a towel. Twisting can break the rule that the distance is never too far, so step by <code>d * 0.7</code> instead of the full d, or holes appear.</p>
                     <h2>Keeping it readable</h2>
-                    <p>Give each part its own named distance (<code>ball</code>, <code>ring</code>, <code>stem</code>) and combine them
-                    at the end. When something looks wrong, you can return a single part to see it on its own.</p>
+                    <p>Give each part its own name, like <code>ball</code>, <code>ring</code> or <code>stem</code>, then combine them at the end. If something looks wrong, return one part on its own to check it.</p>
                     <h2>Common mistakes</h2>
                     <ul>
                     <li>Carving with the wrong sign removes everything outside the cutter instead of inside it.</li>
                     <li>Heavy twisting with full steps leaves holes and missing chunks.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>You build a shape out of parts, then carve, blend, repeat and animate it. The new tasks repeat a copy of the shape
                     across space with <code>mod</code>, and twist it, which is the fastest way to get complex forms from one simple one.</p>
                     <h2>Try this</h2>

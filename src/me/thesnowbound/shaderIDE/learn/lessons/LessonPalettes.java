@@ -12,17 +12,12 @@ public final class LessonPalettes {
     }
 
     public static final Lesson LESSON = new Lesson("lesson_palettes", "Color like a pro", "cosine palettes and tone mapping", 8, """
-                    <p>Picking every color by hand gets old. A <b>cosine palette</b> turns one number into a whole smooth range
-                    of colors: <code>a + b * cos(6.28318 * (c * t + d))</code>, where <code>a</code>, <code>b</code>,
-                    <code>c</code> and <code>d</code> are vec3s. Changing <code>d</code> shifts the hues, which makes it easy
-                    to find a set that looks good together.</p>
-                    <p>When you add a lot of light, colors go past 1 and clip to flat white. <b>Tone mapping</b> squeezes them
-                    back. <code>1.0 - exp(-color)</code> leaves dark values almost alone and bends bright ones smoothly toward
-                    1, so highlights keep their shape.</p>
+                    <p>Choosing every colour by hand is slow. A <b>cosine palette</b> turns one number into a smooth range of colours: <code>a + b * cos(6.28318 * (c * t + d))</code>. Here <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code> are vec3s. Changing <code>d</code> shifts the hues, which makes it easy to find a set that looks good together.</p>
+                    <p>When you add a lot of light, colours go past 1 and turn into flat white. <b>Tone mapping</b> squeezes them back into range. <code>1.0 - exp(-color)</code> leaves dark colours almost alone and bends bright ones smoothly toward 1, so highlights keep their shape.</p>
                     <h2>Reading the four vectors</h2>
                     <table>
                     <tr><td><code>a</code></td><td>the middle brightness of each channel</td></tr>
-                    <tr><td><code>b</code></td><td>how far each channel swings, the contrast</td></tr>
+                    <tr><td><code>b</code></td><td>how far each channel swings, which sets the contrast</td></tr>
                     <tr><td><code>c</code></td><td>how many times it cycles as t goes from 0 to 1</td></tr>
                     <tr><td><code>d</code></td><td>where each channel starts its cycle, which sets the hues</td></tr>
                     </table>
@@ -34,18 +29,15 @@ public final class LessonPalettes {
                     </table>
                     <p>Change one vector at a time to see what each one does.</p>
                     <h2>Why tone mapping</h2>
-                    <p>A screen can only show 0 to 1, but light in the real world just adds up. When you stack suns, glows and stars,
-                    values pass 1.0 and every bright part becomes the same flat white. <code>1.0 - exp(-color * k)</code> bends the top
-                    end so bright values approach 1 without reaching it. The <code>k</code> works like exposure: bigger is brighter.</p>
+                    <p>A screen can only show values from 0 to 1, but light adds up without limit. When you stack suns, glows and stars, values pass 1.0 and every bright part becomes the same flat white. <code>1.0 - exp(-color * k)</code> bends the top end, so bright values get close to 1 without reaching it. The <code>k</code> works like exposure: bigger is brighter.</p>
                     <h2>Brighter blends</h2>
-                    <p>Mixing two colors straight gives a slightly dark middle. Mixing their squares and taking the square root,
-                    <code>sqrt(mix(a * a, b * b, t))</code>, keeps the middle bright, which helps sunsets and gradients.</p>
+                    <p>Mixing two colours in a straight line gives a slightly dull middle. Mixing their squares and taking the square root, <code>sqrt(mix(a * a, b * b, t))</code>, keeps the middle bright. That helps sunsets and gradients.</p>
                     <h2>Common mistakes</h2>
                     <ul>
                     <li>Adding more light after tone mapping brings the clipping back. Tone map last.</li>
-                    <li>A big <code>c</code> makes the colors cycle so fast they look like stripes.</li>
+                    <li>A big <code>c</code> makes the colours cycle so fast they look like stripes.</li>
                     </ul>
-<h2>Working through the tasks</h2>
+                    <h2>Working through the tasks</h2>
                     <p>You build the palette function first, then use it, animate it and finally tone map. The new tasks are about the
                     brightness of the whole sky: a square root to lift the dark parts, and one exposure value to control everything at once.</p>
                     <h2>Try this</h2>
