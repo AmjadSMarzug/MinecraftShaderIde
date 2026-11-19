@@ -26,7 +26,7 @@ import java.util.zip.ZipOutputStream;
 
 public final class Forge {
     public static final String TOOL = "Shader IDE";
-    public static final String VERSION = "2.1.0";
+    public static final String VERSION = "2.2.0";
 
     // 1.21 and 1.21.1 read the shader name without the core/ prefix, so they get their own json
     public static final List<Tier> TIERS = List.of(
