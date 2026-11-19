@@ -1,6 +1,6 @@
-# Shader IDE
+# Shader IDE - Fork of [Mirothe's Hogyoku Vessel](https://github.com/Mirothe/Hogyoku-Vessel)
 
-Fork of [Mirothe's Hogyoku Vessel](https://github.com/Mirothe/Hogyoku-Vessel), an IDE for Minecraft shaders. This fork is by Thesnowbound.
+An IDE for Minecraft shaders. This fork is by Thesnowbound.
 
 An IDE for Minecraft shaders. You write GLSL, watch it run live as you type, and Shader IDE builds it into a resource pack that works on every version from 1.21 to 26.3.
 
