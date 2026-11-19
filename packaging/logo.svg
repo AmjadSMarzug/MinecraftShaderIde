@@ -1,34 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
-      <stop offset="0" stop-color="#2a1f4a"/>
-      <stop offset="1" stop-color="#07050d"/>
-    </radialGradient>
-    <radialGradient id="orb" cx="40%" cy="36%" r="70%">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="0.22" stop-color="#b8f6ff"/>
-      <stop offset="0.5" stop-color="#00d8ff"/>
-      <stop offset="0.82" stop-color="#7a1fd6"/>
-      <stop offset="1" stop-color="#3a0a6e"/>
-    </radialGradient>
-    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
-      <stop offset="0.55" stop-color="#00d8ff" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#00d8ff" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="4"/>
-    </filter>
-    <clipPath id="orbClip"><circle cx="256" cy="256" r="148"/></clipPath>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#241a44"/>
+      <stop offset="1" stop-color="#0a0712"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00d8ff"/>
+      <stop offset="1" stop-color="#b65cff"/>
+    </linearGradient>
   </defs>
   <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
-  <circle cx="256" cy="256" r="196" fill="url(#halo)"/>
-  <ellipse cx="256" cy="256" rx="206" ry="66" transform="rotate(-22 256 256)" fill="none" stroke="#c77dff" stroke-opacity="0.55" stroke-width="7"/>
-  <circle cx="256" cy="256" r="148" fill="url(#orb)"/>
-  <g clip-path="url(#orbClip)" fill="none" stroke-linecap="round">
-    <path d="M100 230 C160 190, 210 270, 270 236 S370 200, 420 232" stroke="#ffffff" stroke-opacity="0.45" stroke-width="10" filter="url(#blur)"/>
-    <path d="M90 290 C160 255, 220 320, 290 282 S380 258, 430 288" stroke="#e6fbff" stroke-opacity="0.35" stroke-width="8" filter="url(#blur)"/>
-    <path d="M110 190 C170 160, 230 205, 300 180 S390 160, 420 176" stroke="#ffffff" stroke-opacity="0.25" stroke-width="6"/>
+  <g fill="none" stroke="url(#accent)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="186,160 96,256 186,352"/>
+    <polyline points="326,160 416,256 326,352"/>
   </g>
-  <ellipse cx="256" cy="256" rx="206" ry="66" transform="rotate(-22 256 256)" fill="none" stroke="#ffffff" stroke-opacity="0.8" stroke-width="5" stroke-dasharray="520 1000" stroke-dashoffset="-120"/>
-  <circle cx="256" cy="256" r="148" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="3"/>
+  <circle cx="256" cy="256" r="34" fill="#ffffff"/>
 </svg>
