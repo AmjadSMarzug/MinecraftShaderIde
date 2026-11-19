@@ -2,7 +2,7 @@
 out/
 
 # packs built from a project, and the preview's thumbnails
-build/
+/build/
 .vessel/
 
 # design drafts
