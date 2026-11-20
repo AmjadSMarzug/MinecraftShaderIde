@@ -9,7 +9,8 @@ import java.util.Set;
 // the item model for a sky or an object: a cube, a cylinder or a flat circle. the game's item models only hold
 // cuboids, so the round shapes are built from them. each piece only gets the faces on its outside, and every model
 // is checked so no two faces sit in the same place, since those flicker against each other in game
-final class Models {
+public final class Models {
+    public static final List<String> SHAPES = List.of("cube", "cylinder", "circle");
     static final double THICK = 0.2;   // thickness of the thin pieces, in model pixels
     static final int WALLS = 16;       // sides of the cylinder
     static final int CAP_GRID = 6;     // tiles across each lid of the cylinder

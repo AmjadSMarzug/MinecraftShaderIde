@@ -6,21 +6,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 // the build settings from build.json in the project folder. every key is optional, and the command line can override them
-public record BuildConfig(boolean obfuscate, boolean check, boolean skript, boolean remap, String model) {
-    public static final List<String> MODELS = List.of("cube", "cylinder", "circle");
-    public static final BuildConfig DEFAULT = new BuildConfig(true, true, false, true, "cylinder");
-    private static final Set<String> KEYS = Set.of("obfuscate", "check", "skript", "remap", "model");
-
-    public BuildConfig {
-        if (!MODELS.contains(model)) {
-            throw new IllegalArgumentException("model must be cube, cylinder or circle, not \"" + model + "\"");
-        }
-    }
+public record BuildConfig(boolean obfuscate, boolean check, boolean skript, boolean remap) {
+    public static final BuildConfig DEFAULT = new BuildConfig(true, true, false, true);
+    private static final Set<String> KEYS = Set.of("obfuscate", "check", "skript", "remap");
 
     // no build.json means the defaults. a broken one stops the build with a message saying what's wrong
     public static BuildConfig read(Path dir) {
@@ -41,8 +33,7 @@ public record BuildConfig(boolean obfuscate, boolean check, boolean skript, bool
                 bool(j, "obfuscate", DEFAULT.obfuscate()),
                 bool(j, "check", DEFAULT.check()),
                 bool(j, "skript", DEFAULT.skript()),
-                bool(j, "remap", DEFAULT.remap()),
-                j.containsKey("model") ? String.valueOf(j.get("model")) : DEFAULT.model());
+                bool(j, "remap", DEFAULT.remap()));
     }
 
     private static boolean bool(Map<?, ?> j, String key, boolean fallback) {

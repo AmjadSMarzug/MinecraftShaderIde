@@ -13,12 +13,16 @@ Use
   shader-build --readable path/to/project  readable names
   shader-build --no-check                  skip the glslang check
   shader-build --skript                    also write the Skript file
-  shader-build --model circle path         item model shape: cube, cylinder or circle
 
 Settings file
-  build.json in the project folder sets the defaults. Every key is optional:
-    {"obfuscate": true, "check": true, "skript": false, "remap": true, "model": "cylinder"}
+  build.json in the project folder sets the build defaults. Every key is optional:
+    {"obfuscate": true, "check": true, "skript": false, "remap": true}
   Command line flags override it. A typo in a key stops the build with a message.
+
+Item model per effect
+  Each effect in project.json can set its item shape with "model":
+    "cube", "cylinder" (default) or "circle"
+  Example: {"id": "sky", "file": "effects/sky.glsl", "alpha": 10, "item": "sky_1", "model": "circle", "defines": {}}
 
 Putting the names back
   Obfuscated builds write <name>.remap.json into the project's build folder.

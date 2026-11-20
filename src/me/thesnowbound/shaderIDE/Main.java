@@ -1322,7 +1322,7 @@ public final class Main extends JFrame {
         }
         if (id.isEmpty()) return;
         try {
-            project.effects.set(project.effects.indexOf(effect), new Project.Effect(effect.id(), effect.file(), code, id, effect.defines()));
+            project.effects.set(project.effects.indexOf(effect), new Project.Effect(effect.id(), effect.file(), code, id, effect.defines(), effect.model()));
             project.save();
             reloadOpen(project.file());
             refreshPreview();
@@ -1511,7 +1511,7 @@ public final class Main extends JFrame {
             for (int i = 0; i < project.effects.size(); i++) {
                 Project.Effect e = project.effects.get(i);
                 if (project.dir.resolve(e.file()).normalize().equals(file.normalize())) {
-                    project.effects.set(i, new Project.Effect(e.id().equals(old) ? id : e.id(), rel, e.alpha(), e.item(), e.defines()));
+                    project.effects.set(i, new Project.Effect(e.id().equals(old) ? id : e.id(), rel, e.alpha(), e.item(), e.defines(), e.model()));
                 }
             }
             project.save();

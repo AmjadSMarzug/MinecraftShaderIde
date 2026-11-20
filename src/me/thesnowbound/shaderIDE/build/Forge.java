@@ -192,7 +192,7 @@ public final class Forge {
                 }
                 ImageIO.write(img, "png", tex.toFile());
                 write(assets.resolve("models/item/" + e.item() + ".json"),
-                        overlays.contains(e.id()) ? overlayModel(ref) : Models.sky(config.model(), ref, shapes.getOrDefault(e.id(), new float[]{1f, 1f, 1f})));
+                        overlays.contains(e.id()) ? overlayModel(ref) : Models.sky(e.model(), ref, shapes.getOrDefault(e.id(), new float[]{1f, 1f, 1f})));
             }
 
             Map<String, Object> tint = new LinkedHashMap<>();

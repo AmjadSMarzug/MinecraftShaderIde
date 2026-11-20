@@ -20,14 +20,14 @@ public final class Builder {
               --readable          keep names readable instead of obfuscating them
               --no-check          skip the glslang check
               --skript            also write the Skript file next to the pack
-              --model <shape>     the item model shape: cube, cylinder or circle
               --unmap <map> <f>   print a shader with its original names put back
               -h, --help          show this help
               -v, --version       show the version
 
             build.json in the project folder sets the defaults for these:
-              {"obfuscate": true, "check": true, "skript": false, "remap": true, "model": "cylinder"}
+              {"obfuscate": true, "check": true, "skript": false, "remap": true}
             The command line overrides it. "remap" writes <name>.remap.json next to the pack when obfuscating.
+            The item model is set per effect in project.json, "model": "cube", "cylinder" or "circle".
             """;
 
     private Builder() {
@@ -57,7 +57,6 @@ public final class Builder {
         }
 
         boolean readable = false, noCheck = false, skriptFlag = false;
-        String model = null;
         List<String> folders = new ArrayList<>();
         for (int i = 0; i < args.size(); i++) {
             String a = args.get(i);
@@ -65,10 +64,6 @@ public final class Builder {
                 case "--readable" -> readable = true;
                 case "--no-check" -> noCheck = true;
                 case "--skript" -> skriptFlag = true;
-                case "--model" -> {
-                    if (++i >= args.size()) throw new IllegalArgumentException("--model needs cube, cylinder or circle");
-                    model = args.get(i);
-                }
                 default -> {
                     if (a.startsWith("-")) {
                         System.err.println("unknown option: " + a);
@@ -94,8 +89,7 @@ public final class Builder {
                 file.obfuscate() && !readable,
                 file.check() && !noCheck,
                 file.skript() || skriptFlag,
-                file.remap(),
-                model == null ? file.model() : model);
+                file.remap());
 
         Project project = Project.load(dir);
         Forge forge = new Forge(project, System.out::println, settings);

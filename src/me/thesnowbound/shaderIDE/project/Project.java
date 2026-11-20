@@ -13,7 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 public final class Project {
-    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines) {
+    // model is the shape of the item this effect is drawn on: cube, cylinder or circle
+    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model) {
+        public Effect(String id, String file, int alpha, String item, Map<String, String> defines) {
+            this(id, file, alpha, item, defines, "cylinder");
+        }
+
+        public Effect {
+            if (!me.thesnowbound.shaderIDE.build.Models.SHAPES.contains(model)) {
+                throw new IllegalArgumentException("effect " + id + ": model must be cube, cylinder or circle, not \"" + model + "\"");
+            }
+        }
     }
 
     public final Path dir;
@@ -52,8 +62,9 @@ public final class Project {
                 if (e.get("defines") instanceof Map<?, ?> d) d.forEach((k, v) -> defs.put(k.toString(), String.valueOf(v)));
                 Object alpha = e.get("alpha");
                 if (!(alpha instanceof Number)) throw new IllegalArgumentException("effect " + e.get("id") + " is missing \"alpha\"");
+                String model = e.get("model") == null ? "cylinder" : String.valueOf(e.get("model"));
                 p.effects.add(new Effect(String.valueOf(e.get("id")), String.valueOf(e.get("file")), ((Number) alpha).intValue(),
-                        String.valueOf(e.get("item")), defs));
+                        String.valueOf(e.get("item")), defs, model));
             }
         }
         return p;
@@ -86,6 +97,7 @@ public final class Project {
             m.put("file", e.file);
             m.put("alpha", e.alpha);
             m.put("item", e.item);
+            m.put("model", e.model);
             if (!e.defines.isEmpty()) m.put("defines", new LinkedHashMap<>(e.defines));
             list.add(m);
         }
