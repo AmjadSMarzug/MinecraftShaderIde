@@ -13,10 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 public final class Project {
-    // model is the shape of the item this effect is drawn on: cube, cylinder or circle
-    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model) {
+    // model is the shape of the item this effect is drawn on: cube, cylinder or circle.
+    // obfuscate says whether this effect's names and code get scrambled in a build (build.json can turn it off for all)
+    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model, boolean obfuscate) {
         public Effect(String id, String file, int alpha, String item, Map<String, String> defines) {
-            this(id, file, alpha, item, defines, "cylinder");
+            this(id, file, alpha, item, defines, "cylinder", true);
+        }
+
+        public Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model) {
+            this(id, file, alpha, item, defines, model, true);
         }
 
         public Effect {
@@ -63,8 +68,11 @@ public final class Project {
                 Object alpha = e.get("alpha");
                 if (!(alpha instanceof Number)) throw new IllegalArgumentException("effect " + e.get("id") + " is missing \"alpha\"");
                 String model = e.get("model") == null ? "cylinder" : String.valueOf(e.get("model"));
+                if (e.get("obfuscate") != null && !(e.get("obfuscate") instanceof Boolean))
+                    throw new IllegalArgumentException("effect " + e.get("id") + ": obfuscate must be true or false");
+                boolean obfuscate = !Boolean.FALSE.equals(e.get("obfuscate"));
                 p.effects.add(new Effect(String.valueOf(e.get("id")), String.valueOf(e.get("file")), ((Number) alpha).intValue(),
-                        String.valueOf(e.get("item")), defs, model));
+                        String.valueOf(e.get("item")), defs, model, obfuscate));
             }
         }
         return p;
@@ -98,6 +106,7 @@ public final class Project {
             m.put("alpha", e.alpha);
             m.put("item", e.item);
             m.put("model", e.model);
+            m.put("obfuscate", e.obfuscate);
             if (!e.defines.isEmpty()) m.put("defines", new LinkedHashMap<>(e.defines));
             list.add(m);
         }

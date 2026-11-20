@@ -94,10 +94,12 @@ public final class Forge {
             float scale = Obfuscator.scale(raw);
             shapes.put(e.id(), new float[]{box[0] * scale, box[1] * scale, box[2] * scale});
             String src = Obfuscator.withoutShape(raw);
-            Result r = ob.compile(e.id(), src, e.defines(), obfuscate);
-            effectNames.put(e.id(), new java.util.LinkedHashMap<String, Object>(Map.of("kind", r.kind(), "entry", String.valueOf(r.entry()), "names", new java.util.TreeMap<>(r.renames()))));
+            // an effect is scrambled only when the build and the effect both ask for it
+            boolean own = obfuscate && e.obfuscate();
+            Result r = ob.compile(e.id(), src, e.defines(), own);
+            if (own) effectNames.put(e.id(), new java.util.LinkedHashMap<String, Object>(Map.of("kind", r.kind(), "entry", String.valueOf(r.entry()), "names", new java.util.TreeMap<>(r.renames()))));
             body.append(r.code()).append('\n');
-            if (obfuscate) body.append(ob.decoys(4));
+            if (own) body.append(ob.decoys(4));
             dispatch.append("if(abs(skyAlpha-").append(e.alpha()).append(".0)<0.5){");
             // objects and surfaces both need the cube worked out, and both get placed rather than worn as a sky
             if (r.kind().equals("object")) {
@@ -141,15 +143,16 @@ public final class Forge {
         }
         writeAssets(out);
         writeMeta(out);
+        Path remapFile = project.dir.resolve("build").resolve(project.name + ".remap.json");
+        if (!(obfuscate && config.remap())) Files.deleteIfExists(remapFile); // a stale map would mislead
         if (obfuscate && config.remap()) {
             Map<String, Object> remap = new java.util.LinkedHashMap<>();
             remap.put("tool", TOOL + " " + VERSION);
             remap.put("project", project.name);
             remap.put("effects", effectNames);
             remap.put("wrapper", new java.util.TreeMap<>(ob.wrapperRenames()));
-            Path file = project.dir.resolve("build").resolve(project.name + ".remap.json");
-            write(file, remap);
-            log.accept("wrote " + file + " so the names can be put back");
+            write(remapFile, remap);
+            log.accept("wrote " + remapFile + " so the names can be put back");
         }
 
         if (check) verify(out);
