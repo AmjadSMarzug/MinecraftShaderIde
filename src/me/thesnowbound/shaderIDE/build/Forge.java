@@ -95,11 +95,11 @@ public final class Forge {
             shapes.put(e.id(), new float[]{box[0] * scale, box[1] * scale, box[2] * scale});
             String src = Obfuscator.withoutShape(raw);
             // an effect is scrambled only when the build and the effect both ask for it
-            boolean own = obfuscate && e.obfuscate();
-            Result r = ob.compile(e.id(), src, e.defines(), own);
-            if (own) effectNames.put(e.id(), new java.util.LinkedHashMap<String, Object>(Map.of("kind", r.kind(), "entry", String.valueOf(r.entry()), "names", new java.util.TreeMap<>(r.renames()))));
+            me.thesnowbound.shaderIDE.project.Obfuscation style = obfuscate ? e.obfuscation() : me.thesnowbound.shaderIDE.project.Obfuscation.readable();
+            Result r = ob.compile(e.id(), src, e.defines(), style);
+            if (style.rename()) effectNames.put(e.id(), new java.util.LinkedHashMap<String, Object>(Map.of("kind", r.kind(), "entry", String.valueOf(r.entry()), "names", new java.util.TreeMap<>(r.renames()))));
             body.append(r.code()).append('\n');
-            if (own) body.append(ob.decoys(4));
+            if (style.decoys() > 0) body.append(ob.decoys(style.decoys()));
             dispatch.append("if(abs(skyAlpha-").append(e.alpha()).append(".0)<0.5){");
             // objects and surfaces both need the cube worked out, and both get placed rather than worn as a sky
             if (r.kind().equals("object")) {
@@ -120,11 +120,14 @@ public final class Forge {
             }
             log.accept("compiled " + e.id());
         }
+        // the wrapper code is scrambled for the whole pack when any effect asks for it
+        boolean wrapper = obfuscate && project.effects.stream().anyMatch(x -> x.obfuscation().wrapper());
         String frame = "bool drawSky(vec4 texel,vec3 viewPos,vec2 atlasPx,float skyTime,out vec4 skyColor){"
-                + "float skyAlpha=texel.a*255.0;vec3 skyDir=normalize(viewPos);" + (obfuscate ? ob.decoyBranch("viewPos", "skyTime", "skyColor") : "")
+                + "float skyAlpha=texel.a*255.0;vec3 skyDir=normalize(viewPos);" + (wrapper ? ob.decoyBranch("viewPos", "skyTime", "skyColor") : "")
                 + (objects.isEmpty() ? "" : OBJECT_FRAME) + (materials.isEmpty() ? "" : MATERIAL_FRAME) + (skies ? INTRO_FRAME : "")
                 + dispatch + "return false;}";
-        String sky = "float intro=1.0;\n" + (obfuscate ? ob.seal(body.toString()) : body) + frame;
+        // the numbers hidden by the styles get their pool written here, frame included
+        String sky = "float intro=1.0;\n" + ob.seal(body + frame);
         java.util.Set<String> wrapperNames = new java.util.HashSet<>(Obfuscator.declared("float intro=1.0;\n" + frame));
         wrapperNames.addAll(java.util.List.of("drawSky", "intro", "texel", "skyColor", "color"));
 
@@ -136,7 +139,7 @@ public final class Forge {
             for (String f : t.files()) {
                 String text = resource("/tiers/" + t.name() + "/" + f);
                 if (f.endsWith(".fsh")) text = text.replace("//%SKY%", sky);
-                if (f.endsWith(".fsh") && obfuscate) text = ob.scrub(text, wrapperNames);
+                if (f.endsWith(".fsh") && wrapper) text = ob.scrub(text, wrapperNames);
                 if (f.endsWith(".fsh") || f.endsWith(".vsh")) text = stamp(text);
                 Files.writeString(core.resolve(f), text, StandardCharsets.UTF_8);
             }

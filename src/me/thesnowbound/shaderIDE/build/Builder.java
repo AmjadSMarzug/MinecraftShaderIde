@@ -27,8 +27,11 @@ public final class Builder {
             build.json in the project folder sets the defaults for these:
               {"obfuscate": true, "check": true, "skript": false, "remap": true}
             The command line overrides it. "remap" writes <name>.remap.json next to the pack when obfuscating.
-            Each effect in project.json sets its own "model" ("cube", "cylinder" or "circle") and "obfuscate" (true or false).
-            An effect is scrambled only when build.json and the effect both say so.
+            Each effect in project.json sets its own "model" ("cube", "cylinder" or "circle") and "obfuscation":
+              "lite" (default): renames and strips comments and spacing
+              "max": also hides the numbers, adds decoy code and scrambles the wrapper
+              or an object: {"style": "max", "decoys": 6, "numbers": false} to change any part
+            An effect is scrambled only when build.json and the effect both allow it.
             """;
 
     private Builder() {

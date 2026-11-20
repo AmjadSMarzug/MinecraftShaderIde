@@ -14,14 +14,15 @@ import java.util.Map;
 
 public final class Project {
     // model is the shape of the item this effect is drawn on: cube, cylinder or circle.
-    // obfuscate says whether this effect's names and code get scrambled in a build (build.json can turn it off for all)
-    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model, boolean obfuscate) {
+    // obfuscation says how this effect is scrambled in a build (lite by default, build.json can turn it off for all)
+    public record Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model,
+                         me.thesnowbound.shaderIDE.project.Obfuscation obfuscation) {
         public Effect(String id, String file, int alpha, String item, Map<String, String> defines) {
-            this(id, file, alpha, item, defines, "cylinder", true);
+            this(id, file, alpha, item, defines, "cylinder", Obfuscation.lite());
         }
 
         public Effect(String id, String file, int alpha, String item, Map<String, String> defines, String model) {
-            this(id, file, alpha, item, defines, model, true);
+            this(id, file, alpha, item, defines, model, Obfuscation.lite());
         }
 
         public Effect {
@@ -68,14 +69,21 @@ public final class Project {
                 Object alpha = e.get("alpha");
                 if (!(alpha instanceof Number)) throw new IllegalArgumentException("effect " + e.get("id") + " is missing \"alpha\"");
                 String model = e.get("model") == null ? "cylinder" : String.valueOf(e.get("model"));
-                if (e.get("obfuscate") != null && !(e.get("obfuscate") instanceof Boolean))
-                    throw new IllegalArgumentException("effect " + e.get("id") + ": obfuscate must be true or false");
-                boolean obfuscate = !Boolean.FALSE.equals(e.get("obfuscate"));
-                p.effects.add(new Effect(String.valueOf(e.get("id")), String.valueOf(e.get("file")), ((Number) alpha).intValue(),
-                        String.valueOf(e.get("item")), defs, model, obfuscate));
+                String id = String.valueOf(e.get("id"));
+                Obfuscation obfuscation = Obfuscation.parse(e.get("obfuscation") != null ? e.get("obfuscation") : legacy(e.get("obfuscate")), id);
+                p.effects.add(new Effect(id, String.valueOf(e.get("file")), ((Number) alpha).intValue(),
+                        String.valueOf(e.get("item")), defs, model, obfuscation));
             }
         }
         return p;
+    }
+
+    // project files from before the styles had "obfuscate": true (full scrambling) or false (none)
+    private static Object legacy(Object obfuscate) {
+        if (obfuscate == null) return null;
+        if (Boolean.TRUE.equals(obfuscate)) return Map.of("style", "max");
+        if (Boolean.FALSE.equals(obfuscate)) return Map.of("style", "lite", "rename", false, "strip", false);
+        throw new IllegalArgumentException("obfuscate must be true or false");
     }
 
     public static Project create(Path dir, String name) throws IOException {
@@ -106,7 +114,7 @@ public final class Project {
             m.put("alpha", e.alpha);
             m.put("item", e.item);
             m.put("model", e.model);
-            m.put("obfuscate", e.obfuscate);
+            m.put("obfuscation", e.obfuscation.toMap());
             if (!e.defines.isEmpty()) m.put("defines", new LinkedHashMap<>(e.defines));
             list.add(m);
         }

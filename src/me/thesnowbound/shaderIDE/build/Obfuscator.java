@@ -188,7 +188,7 @@ public final class Obfuscator {
         }
     }
 
-    public Result compile(String id, String src, Map<String, String> defines, boolean obfuscate) {
+    public Result compile(String id, String src, Map<String, String> defines, me.thesnowbound.shaderIDE.project.Obfuscation style) {
         StringBuilder head = new StringBuilder();
         defines.forEach((k, v) -> head.append("#define ").append(k).append(' ').append(v).append('\n'));
         src = head + src;
@@ -202,7 +202,7 @@ public final class Obfuscator {
                     + ",  vec4 surface(vec2 uv, vec3 pos, vec3 normal, vec3 view, float time)"
                     + ",  vec4 material(vec4 texel, vec2 uv, vec3 normal, vec3 view, float time)  or  vec4 overlay(vec2 screen, vec3 dir, float time)");
         }
-        if (obfuscate) toks = tokenize(inline(toks, kind));
+        if (style.strip()) toks = tokenize(inline(toks, kind));
         names.clear();
         fields.clear();
         declarations(toks, names, fields);
@@ -211,8 +211,8 @@ public final class Obfuscator {
         Set<String> all = new java.util.TreeSet<>(names);
         all.addAll(fields);
         // a local called "mix" or "length" is renamed on its own, but the built-in of that name keeps working everywhere else
-        for (String n : all) if (!BUILTINS.contains(n)) map.put(n, obfuscate ? freshName() : prefix + n);
-        return new Result(rename(toks, map, fields, obfuscate), map.get(kind), kind, Map.copyOf(map));
+        for (String n : all) if (!BUILTINS.contains(n)) map.put(n, style.rename() ? freshName() : prefix + n);
+        return new Result(rename(toks, map, fields, style.strip(), style.numbers()), map.get(kind), kind, Map.copyOf(map));
     }
 
     // text of the nearest token before (step -1) or after (step 1) index from, skipping whitespace and comments
@@ -229,7 +229,7 @@ public final class Obfuscator {
         return (prev.endsWith("+") && next.startsWith("+")) || (prev.endsWith("-") && next.startsWith("-"));
     }
 
-    private String rename(List<Token> toks, Map<String, String> map, Set<String> fields, boolean minify) {
+    private String rename(List<Token> toks, Map<String, String> map, Set<String> fields, boolean minify, boolean numbers) {
         StringBuilder out = new StringBuilder();
         String prevSig = "";
         int depth = 0;
@@ -242,7 +242,7 @@ public final class Obfuscator {
             else if (t.text().equals(";")) inConst = false;
             // numbers inside functions go into one shared array. globals and consts have to stay literal,
             // GLSL wants constant expressions there and an array lookup doesn't count
-            if (minify && t.kind().equals("num") && depth > 0 && !inConst && FLOAT.matcher(t.text()).matches()) {
+            if (minify && numbers && t.kind().equals("num") && depth > 0 && !inConst && FLOAT.matcher(t.text()).matches()) {
                 out.append('\u0000').append(pool.computeIfAbsent(t.text(), k -> pool.size())).append('\u0000');
                 prevSig = t.text();
                 continue;
@@ -391,7 +391,7 @@ public final class Obfuscator {
                     + "*" + a + "*(3.0-2.0*" + a + ")+sin(" + c + "*" + x + ");}\n");
             decoyUses.add(flat ? name + "(%P.xy)" : name + "(%P,%T).y");
         }
-        return rename(tokenize(b.toString()), Map.of(), Set.of(), true);
+        return rename(tokenize(b.toString()), Map.of(), Set.of(), true, false);
     }
 
     // the branch that keeps the decoys alive. time is never below zero in game, but nothing can prove that from the code
