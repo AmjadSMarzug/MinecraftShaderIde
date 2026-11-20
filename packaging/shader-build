@@ -1,4 +1,0 @@
-#!/bin/sh
-# runs the Shader IDE command line builder, installed by packaging/install-builder.sh
-JAR="${SHADER_BUILD_JAR:-/usr/local/share/shader-build/shader-build.jar}"
-exec java -jar "$JAR" "$@"

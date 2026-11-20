@@ -49,8 +49,8 @@ mkdir -p out/builder/me/thesnowbound/shaderIDE && cp -r out/classes/me out/build
 rm -rf out/builder/me/thesnowbound/shaderIDE/ui out/builder/me/thesnowbound/shaderIDE/editor out/builder/me/thesnowbound/shaderIDE/preview out/builder/me/thesnowbound/shaderIDE/learn out/builder/me/thesnowbound/shaderIDE/discord out/builder/me/thesnowbound/shaderIDE/*.class
 cp -r out/classes/tiers out/classes/stubs out/builder/ 2>/dev/null
 printf 'Main-Class: me.thesnowbound.shaderIDE.build.Builder\n' > out/builder-manifest.txt
-jar cfm out/dist/shader-build.jar out/builder-manifest.txt -C out/builder .
-echo "built out/dist/shader-build.jar"
+jar cfm out/shader-build.jar out/builder-manifest.txt -C out/builder .
+echo "built the shader-build jar"
 
 # a self contained app with its own Java for this platform, packed up for the GitHub release
 VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/me/thesnowbound/shaderIDE/build/Forge.java | cut -d'"' -f2)}
@@ -84,3 +84,17 @@ if [ "$(uname -s)" = Linux ] && command -v rpmbuild >/dev/null 2>&1; then
     cp out/rpm/*.rpm out/dist/
     echo "built out/dist/$(cd out/dist && ls *.rpm)"
 fi
+
+# the command line builder as one download for every OS: the jar runs anywhere, and the installers
+# cover Linux, Mac and Windows. only the Linux job packs it, so the release gets one copy
+case "$OS" in
+    linux-*)
+        CLI=Shader-Build-$VERSION-cli
+        rm -rf out/cli && mkdir -p out/cli/$CLI
+        cp out/shader-build.jar packaging/cli/* out/cli/$CLI/
+        chmod +x out/cli/$CLI/*.sh
+        python3 -c "import shutil; shutil.make_archive('out/dist/$CLI', 'zip', 'out/cli', '$CLI')"
+        tar -czf "out/dist/$CLI.tar.gz" -C out/cli "$CLI"
+        echo "built out/dist/$CLI.zip and out/dist/$CLI.tar.gz"
+        ;;
+esac
