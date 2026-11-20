@@ -45,6 +45,8 @@ public final class Forge {
     private final java.util.Set<String> materials = new java.util.HashSet<>();
     private final java.util.Set<String> overlays = new java.util.HashSet<>();
     private final Map<String, float[]> shapes = new java.util.HashMap<>();
+    private final BuildConfig config;
+    private final Map<String, Object> effectNames = new java.util.LinkedHashMap<>();
 
     // works out where the item's cube is from how the view position and texture position change across the screen,
     // then gives the object effects a ray that starts on the cube's surface in -1..1 box space
@@ -65,8 +67,13 @@ public final class Forge {
             + "float iturn=acos(clamp((3.0*imax-1.0)*0.5,-1.0,1.0));float introNow=clamp(1.0-(iturn-0.035)/0.6631317,0.0,1.0);";
 
     public Forge(Project project, Consumer<String> log) {
+        this(project, log, BuildConfig.read(project.dir));
+    }
+
+    public Forge(Project project, Consumer<String> log, BuildConfig config) {
         this.project = project;
         this.log = log;
+        this.config = config;
     }
 
     public Path writeSkript(Path dir) throws IOException {
@@ -88,6 +95,7 @@ public final class Forge {
             shapes.put(e.id(), new float[]{box[0] * scale, box[1] * scale, box[2] * scale});
             String src = Obfuscator.withoutShape(raw);
             Result r = ob.compile(e.id(), src, e.defines(), obfuscate);
+            effectNames.put(e.id(), new java.util.LinkedHashMap<String, Object>(Map.of("kind", r.kind(), "entry", String.valueOf(r.entry()), "names", new java.util.TreeMap<>(r.renames()))));
             body.append(r.code()).append('\n');
             if (obfuscate) body.append(ob.decoys(4));
             dispatch.append("if(abs(skyAlpha-").append(e.alpha()).append(".0)<0.5){");
@@ -133,6 +141,16 @@ public final class Forge {
         }
         writeAssets(out);
         writeMeta(out);
+        if (obfuscate && config.remap()) {
+            Map<String, Object> remap = new java.util.LinkedHashMap<>();
+            remap.put("tool", TOOL + " " + VERSION);
+            remap.put("project", project.name);
+            remap.put("effects", effectNames);
+            remap.put("wrapper", new java.util.TreeMap<>(ob.wrapperRenames()));
+            Path file = project.dir.resolve("build").resolve(project.name + ".remap.json");
+            write(file, remap);
+            log.accept("wrote " + file + " so the names can be put back");
+        }
 
         if (check) verify(out);
 
@@ -174,7 +192,7 @@ public final class Forge {
                 }
                 ImageIO.write(img, "png", tex.toFile());
                 write(assets.resolve("models/item/" + e.item() + ".json"),
-                        overlays.contains(e.id()) ? overlayModel(ref) : cubeModel(ref, shapes.getOrDefault(e.id(), new float[]{1f, 1f, 1f})));
+                        overlays.contains(e.id()) ? overlayModel(ref) : Models.sky(config.model(), ref, shapes.getOrDefault(e.id(), new float[]{1f, 1f, 1f})));
             }
 
             Map<String, Object> tint = new LinkedHashMap<>();

@@ -212,7 +212,7 @@ public final class Obfuscator {
         all.addAll(fields);
         // a local called "mix" or "length" is renamed on its own, but the built-in of that name keeps working everywhere else
         for (String n : all) if (!BUILTINS.contains(n)) map.put(n, obfuscate ? freshName() : prefix + n);
-        return new Result(rename(toks, map, fields, obfuscate), map.get(kind), kind);
+        return new Result(rename(toks, map, fields, obfuscate), map.get(kind), kind, Map.copyOf(map));
     }
 
     // text of the nearest token before (step -1) or after (step 1) index from, skipping whitespace and comments
@@ -402,6 +402,11 @@ public final class Obfuscator {
     }
 
     // Shader IDE's own wrapper code gets the same treatment as the effects, with one set of names for every version
+    // the names given to Shader IDE's own wrapper code, for the remap file
+    public Map<String, String> wrapperRenames() {
+        return new HashMap<>(wrapper);
+    }
+
     public String scrub(String text, Set<String> names) {
         StringBuilder out = new StringBuilder();
         String prev = "";

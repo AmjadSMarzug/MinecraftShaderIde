@@ -11,5 +11,5 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static me.thesnowbound.shaderIDE.build.Obfuscator.*;
 
-public record Result(String code, String entry, String kind) {
+public record Result(String code, String entry, String kind, Map<String, String> renames) {
 }
