@@ -42,6 +42,16 @@ printf 'Main-Class: me.thesnowbound.shaderIDE.Main\nMulti-Release: true\n' > out
 jar cfm "out/dist/Shader IDE.jar" out/manifest.txt -C out/classes .
 echo "built out/dist/Shader IDE.jar"
 
+# the command line builder: only the packages it needs, so there's no LWJGL or editor in it
+rm -rf out/builder && mkdir -p out/builder
+for d in build library project util presets; do cp -r out/classes/me/thesnowbound/shaderIDE/$d out/builder/ 2>/dev/null; done
+mkdir -p out/builder/me/thesnowbound/shaderIDE && cp -r out/classes/me out/builder/ 2>/dev/null
+rm -rf out/builder/me/thesnowbound/shaderIDE/ui out/builder/me/thesnowbound/shaderIDE/editor out/builder/me/thesnowbound/shaderIDE/preview out/builder/me/thesnowbound/shaderIDE/learn out/builder/me/thesnowbound/shaderIDE/discord out/builder/me/thesnowbound/shaderIDE/*.class
+cp -r out/classes/tiers out/classes/stubs out/builder/ 2>/dev/null
+printf 'Main-Class: me.thesnowbound.shaderIDE.build.Builder\n' > out/builder-manifest.txt
+jar cfm out/dist/shader-build.jar out/builder-manifest.txt -C out/builder .
+echo "built out/dist/shader-build.jar"
+
 # a self contained app with its own Java for this platform, packed up for the GitHub release
 VERSION=${VERSION:-$(grep -o 'VERSION = "[^"]*"' src/me/thesnowbound/shaderIDE/build/Forge.java | cut -d'"' -f2)}
 rm -rf out/jpkg out/app
