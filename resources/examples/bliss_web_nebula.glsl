@@ -1,7 +1,11 @@
 // Web Nebula: a nebula with a web of glowing cells and drifting orbs.
-// recovered from the Bliss SMP Pack 6 (26.3). the build had scrambled the names; the names here were chosen from what the code does.
+// Unobfuscated from the Bliss SMP Pack 6 (26.3 item shader).
+// Names were chosen from what the code does. Comments added by hand.
+
+// Constants: the scale of the planar warp, and how many orbs are drawn.
 #define planeScale 7.5
 #define orbCount 48
+// The nebula's seven colours, from dark ember up to cream. The whole sky reads from this one struct.
 struct ColourPalette {
     vec3 ember;
     vec3 amber;
@@ -12,24 +16,29 @@ struct ColourPalette {
     vec3 cream;
 }
 ;
+// Returns the palette above.
 ColourPalette nebulaPalette() {
     return ColourPalette(vec3(0.46,0.31,0.09),vec3(0.62,0.44,0.15),vec3(0.86,0.66,0.27),vec3(1.0,0.96,0.72),vec3(1.0,0.82,0.36),vec3(0.97,0.7,0.26),vec3(1.0,0.98,0.88));
 }
+// Random vec3 from a vec3 position. Places a random point inside every Voronoi cell.
 vec3 hash33(vec3 p) {
     return fract(sin(vec3(dot(p,vec3(127.1,311.7,74.7)),dot(p,vec3(269.5,183.3,246.1)),dot(p,vec3(113.5,271.9,124.6))))*43758.55);
 }
+// 3D value noise: smooth random values from a hashed grid.
 float valueNoise3(vec3 p) {
     vec3 cell=floor(p);
     vec3 fade=fract(p);
     fade=fade*fade*(3.0-2.0*fade);
     return mix(mix(mix(float((fract(sin(dot(vec3(cell+vec3(0,0,0)),vec3(12.9898,78.233,37.719)))*43758.55))),float((fract(sin(dot(vec3(cell+vec3(1,0,0)),vec3(12.9898,78.233,37.719)))*43758.55))),fade . x),mix(float((fract(sin(dot(vec3(cell+vec3(0,1,0)),vec3(12.9898,78.233,37.719)))*43758.55))),float((fract(sin(dot(vec3(cell+vec3(1,1,0)),vec3(12.9898,78.23301,37.719)))*43758.55))),fade . x),fade . y),mix(mix(float((fract(sin(dot(vec3(cell+vec3(0,0,1)),vec3(12.9898,78.23301,37.719)))*43758.55))),float((fract(sin(dot(vec3(cell+vec3(1,0,1)),vec3(12.9898,78.233,37.719)))*43758.55))),fade . x),mix(float((fract(sin(dot(vec3(cell+vec3(0,1,1)),vec3(12.9898,78.233,37.719)))*43758.55))),float((fract(sin(dot(vec3(cell+vec3(1,1,1)),vec3(12.9898,78.233,37.719)))*43758.54))),fade . x),fade . y),fade . z);
 }
+// Base cloud colour: two layers of noise mix the palette's dark and gold tones.
 vec3 nebulaBase(vec3 dir,float time,ColourPalette palette) {
     float n1=valueNoise3(dir*2.4+valueNoise3(dir*4.8+time*0.12)*3.0+time*vec3(0.02,-0.05,0.01));
     float n2=valueNoise3(dir*6.0+valueNoise3(dir*3.5-time*0.2)*1.6+time*vec3(0.05,-0.1,0.03));
     vec3 colour=mix(mix(palette . ember,palette . amber,n1),palette . gold,clamp(n2*n1*1.1,0.0,1.0));
     return colour;
 }
+// Glowing orbs: orbCount orbs spread over a sphere. Each is a ring with a halo, and each pulses at its own time.
 vec3 sparkOrbs(vec3 dir,float time,ColourPalette palette) {
     vec3 glow=vec3(0.0);
     float phase=mod(time*12.5,999.9999)*0.005;
@@ -57,6 +66,8 @@ vec3 sparkOrbs(vec3 dir,float time,ColourPalette palette) {
     }
     return glow;
 }
+// Voronoi cells: returns the distance to the nearest and second-nearest cell centre.
+// The gap between those two distances is what draws the web.
 vec2 voronoi2(vec3 p) {
     vec3 cell=floor(p);
     vec3 local=fract(p);
@@ -75,6 +86,7 @@ vec2 voronoi2(vec3 p) {
     }
     return vec2(sqrt(d1),sqrt(d2));
 }
+// The web: bright lines along the cell borders, where the nearest and second-nearest distances meet, with a slow shimmer.
 vec3 cellGlow(vec3 dir,vec3 base,float time,ColourPalette palette) {
     vec3 p=dir*planeScale;
     p . x+=sin(p . y+time*0.9)*0.14;
@@ -91,6 +103,7 @@ vec3 cellGlow(vec3 dir,vec3 base,float time,ColourPalette palette) {
     tint=mix(tint,vec3(1.0),line*line*0.6);
     return mix(base,tint,line)+rim*glow;
 }
+// A slow shimmering band of light across the nebula.
 float shimmer(vec3 dir,float time) {
     vec3 drift=time*vec3(-0.05,0.085,-0.035);
     float n1=valueNoise3(dir*14.0+drift);
@@ -102,6 +115,7 @@ float shimmer(vec3 dir,float time) {
     float mask=sin(valueNoise3(dir*10.0+time*0.4)*3.14159)*0.5+0.5;
     return (p1*1.1+p2*0.9+p3*0.45)*mask;
 }
+// Soft cloud bands from three layers of noise at different scales.
 float cloudBands(vec3 dir,float time) {
     vec3 p=dir*vec3(1.6,2.6,1.6);
     float t=time*0.12;
@@ -112,6 +126,7 @@ float cloudBands(vec3 dir,float time) {
     float fade=0.55+0.45*valueNoise3(dir*vec3(5.0,13.0,5.0)+time*vec3(0.18,0.05,0.14));
     return bands*fade;
 }
+// Combines the layers in order: base, shimmer, cloud bands, orbs, and the web on top.
 vec3 nebulaSky(vec3 dir,ColourPalette palette,float time) {
     vec3 colour=nebulaBase(dir,time,palette);
     float shimmerAmount=shimmer(dir,time);
@@ -122,6 +137,7 @@ vec3 nebulaSky(vec3 dir,ColourPalette palette,float time) {
     colour=cellGlow(dir,colour,time,palette);
     return clamp(colour,0.0,1.0);
 }
+// Entry point called by the game for every sky pixel.
 vec3 sky(vec3 dir,float time) {
     return nebulaSky(dir,nebulaPalette(),time);
 }

@@ -1,6 +1,10 @@
 // Plasma Orb: a pulsing plasma sphere with a gold glow.
-// recovered from the Bliss SMP Pack 6 (26.3). the build had scrambled the names; the names here were chosen from what the code does.
+// Unobfuscated from the Bliss SMP Pack 6 (26.3 item shader).
+// Names were chosen from what the code does. Comments added by hand.
+
+// The gold colour of the glow around the orb.
 const vec3 glowColour=vec3(1.0,0.855,0.455);
+// Integer hash: scrambles the bits of a uint so neighbouring cells look unrelated.
 uint hashUint(uint h) {
     h ^=h>>16u;
     h*=2146121005u;
@@ -9,10 +13,12 @@ uint hashUint(uint h) {
     h ^=h>>16u;
     return h;
 }
+// Hashes an integer cell to a value between 0 and 1.
 float hashCell(vec3 p) {
     uvec3 cellBits=uvec3(ivec3(p));
     return float(hashUint(cellBits . x ^ hashUint(cellBits . y ^ hashUint(cellBits . z))))/4.294967e+09;
 }
+// Smooth noise from the cell hashes, squared for stronger contrast.
 float noiseSquared(vec3 p) {
     vec3 cell=floor(p);
     vec3 fade=fract(p);
@@ -20,10 +26,13 @@ float noiseSquared(vec3 p) {
     float n=mix(mix(mix(hashCell(cell),hashCell(cell+vec3(1.0,0.0,0.0)),fade . x),mix(hashCell(cell+vec3(0.0,1.0,0.0)),hashCell(cell+vec3(1.0,1.0,0.0)),fade . x),fade . y),mix(mix(hashCell(cell+vec3(0.0,0.0,1.0)),hashCell(cell+vec3(1.0,0.0,1.0)),fade . x),mix(hashCell(cell+vec3(0.0,1.0,1.0)),hashCell(cell+vec3(1.0,1.0,1.0)),fade . x),fade . y),fade . z);
     return n*n;
 }
+// Converts hue, saturation and value to RGB. Used to colour the orb's surface.
 vec3 hsvToRgb(vec3 hsv) {
     vec3 rgb=abs(fract(hsv . xxx+vec3(1.0,2.0/3.0,1.0/3.0))*6.0-3.0);
     return hsv . z*mix(vec3(1.0),clamp(rgb-1.0,0.0,1.0),hsv . y);
 }
+// Raymarches a sphere of radius 0.27 that pulses with time.
+// Hit pixels get a noise colour through hsvToRgb. Misses get a gold glow that fades with distance from the orb.
 vec4 object(vec3 origin,vec3 dir,float time) {
     float scaledTime=time/1200.0;
     float radius=0.27-sin(scaledTime*2000.0)*0.006;
