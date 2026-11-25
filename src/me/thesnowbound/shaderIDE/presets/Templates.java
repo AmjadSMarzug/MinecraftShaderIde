@@ -145,6 +145,7 @@ public final class Templates {
             new Example("bliss_web_violet", "Web Violet", "Sky", "a violet nebula with plumes, orbs and a cell web"),
             new Example("bliss_plasma_orb", "Plasma Orb", "Object", "a pulsing plasma sphere with a gold glow"),
             new Example("text_slime_drip", "Slime Drip Text", "Text", "green slime dripping down each letter"),
+            new Example("web_beat", "Web Beat", "Sky", "a cell web that fades in, holds, and fades out in a steady beat"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """
