@@ -75,12 +75,21 @@ public final class TextChat extends JPanel {
     // the font is read from the user's Minecraft jar when one was picked, otherwise the bundled font is used
     private void loadFont() {
         String saved = Preferences.userNodeForPackage(TextChat.class).get(FONT_JAR, "");
-        if (saved.isBlank()) return;
+        Path jar = saved.isBlank() ? TextFont.findGameJar() : Path.of(saved);
+        if (jar == null) {
+            status.setText("no Minecraft install found, using the bundled font. Use my Minecraft jar... to pick one");
+            return;
+        }
         try {
-            BufferedImage font = TextFont.fromJar(Path.of(saved));
-            if (font != null) canvas.setGlyphs(font);
+            BufferedImage font = TextFont.fromJar(jar);
+            if (font != null) {
+                canvas.setGlyphs(font);
+                status.setText("using the Minecraft font from " + jar.getFileName());
+            } else {
+                status.setText("that jar has no Minecraft font, using the bundled font");
+            }
         } catch (Exception e) {
-            status.setText("couldn't read that jar, using the bundled font");
+            status.setText("couldn't read " + jar.getFileName() + ", using the bundled font");
         }
     }
 

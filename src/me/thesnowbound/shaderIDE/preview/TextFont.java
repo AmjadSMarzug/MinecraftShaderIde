@@ -7,7 +7,12 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -19,6 +24,38 @@ public final class TextFont {
     static final int SIZE = 128;
 
     private TextFont() {
+    }
+
+    // looks for an installed game in the usual .minecraft folders, and returns the first version jar that has the font.
+    // the font is read from the player's own game files, the IDE never ships Mojang's font
+    public static Path findGameJar() {
+        List<Path> roots = new ArrayList<>();
+        String home = System.getProperty("user.home");
+        String appData = System.getenv("APPDATA");
+        roots.add(Path.of(home, ".minecraft", "versions"));
+        if (appData != null) roots.add(Path.of(appData, ".minecraft", "versions"));
+        roots.add(Path.of(home, "Library", "Application Support", "minecraft", "versions"));
+        for (Path root : roots) {
+            if (!Files.isDirectory(root)) continue;
+            try (Stream<Path> dirs = Files.list(root)) {
+                List<Path> jars = dirs.map(d -> d.resolve(d.getFileName() + ".jar")).filter(Files::isRegularFile)
+                        .sorted(Comparator.reverseOrder()).toList();
+                for (Path jar : jars) {
+                    if (fromJarQuietly(jar) != null) return jar;
+                }
+            } catch (IOException e) {
+                // an unreadable folder is skipped, the next one is tried
+            }
+        }
+        return null;
+    }
+
+    private static BufferedImage fromJarQuietly(Path jar) {
+        try {
+            return fromJar(jar);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     // the game's own ascii.png from a Minecraft jar, or null if the jar doesn't have it
