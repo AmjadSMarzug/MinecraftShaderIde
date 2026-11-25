@@ -268,8 +268,6 @@ public final class Main extends JFrame {
         panel.addTab("Log", logScroll);
         panel.setBackground(Fx.SIDE);
         panel.putClientProperty("JTabbedPane.tabHeight", 30);
-        // many open effects get arrows instead of an overflowing tab bar
-        tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         panel.putClientProperty("JTabbedPane.trailingComponent", toolActions(() -> toggle(consoleCard, this.middle)));
 
         right.setOpaque(false);
@@ -341,7 +339,13 @@ public final class Main extends JFrame {
         divider.setPreferredSize(new Dimension(17, 46));
         projectSide.add(divider);
         header.add(projectSide, BorderLayout.WEST);
-        header.add(effectBar, BorderLayout.CENTER);
+        // many open effects scroll sideways in the bar instead of running off the window
+        JScrollPane effectScroll = new JScrollPane(effectBar, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        effectScroll.setOpaque(false);
+        effectScroll.getViewport().setOpaque(false);
+        effectScroll.setBorder(BorderFactory.createEmptyBorder());
+        effectScroll.setMinimumSize(new Dimension());
+        header.add(effectScroll, BorderLayout.CENTER);
         header.add(editActions, BorderLayout.EAST);
         center.add(header, BorderLayout.NORTH);
         center.setBorder(BorderFactory.createEmptyBorder(0, 4, 10, 10));
