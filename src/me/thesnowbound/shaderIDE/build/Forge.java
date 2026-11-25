@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,9 @@ public final class Forge {
             new Tier("26_2", 88, 96, "overlay_26_2", List.of("item.vsh", "item.fsh")),
             new Tier("26_3", 97, 99, "overlay_26_3", List.of("item.vsh", "item.fsh")));
 
+    static final List<String> DECOY_NAMES = List.of("sky_palette", "warp_fold", "noise_cache", "ray_budget", "cloud_lod",
+            "haze_mix", "star_seed", "tone_curve", "dust_layer", "grain_tap", "aurora_band", "glint_mask", "wave_rig",
+            "ember_bank", "fog_ramp", "ring_plate", "shard_set", "pulse_grid", "veil_ops", "drift_table");
     static final Pattern INCLUDE = Pattern.compile("#(?:moj_import|include)\\s*<([^>]+)>");
 
     private final Project project;
@@ -146,6 +150,21 @@ public final class Forge {
         }
         writeAssets(out);
         writeMeta(out);
+        // decoy include files: nothing loads them, they only make the pack look like it has more to read
+        int decoyFiles = 0;
+        if (obfuscate) for (Project.Effect e : project.effects) decoyFiles = Math.max(decoyFiles, e.obfuscation().decoyFiles());
+        Random names = new Random(project.seed ^ System.nanoTime());
+        java.util.Set<String> used = new java.util.HashSet<>();
+        for (int i = 0; i < decoyFiles; i++) {
+            String name;
+            do {
+                name = DECOY_NAMES.get(names.nextInt(DECOY_NAMES.size())) + (names.nextBoolean() ? "" : "_" + Integer.toHexString(names.nextInt(0x1000)));
+            } while (!used.add(name));
+            Path file = out.resolve("assets/minecraft/shaders/include").resolve(name + ".glsl");
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, ob.decoyFile(), StandardCharsets.UTF_8);
+        }
+        if (decoyFiles > 0) log.accept("wrote " + decoyFiles + " decoy include files");
         Path remapFile = project.dir.resolve("build").resolve(project.name + ".remap.json");
         if (!(obfuscate && config.remap())) Files.deleteIfExists(remapFile); // a stale map would mislead
         if (obfuscate && config.remap()) {

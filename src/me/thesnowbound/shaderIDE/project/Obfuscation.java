@@ -6,29 +6,33 @@ import java.util.Map;
 
 // how one sky shader is scrambled in a build. "lite" renames and strips, "max" also hides the numbers,
 // adds decoy code and scrambles the wrapper. any of the parts can be changed on top of a style
-public record Obfuscation(String style, boolean rename, boolean strip, boolean numbers, int decoys, boolean wrapper) {
+public record Obfuscation(String style, boolean rename, boolean strip, boolean numbers, int decoys, boolean wrapper, int decoyFiles) {
     public static final List<String> STYLES = List.of("lite", "max");
-    static final List<String> KEYS = List.of("style", "rename", "strip", "numbers", "decoys", "wrapper");
+    static final List<String> KEYS = List.of("style", "rename", "strip", "numbers", "decoys", "wrapper", "decoyFiles");
     static final int MAX_DECOYS = 20;
+    static final int MAX_DECOY_FILES = 40;
 
     public Obfuscation {
         if (!STYLES.contains(style) && !style.equals("readable")) {
             throw new IllegalArgumentException("obfuscation style must be lite or max, not \"" + style + "\"");
         }
         if (decoys < 0 || decoys > MAX_DECOYS) throw new IllegalArgumentException("decoys must be 0 to " + MAX_DECOYS + ", not " + decoys);
+        if (decoyFiles < 0 || decoyFiles > MAX_DECOY_FILES) {
+            throw new IllegalArgumentException("decoyFiles must be 0 to " + MAX_DECOY_FILES + ", not " + decoyFiles);
+        }
     }
 
     public static Obfuscation lite() {
-        return new Obfuscation("lite", true, true, false, 0, false);
+        return new Obfuscation("lite", true, true, false, 0, false, 0);
     }
 
     public static Obfuscation max() {
-        return new Obfuscation("max", true, true, true, 4, true);
+        return new Obfuscation("max", true, true, true, 4, true, 6);
     }
 
     // nothing scrambled: the shader's own names and layout are kept
     public static Obfuscation readable() {
-        return new Obfuscation("readable", false, false, false, 0, false);
+        return new Obfuscation("readable", false, false, false, 0, false, 0);
     }
 
     // project.json accepts "lite", "max", or an object that starts from a style and changes any of its parts
@@ -43,7 +47,7 @@ public record Obfuscation(String style, boolean rename, boolean strip, boolean n
         return new Obfuscation(base.style(),
                 bool(m, "rename", base.rename(), effect), bool(m, "strip", base.strip(), effect),
                 bool(m, "numbers", base.numbers(), effect), decoys(m, base.decoys(), effect),
-                bool(m, "wrapper", base.wrapper(), effect));
+                bool(m, "wrapper", base.wrapper(), effect), decoyCount(m, "decoyFiles", base.decoyFiles(), MAX_DECOY_FILES, effect));
     }
 
     private static Obfuscation preset(String style, String effect) {
@@ -62,10 +66,14 @@ public record Obfuscation(String style, boolean rename, boolean strip, boolean n
     }
 
     private static int decoys(Map<?, ?> m, int fallback, String effect) {
-        Object v = m.get("decoys");
+        return decoyCount(m, "decoys", fallback, MAX_DECOYS, effect);
+    }
+
+    private static int decoyCount(Map<?, ?> m, String key, int fallback, int max, String effect) {
+        Object v = m.get(key);
         if (v == null) return fallback;
-        if (v instanceof Number n && n.doubleValue() == Math.rint(n.doubleValue())) return n.intValue();
-        throw new IllegalArgumentException("effect " + effect + ": \"decoys\" must be a whole number");
+        if (v instanceof Number n && n.doubleValue() == Math.rint(n.doubleValue()) && n.intValue() >= 0 && n.intValue() <= max) return n.intValue();
+        throw new IllegalArgumentException("effect " + effect + ": \"" + key + "\" must be a whole number from 0 to " + max);
     }
 
     public Map<String, Object> toMap() {
@@ -76,6 +84,7 @@ public record Obfuscation(String style, boolean rename, boolean strip, boolean n
         m.put("numbers", numbers);
         m.put("decoys", decoys);
         m.put("wrapper", wrapper);
+        m.put("decoyFiles", decoyFiles);
         return m;
     }
 }

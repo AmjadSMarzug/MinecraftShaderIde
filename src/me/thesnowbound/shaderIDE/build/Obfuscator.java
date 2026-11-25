@@ -402,6 +402,11 @@ public final class Obfuscator {
     }
 
     // Shader IDE's own wrapper code gets the same treatment as the effects, with one set of names for every version
+    // a whole include file of dead code: helpers and constants that nothing in the pack loads
+    public String decoyFile() {
+        return decoys(3 + rng.nextInt(3));
+    }
+
     // the names given to Shader IDE's own wrapper code, for the remap file
     public Map<String, String> wrapperRenames() {
         return new HashMap<>(wrapper);
