@@ -23,6 +23,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
@@ -264,11 +265,12 @@ public final class Home extends Reveal {
     private JPanel examplesPage() {
         JPanel page = page("Examples");
         JLabel sub = new JLabel("<html>Objects float inside the item, surfaces paint its faces, materials repaint an item's pixels, "
-                + "overlays cover the screen and skies surround the player. Click one to add it to your project.</html>");
+                + "overlays cover the screen, skies surround the player and text effects colour the letters. Click one to add it to your project.</html>");
         sub.setForeground(t.dim());
         page.add(pinned(sub));
         page.add(Box.createVerticalStrut(20));
-        String[][] kinds = {{"Object", "Objects"}, {"Surface", "Surfaces"}, {"Material", "Materials"}, {"Overlay", "Overlays"}, {"Sky", "Skies"}};
+        String[][] kinds = {{"Object", "Objects"}, {"Surface", "Surfaces"}, {"Material", "Materials"}, {"Overlay", "Overlays"}, {"Sky", "Skies"},
+                {"Text", "Text"}};
         for (String[] kind : kinds) {
             JPanel g = grid(3);
             for (Example ex : Templates.EXAMPLES) {
@@ -340,7 +342,8 @@ public final class Home extends Reveal {
     // its own list of sections on the left, and only the picked one on the right
     private JComponent settingsPage() {
         String[][] sections = {{"appearance", "\uE790", "Appearance"}, {"building", "\uE8F1", "Building"}, {"projects", "\uE8B7", "New projects"},
-                {"discord", "\uE8BD", "Discord"}, {"learning", "\uE736", "Learning"}, {"about", "\uE946", "About"}};
+                {"discord", "\uE8BD", "Discord"}, {"learning", "\uE736", "Learning"}, {"preview", "\uE8B9", "Text preview"},
+                {"about", "\uE946", "About"}};
         JPanel page = new JPanel(new BorderLayout(28, 0));
         page.setOpaque(false);
         page.setBorder(BorderFactory.createEmptyBorder(26, 30, 14, 14));
@@ -378,6 +381,7 @@ public final class Home extends Reveal {
                 case "projects" -> "Filled in for you every time you make a project.";
                 case "discord" -> "Your Discord status while Shader IDE is open.";
                 case "learning" -> "Lessons and how far along you are.";
+                case "preview" -> "Where the chat preview gets Minecraft's font from.";
                 default -> "How Shader IDE looks. Changes apply right away.";
             });
             blurb.setFont(blurb.getFont().deriveFont(15f));
@@ -413,6 +417,30 @@ public final class Home extends Reveal {
                     refresh();
                 });
                 body.add(setting("Lesson progress", Learn.finishedCount() + " of " + Learn.LESSONS.size() + " lessons marked done", reset));
+            }
+            case "preview" -> {
+                JLabel where = new JLabel(me.thesnowbound.shaderIDE.preview.TextChat.fontSource());
+                where.setFont(where.getFont().deriveFont(13f));
+                where.setForeground(t.dim());
+                JButton choose = Learn.secondary("Choose jar...");
+                JButton auto = Learn.secondary("Use automatic");
+                choose.addActionListener(e -> {
+                    String problem = me.thesnowbound.shaderIDE.preview.TextChat.choose(this);
+                    if (problem == null) return;
+                    if (!problem.isEmpty()) JOptionPane.showMessageDialog(this, problem, "Can't use that jar", JOptionPane.WARNING_MESSAGE);
+                    where.setText(me.thesnowbound.shaderIDE.preview.TextChat.fontSource());
+                });
+                auto.addActionListener(e -> {
+                    me.thesnowbound.shaderIDE.preview.TextChat.useAutomatic();
+                    where.setText(me.thesnowbound.shaderIDE.preview.TextChat.fontSource());
+                });
+                JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+                buttons.setOpaque(false);
+                buttons.add(choose);
+                buttons.add(auto);
+                body.add(setting("Minecraft jar", "The chat preview draws its letters from the font in this game jar, like minecraft-1.21.11-client.jar. Shader IDE never copies it", where));
+                body.add(Box.createVerticalStrut(8));
+                body.add(left(buttons));
             }
             case "about" -> {
                 JPanel about = aboutPage();
