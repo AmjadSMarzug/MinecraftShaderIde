@@ -26,6 +26,7 @@ public final class TextChat extends JPanel {
     private final TextCanvas canvas;
     private final JTextField words = new JTextField("Shader IDE", 24);
     private final JLabel status = new JLabel(" ");
+    private final JLabel font = new JLabel(" ");
     private final JButton jar = new JButton("Use my Minecraft jar...");
 
     public TextChat(String source) {
@@ -63,9 +64,48 @@ public final class TextChat extends JPanel {
         add(top, BorderLayout.NORTH);
         add(canvas, BorderLayout.CENTER);
         status.setFont(status.getFont().deriveFont(Font.PLAIN, 12f));
-        add(status, BorderLayout.SOUTH);
+        font.setFont(font.getFont().deriveFont(Font.PLAIN, 12f));
+        font.setForeground(Color.GRAY);
+        JPanel bottom = new JPanel(new BorderLayout());
+        bottom.add(status, BorderLayout.NORTH);
+        bottom.add(font, BorderLayout.SOUTH);
+        add(bottom, BorderLayout.SOUTH);
         // the game's chat is a flat box, so the canvas is drawn at the window's own rate
         new Timer(33, e -> canvas.render()).start();
+    }
+
+    // the jar picked in settings, or null for automatic
+    public static String savedJar() {
+        String saved = Preferences.userNodeForPackage(TextChat.class).get(FONT_JAR, "");
+        return saved.isBlank() ? null : saved;
+    }
+
+    // what the settings page shows: the picked jar, the automatic one, or the bundled font
+    public static String fontSource() {
+        String saved = savedJar();
+        if (saved != null) return saved;
+        Path found = TextFont.findGameJar();
+        return found != null ? found + " (found automatically)" : "none found, using the bundled font";
+    }
+
+    // stores the jar the user picked, after checking it really has the game's font
+    public static String choose(java.awt.Component parent) {
+        JFileChooser pick = new JFileChooser();
+        pick.setDialogTitle("Pick a Minecraft client jar, like minecraft-1.21.11-client.jar");
+        pick.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Minecraft jars", "jar"));
+        if (pick.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return null;
+        File file = pick.getSelectedFile();
+        try {
+            if (TextFont.fromJar(file.toPath()) == null) return "That jar has no Minecraft font in it";
+        } catch (java.io.IOException e) {
+            return "Couldn't read that jar";
+        }
+        Preferences.userNodeForPackage(TextChat.class).put(FONT_JAR, file.getAbsolutePath());
+        return "";
+    }
+
+    public static void useAutomatic() {
+        Preferences.userNodeForPackage(TextChat.class).remove(FONT_JAR);
     }
 
     public void setSource(String source) {
@@ -77,19 +117,19 @@ public final class TextChat extends JPanel {
         String saved = Preferences.userNodeForPackage(TextChat.class).get(FONT_JAR, "");
         Path jar = saved.isBlank() ? TextFont.findGameJar() : Path.of(saved);
         if (jar == null) {
-            status.setText("no Minecraft install found, using the bundled font. Use my Minecraft jar... to pick one");
+            font.setText("no Minecraft install found, using the bundled font. Use my Minecraft jar... to pick one");
             return;
         }
         try {
-            BufferedImage font = TextFont.fromJar(jar);
-            if (font != null) {
-                canvas.setGlyphs(font);
-                status.setText("using the Minecraft font from " + jar.getFileName());
+            BufferedImage glyphs = TextFont.fromJar(jar);
+            if (glyphs != null) {
+                canvas.setGlyphs(glyphs);
+                font.setText("using the Minecraft font from " + jar.getFileName());
             } else {
-                status.setText("that jar has no Minecraft font, using the bundled font");
+                font.setText("that jar has no Minecraft font, using the bundled font");
             }
         } catch (Exception e) {
-            status.setText("couldn't read " + jar.getFileName() + ", using the bundled font");
+            font.setText("couldn't read " + jar.getFileName() + ", using the bundled font");
         }
     }
 
@@ -100,7 +140,7 @@ public final class TextChat extends JPanel {
         File file = pick.getSelectedFile();
         Preferences.userNodeForPackage(TextChat.class).put(FONT_JAR, file.getAbsolutePath());
         loadFont();
-        status.setText("using the font from " + file.getName());
+        font.setText("using the font from " + file.getName());
     }
 
     // opens the chat box in its own window
