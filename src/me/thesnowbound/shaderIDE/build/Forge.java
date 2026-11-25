@@ -51,6 +51,7 @@ public final class Forge {
     private final Map<String, float[]> shapes = new java.util.HashMap<>();
     private final BuildConfig config;
     private final Map<String, Object> effectNames = new java.util.LinkedHashMap<>();
+    private final java.util.Set<String> skipped = new java.util.HashSet<>();
 
     // works out where the item's cube is from how the view position and texture position change across the screen,
     // then gives the object effects a ray that starts on the cube's surface in -1..1 box space
@@ -101,6 +102,13 @@ public final class Forge {
             // an effect is scrambled only when the build and the effect both ask for it
             me.thesnowbound.shaderIDE.project.Obfuscation style = obfuscate ? e.obfuscation() : me.thesnowbound.shaderIDE.project.Obfuscation.readable();
             Result r = ob.compile(e.id(), src, e.defines(), style);
+            if (r.kind().equals("text")) {
+                // a text effect is a plain glsl file like the others: it goes through the compiler, and its .glsl is kept
+                // in the build. the pack can't draw text effects yet, so it isn't written into the zip
+                verifyText(e, raw);
+                skipped.add(e.id());
+                continue;
+            }
             if (style.rename()) effectNames.put(e.id(), new java.util.LinkedHashMap<String, Object>(Map.of("kind", r.kind(), "entry", String.valueOf(r.entry()), "names", new java.util.TreeMap<>(r.renames()))));
             body.append(r.code()).append('\n');
             if (style.decoys() > 0) body.append(ob.decoys(style.decoys()));
@@ -193,9 +201,30 @@ public final class Forge {
         return text.substring(0, cut) + note + text.substring(cut);
     }
 
+    // compiles a text effect's own code as a fragment shader with a small main around it, and keeps the .glsl in the build
+    private void verifyText(Project.Effect e, String raw) throws IOException {
+        Path glslang = glslang();
+        Path dir = project.dir.resolve("build").resolve(project.name + "-text");
+        Files.createDirectories(dir);
+        Path kept = dir.resolve(e.id() + ".glsl");
+        Files.writeString(kept, raw, StandardCharsets.UTF_8);
+        String wrapped = "#version 330\n" + raw + "\nout vec4 fragColor;\nvoid main() { fragColor = text(mod(gl_FragCoord.xy, vec2(8.0)), vec2(8.0), 1.0); }\n";
+        Path check = dir.resolve(e.id() + ".check.frag");
+        Files.writeString(check, wrapped, StandardCharsets.UTF_8);
+        if (glslang == null) {
+            log.accept("text " + e.id() + " kept, but glslang isn't available so it wasn't checked");
+            return;
+        }
+        String errors = run(List.of(glslang.toString(), "-S", "frag", check.toString()));
+        Files.deleteIfExists(check);
+        if (errors != null) throw new IllegalStateException("text effect " + e.id() + " doesn't compile:\n" + errors);
+        log.accept("checked text " + e.id() + " -> " + kept);
+    }
+
     private void writeAssets(Path out) throws IOException {
         Path assets = out.resolve("assets").resolve(project.namespace);
         for (Project.Effect e : project.effects) {
+            if (skipped.contains(e.id())) continue;
             Path tex = assets.resolve("textures/item/" + e.item() + ".png");
             Files.createDirectories(tex.getParent());
             String ref = project.namespace + ":item/" + e.item();

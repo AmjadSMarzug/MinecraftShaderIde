@@ -107,6 +107,13 @@ public final class Templates {
             new Example("orb_purple", "Orb Purple", "Object", "a glowing purple orb with bright streaks of light"),
             new Example("orb_red", "Orb Red", "Object", "a glowing red orb with bright streaks of light"),
             new Example("orb_yellow", "Orb Yellow", "Object", "a glowing yellow orb with bright streaks of light"),
+            new Example("text_neon", "Neon Text", "Text", "letters that glow and pulse"),
+            new Example("text_toxic", "Toxic Text", "Text", "green letters with bubbles that pop"),
+            new Example("text_glitch", "Glitch Text", "Text", "bands of letters jumping sideways"),
+            new Example("text_rainbow", "Rainbow Text", "Text", "a rainbow flowing through the word"),
+            new Example("text_fire", "Fire Text", "Text", "hot letters that flicker upward"),
+            new Example("text_digital_rain", "Digital Rain Text", "Text", "green streaks falling down each letter"),
+            new Example("text_frost", "Frost Text", "Text", "icy letters with moving sparkles"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """

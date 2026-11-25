@@ -196,7 +196,7 @@ public final class Obfuscator {
         Set<String> names = new HashSet<>(), fields = new HashSet<>();
         declarations(toks, names, fields);
         String kind = names.contains("material") ? "material" : names.contains("overlay") ? "overlay"
-                : names.contains("surface") ? "surface" : names.contains("object") ? "object" : "sky";
+                : names.contains("surface") ? "surface" : names.contains("object") ? "object" : names.contains("text") ? "text" : "sky";
         if (kind.equals("sky") && !names.contains("sky")) {
             throw new IllegalArgumentException(id + ": needs one of  vec3 sky(vec3 dir, float time),  vec4 object(vec3 origin, vec3 dir, float time)"
                     + ",  vec4 surface(vec2 uv, vec3 pos, vec3 normal, vec3 view, float time)"
