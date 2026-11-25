@@ -139,11 +139,11 @@ public final class Templates {
             new Example("text_hop", "Hop Text", "Text", "letters that hop one after another in a wave"),
             new Example("text_sticker", "Sticker Text", "Text", "letters with a white sticker outline"),
             new Example("text_enchanted", "Enchanted Text", "Text", "letters with a purple glint sliding across"),
-            new Example("bliss_sky_3", "Bliss Sky 3", "Sky", "recovered from Bliss SMP Pack 6"),
-            new Example("bliss_sky_9", "Bliss Sky 9", "Sky", "recovered from Bliss SMP Pack 6"),
-            new Example("bliss_sky_10", "Bliss Sky 10", "Sky", "recovered from Bliss SMP Pack 6"),
-            new Example("bliss_sky_11", "Bliss Sky 11", "Sky", "recovered from Bliss SMP Pack 6"),
-            new Example("bliss_object_243", "Bliss Object 243", "Object", "recovered from Bliss SMP Pack 6"),
+            new Example("bliss_cloud_drift", "Cloud Drift", "Sky", "warped clouds drifting over a dusk gradient"),
+            new Example("bliss_repeating_blobs", "Repeating Blobs", "Sky", "raymarched blobs repeating through the sky, lit from above"),
+            new Example("bliss_web_nebula", "Web Nebula", "Sky", "a nebula with a web of glowing cells and drifting orbs"),
+            new Example("bliss_web_violet", "Web Violet", "Sky", "a violet nebula with plumes, orbs and a cell web"),
+            new Example("bliss_plasma_orb", "Plasma Orb", "Object", "a pulsing plasma sphere with a gold glow"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """
