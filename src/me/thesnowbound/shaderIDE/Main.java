@@ -9,6 +9,7 @@ import me.thesnowbound.shaderIDE.learn.Panel;
 import me.thesnowbound.shaderIDE.presets.Example;
 import me.thesnowbound.shaderIDE.presets.Templates;
 import me.thesnowbound.shaderIDE.preview.Preview;
+import me.thesnowbound.shaderIDE.preview.TextChat;
 import me.thesnowbound.shaderIDE.preview.Problem;
 import me.thesnowbound.shaderIDE.project.Project;
 import me.thesnowbound.shaderIDE.project.ProjectForm;
@@ -143,6 +144,9 @@ public final class Main extends JFrame {
     private JSplitPane middle;
     private final JPanel sidebar = new JPanel(new BorderLayout());
     private final JPanel right = new JPanel(new BorderLayout());
+    // the preview pane holds the sky or object preview, or the chat box for a text effect, one at a time
+    private final JPanel previewStack = new JPanel(new java.awt.CardLayout());
+    private TextChat textPreview;
     private final CardLayout sideCards = new CardLayout();
     private final JPanel sideStack = new JPanel(sideCards);
     private final Island sideCard = new Island(sideStack, 2);
@@ -264,14 +268,19 @@ public final class Main extends JFrame {
         panel.addTab("Log", logScroll);
         panel.setBackground(Fx.SIDE);
         panel.putClientProperty("JTabbedPane.tabHeight", 30);
+        // many open effects get arrows instead of an overflowing tab bar
+        tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         panel.putClientProperty("JTabbedPane.trailingComponent", toolActions(() -> toggle(consoleCard, this.middle)));
 
         right.setOpaque(false);
         try {
             preview = new Preview(this::showProblems);
             preview.setMinimumSize(new Dimension());
-            right.add(preview, BorderLayout.CENTER);
+            previewStack.add(preview, "sky");
+            right.add(previewStack, BorderLayout.CENTER);
             preview.onStats(statusFps::setText);
+            textPreview = new TextChat("");
+            previewStack.add(textPreview, "text");
         } catch (Throwable t) {
             JLabel sorry = new JLabel("<html><div style='width:260px'>The preview couldn't start. It needs OpenGL 3.3.<br><br><font color='"
                     + Fx.hex(Fx.DIM) + "'>" + escape(String.valueOf(t)) + "</font></div></html>");
@@ -1657,13 +1666,26 @@ public final class Main extends JFrame {
         return r == JOptionPane.NO_OPTION;
     }
 
+    static final java.util.regex.Pattern TEXT_MAIN = java.util.regex.Pattern.compile("(?m)^\\s*vec4\\s+text\\s*\\(");
+
     private void refreshPreview() {
         CodeEditor ed = current();
         if (preview == null || ed == null || project == null) return;
         if (!ed.file().toString().endsWith(".glsl")) return;
         Project.Effect effect = project.effectFor(ed.file());
         Map<String, String> defines = effect != null ? effect.defines() : Map.of();
-        preview.show(ed.source(), defines);
+        String source = ed.source();
+        // a text effect is drawn in the chat box instead of the sky or object preview
+        boolean text = TEXT_MAIN.matcher(source).find() && textPreview != null;
+        java.awt.CardLayout cards = (java.awt.CardLayout) previewStack.getLayout();
+        if (text) {
+            cards.show(previewStack, "text");
+            textPreview.setSource(source);
+            showProblems(List.of());
+            return;
+        }
+        cards.show(previewStack, "sky");
+        preview.show(source, defines);
         if (effect != null) keepShot(Project.shot(project.dir, effect.id()));
     }
 

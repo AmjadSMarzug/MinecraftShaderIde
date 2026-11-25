@@ -71,7 +71,9 @@ public final class TextChat extends JPanel {
         bottom.add(font, BorderLayout.SOUTH);
         add(bottom, BorderLayout.SOUTH);
         // the game's chat is a flat box, so the canvas is drawn at the window's own rate
-        new Timer(33, e -> canvas.render()).start();
+        new Timer(33, e -> {
+            if (canvas.isShowing()) canvas.render();
+        }).start();
     }
 
     // the jar picked in settings, or null for automatic
