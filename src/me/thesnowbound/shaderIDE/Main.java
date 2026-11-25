@@ -391,6 +391,11 @@ public final class Main extends JFrame {
         view.add(item("Files", KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), () -> toggle(sideCard, all)));
         view.add(item("Preview", KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), () -> toggle(previewSide, editorAndPreview)));
         view.add(item("Console", KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK), () -> toggle(consoleCard, middle)));
+        view.add(item("Chat Preview", null, () -> {
+            CodeEditor open = current();
+            if (open == null) return;
+            me.thesnowbound.shaderIDE.preview.TextChat.open(open.source());
+        }));
 
         JMenu build = new JMenu("Build");
         build.add(item("Build Pack", KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), this::build));
