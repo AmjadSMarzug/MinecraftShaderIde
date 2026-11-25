@@ -139,6 +139,11 @@ public final class Templates {
             new Example("text_hop", "Hop Text", "Text", "letters that hop one after another in a wave"),
             new Example("text_sticker", "Sticker Text", "Text", "letters with a white sticker outline"),
             new Example("text_enchanted", "Enchanted Text", "Text", "letters with a purple glint sliding across"),
+            new Example("bliss_sky_3", "Bliss Sky 3", "Sky", "recovered from Bliss SMP Pack 6"),
+            new Example("bliss_sky_9", "Bliss Sky 9", "Sky", "recovered from Bliss SMP Pack 6"),
+            new Example("bliss_sky_10", "Bliss Sky 10", "Sky", "recovered from Bliss SMP Pack 6"),
+            new Example("bliss_sky_11", "Bliss Sky 11", "Sky", "recovered from Bliss SMP Pack 6"),
+            new Example("bliss_object_243", "Bliss Object 243", "Object", "recovered from Bliss SMP Pack 6"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """
