@@ -79,8 +79,10 @@ vec3 sky(vec3 dir, float time) {
                + wspNoise(p * 5.4 - vec3(0.0, t * 0.12, 0.0)) * 0.35;
     color *= 0.70 + 0.58 * fogm;
 
-    float bloom = pow(1.0 - smoothstep(0.0, 0.16, w), 2.2);
-    float core = 1.0 - smoothstep(0.02, 0.06, w);
+    // the web's boundaries glow in and out slowly, about every ten seconds, so the web breathes
+    float breathe = mix(0.35, 1.0, 0.5 + 0.5 * sin(time * 0.6));
+    float bloom = pow(1.0 - smoothstep(0.0, 0.16, w), 2.2) * breathe;
+    float core = (1.0 - smoothstep(0.02, 0.06, w)) * breathe;
     color += bloomCol * bloom * 0.50;
     color += hot * core * 0.80;
     color += mix(base, vec3(1.0), 0.8) * wspStars(dir) * 1.2;
