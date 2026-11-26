@@ -9,6 +9,7 @@ import me.thesnowbound.shaderIDE.learn.lessons.LessonMaterial;
 import me.thesnowbound.shaderIDE.learn.lessons.LessonObject;
 import me.thesnowbound.shaderIDE.learn.lessons.LessonOverlay;
 import me.thesnowbound.shaderIDE.learn.lessons.LessonText;
+import me.thesnowbound.shaderIDE.learn.lessons.LessonVariants;
 import me.thesnowbound.shaderIDE.learn.lessons.LessonPalettes;
 import me.thesnowbound.shaderIDE.learn.lessons.LessonShapes;
 import me.thesnowbound.shaderIDE.learn.lessons.LessonStars;
@@ -39,7 +40,8 @@ public final class Lessons {
             LessonSurface.LESSON,
             LessonMaterial.LESSON,
             LessonOverlay.LESSON,
-            LessonText.LESSON);
+            LessonText.LESSON,
+            LessonVariants.LESSON);
 
     // one open task per lesson with no example, where you have to work it out yourself
     public static final java.util.Map<String, String> CHALLENGES = java.util.Map.ofEntries(
