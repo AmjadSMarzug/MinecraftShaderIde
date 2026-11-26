@@ -75,6 +75,7 @@ public final class Project {
                         String.valueOf(e.get("item")), defs, model, obfuscation));
             }
         }
+        Variants.addTo(p);
         return p;
     }
 
@@ -108,6 +109,7 @@ public final class Project {
         if (!discordImageFor.isBlank()) j.put("discordImageFor", discordImageFor);
         List<Object> list = new ArrayList<>();
         for (Effect e : effects) {
+            if (Variants.isVariant(e)) continue;
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", e.id);
             m.put("file", e.file);
