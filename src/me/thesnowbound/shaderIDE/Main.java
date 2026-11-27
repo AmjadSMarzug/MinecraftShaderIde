@@ -46,6 +46,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -1272,6 +1273,34 @@ public final class Main extends JFrame {
         fileMenu(pathAt(e)).show(tree, e.getX(), e.getY());
     }
 
+    // saves an effect as a preset of your own, shown in the gallery next to the built-in ones
+    private void convertToPreset(Project.Effect effect) {
+        try {
+            Path file = project.dir.resolve(effect.file());
+            String source = Files.readString(file, StandardCharsets.UTF_8);
+            JTextField name = new JTextField(Chrome.pretty(effect.id()), 24);
+            JComboBox<String> level = new JComboBox<>(me.thesnowbound.shaderIDE.presets.UserPresets.LEVELS.toArray(new String[0]));
+            level.setSelectedItem(me.thesnowbound.shaderIDE.presets.UserPresets.levelOf(source));
+            JTextField blurb = new JTextField("my own preset", 24);
+            JPanel form = new JPanel(new java.awt.GridLayout(0, 2, 8, 8));
+            form.add(new JLabel("Name")); form.add(name);
+            form.add(new JLabel("Kind")); form.add(level);
+            form.add(new JLabel("Description")); form.add(blurb);
+            if (JOptionPane.showConfirmDialog(this, form, "Convert to preset", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+            String id = "user_" + name.getText().strip().toLowerCase().replaceAll("[^a-z0-9]+", "_").replaceAll("^_|_$", "");
+            if (id.equals("user_")) return;
+            java.awt.image.BufferedImage shot = null;
+            Path picture = Project.shot(project.dir, effect.id());
+            if (Files.isRegularFile(picture)) shot = javax.imageio.ImageIO.read(picture.toFile());
+            me.thesnowbound.shaderIDE.presets.UserPresets.save(id, name.getText().strip(), (String) level.getSelectedItem(),
+                    blurb.getText().strip(), source, shot);
+            log("saved preset " + id);
+            Fx.toast(this, "Saved " + name.getText().strip() + " as a preset", false, null, null);
+        } catch (IOException ex) {
+            error("Couldn't save the preset", ex);
+        }
+    }
+
     private void chipMenu(Path p, MouseEvent e) {
         if (project != null) fileMenu(p).show(e.getComponent(), e.getX(), e.getY());
     }
@@ -1285,6 +1314,7 @@ public final class Main extends JFrame {
         if (effect != null) {
             menu.addSeparator();
             menu.add(item("Effect Settings...", null, () -> effectSettings(effect)));
+            menu.add(item("Convert to Preset...", null, () -> convertToPreset(effect)));
             menu.add(item("Duplicate", null, () -> duplicate(effect)));
             menu.add(item("Give Command", null, () -> copy("/give @s minecraft:paper[minecraft:item_model=\"" + project.namespace + ":" + effect.item() + "\"]",
                     "Copied the /give command for " + effect.id())));
@@ -1405,7 +1435,7 @@ public final class Main extends JFrame {
         choices.add(new Gallery.Choice("my_surface", "Blank surface", "Surface", "an empty surface to start from", Templates.NEW_SURFACE, null));
         choices.add(new Gallery.Choice("my_material", "Blank material", "Material", "an empty material to start from", Templates.NEW_MATERIAL, null));
         choices.add(new Gallery.Choice("my_overlay", "Blank overlay", "Overlay", "an empty overlay to start from", Templates.NEW_OVERLAY, null));
-        for (Example ex : Templates.EXAMPLES) choices.add(ex.choice());
+        for (Example ex : Templates.all()) choices.add(ex.choice());
         Gallery.show(this, choices, c -> createEffect(c.id(), c.source()));
     }
 

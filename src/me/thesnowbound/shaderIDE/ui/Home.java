@@ -226,7 +226,7 @@ public final class Home extends Reveal {
         page.add(section("Examples to start from"));
         JPanel examples = new JPanel(new GridLayout(1, 5, 14, 0));
         examples.setOpaque(false);
-        Stream.concat(Templates.EXAMPLES.stream().filter(x -> x.level().equals("Sky")), Templates.EXAMPLES.stream().filter(x -> !x.level().equals("Sky")))
+        Stream.concat(Templates.all().stream().filter(x -> x.level().equals("Sky")), Templates.all().stream().filter(x -> !x.level().equals("Sky")))
                 .limit(5).forEach(ex -> examples.add(new Gallery.Card(ex.choice(), 220, () -> hooks.example().accept(ex))));
         examples.setPreferredSize(new Dimension(0, Gallery.Card.height(220)));
         page.add(pinned(examples));
@@ -273,7 +273,7 @@ public final class Home extends Reveal {
                 {"Text", "Text"}};
         for (String[] kind : kinds) {
             JPanel g = grid(3);
-            for (Example ex : Templates.EXAMPLES) {
+            for (Example ex : Templates.all()) {
                 if (ex.level().equals(kind[0])) g.add(new Gallery.Card(ex.choice(), 220, () -> hooks.example().accept(ex)));
             }
             page.add(heading(kind[1]));

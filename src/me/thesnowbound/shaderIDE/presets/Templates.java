@@ -1,6 +1,13 @@
 package me.thesnowbound.shaderIDE.presets;
 
 public final class Templates {
+    // the built-in presets, then the ones you made yourself
+    public static java.util.List<Example> all() {
+        java.util.List<Example> out = new java.util.ArrayList<>(EXAMPLES);
+        out.addAll(UserPresets.load());
+        return out;
+    }
+
     public static final java.util.List<Example> EXAMPLES = java.util.List.of(
             new Example("black_hole_object", "Black Hole", "Object", "a real one floating in the item"),
             new Example("hogyoku_crystal", "Hogyoku", "Object", "faceted crystal with energy inside"),
