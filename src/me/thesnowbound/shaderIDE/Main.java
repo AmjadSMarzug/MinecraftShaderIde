@@ -882,7 +882,11 @@ public final class Main extends JFrame {
         f.setOpaque(false);
         f.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         f.add(new Island(line, 0, 10), BorderLayout.NORTH);
-        f.add(Chrome.action("Build pack", 58, this::build), BorderLayout.SOUTH);
+        JPanel buttons = new JPanel(new java.awt.GridLayout(1, 2, 8, 0));
+        buttons.setOpaque(false);
+        buttons.add(Chrome.action("Build pack", 58, this::build));
+        buttons.add(Chrome.action("Commit and Push", 58, this::commitAndPush));
+        f.add(buttons, BorderLayout.SOUTH);
         return f;
     }
 
@@ -1271,6 +1275,71 @@ public final class Main extends JFrame {
     private void popup(MouseEvent e) {
         if (!e.isPopupTrigger() || project == null) return;
         fileMenu(pathAt(e)).show(tree, e.getX(), e.getY());
+    }
+
+    // commits the project and pushes it. a project that isn't a git repo yet gets a repo made for it first
+    private void commitAndPush() {
+        if (project == null) return;
+        Path dir = project.dir;
+        saveAll();
+        if (!me.thesnowbound.shaderIDE.git.Git.isRepo(dir)) {
+            int yes = JOptionPane.showConfirmDialog(this, "This project isn't a git repo yet. Create one for it on GitHub?", "No repo yet", JOptionPane.YES_NO_OPTION);
+            if (yes != JOptionPane.YES_OPTION) return;
+            JTextField repoName = new JTextField(dir.getFileName().toString().replaceAll("[^A-Za-z0-9._-]+", "-"), 24);
+            JComboBox<String> visibility = new JComboBox<>(new String[]{"Private", "Public"});
+            JTextField repoDescription = new JTextField("", 24);
+            JPanel form = new JPanel(new java.awt.GridLayout(0, 2, 8, 8));
+            form.add(new JLabel("Repo name")); form.add(repoName);
+            form.add(new JLabel("Visibility")); form.add(visibility);
+            form.add(new JLabel("Description")); form.add(repoDescription);
+            if (JOptionPane.showConfirmDialog(this, form, "Create a GitHub repo", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+            String name = repoName.getText().strip();
+            boolean isPrivate = visibility.getSelectedIndex() == 0;
+            String desc = repoDescription.getText().strip();
+            runGit("Creating the repo", () -> me.thesnowbound.shaderIDE.git.Git.createRepo(dir, name, isPrivate, desc));
+            return;
+        }
+        JTextField summary = new JTextField("", 32);
+        JTextArea description = new JTextArea(5, 32);
+        description.setLineWrap(true);
+        JPanel form = new JPanel(new java.awt.BorderLayout(0, 8));
+        JPanel top = new JPanel(new java.awt.BorderLayout(8, 0));
+        top.add(new JLabel("Commit name"), java.awt.BorderLayout.WEST);
+        top.add(summary, java.awt.BorderLayout.CENTER);
+        form.add(top, java.awt.BorderLayout.NORTH);
+        form.add(new JScrollPane(description), java.awt.BorderLayout.CENTER);
+        form.add(new JLabel("Description (optional)"), java.awt.BorderLayout.SOUTH);
+        if (JOptionPane.showConfirmDialog(this, form, "Commit and push", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+        String name = summary.getText().strip();
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "A commit needs a name.", "Commit and push", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String body = description.getText().strip();
+        runGit("Committing and pushing", () -> me.thesnowbound.shaderIDE.git.Git.commitAndPush(dir, name, body));
+    }
+
+    // runs a git job in the background so the window stays responsive, then says how it went
+    private void runGit(String label, java.util.concurrent.Callable<String> job) {
+        log(label + "...");
+        new javax.swing.SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                return job.call();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String result = get();
+                    log(result);
+                    Fx.toast(Main.this, "Done. Git says: " + (result.lines().reduce((a, b) -> b).orElse("ok")), false, null, null);
+                } catch (Exception ex) {
+                    Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                    JOptionPane.showMessageDialog(Main.this, String.valueOf(cause.getMessage()), "Git didn't finish", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
     }
 
     // saves an effect as a preset of your own, shown in the gallery next to the built-in ones
