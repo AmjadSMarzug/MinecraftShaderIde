@@ -1,0 +1,8 @@
+{
+ "name": "My Skies",
+ "description": "Custom skies",
+ "author": "Your name",
+ "namespace": "skyboxes",
+ "seed": 4211,
+ "effects": []
+}
