@@ -12,6 +12,29 @@
 <link rel="stylesheet" href="../style.css">
 <style>
   body { min-height: 100vh; }
+  :root {
+    --black: #000000; --panel: #0e0e0e; --raised: #161616; --line: #1e1e1e; --hover: #1c1c1c;
+    --white: #d8d8d8; --strong: #ffffff; --dim: #777777; --accent: #ffffff;
+  }
+  body { background: #000; color: #d8d8d8; font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .studio { background: #0e0e0e; border: 1px solid #1e1e1e; }
+  .tabs button[aria-selected="true"] { background: #161616; color: #ffffff; box-shadow: inset 0 -2px 0 #ffffff; }
+  .tabs button { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .tabs button:hover { color: #ffffff; }
+  .tok-k { color: #ffffff; }
+  .tok-n { color: #e8e8e8; }
+  .tok-f { color: #ffffff; }
+  .tok-c { color: #555555; font-style: italic; }
+  .panes textarea { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .mini-top, .mini-top button { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .mini-top button { background: #161616; color: #d8d8d8; border: 1px solid #1e1e1e; }
+  .mini-top button:hover { border-color: #ffffff; color: #ffffff; }
+  .mini-top { border-bottom-color: #1e1e1e; }
+  .mini-top h1 { font-size: 15px; letter-spacing: 0.02em; color: #ffffff; }
+  .mini-top a.home { color: #ffffff; }
+  .status { color: #777777; }
+  .status.bad { color: #ff5c5c; }
+
   .mini-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--line); }
   .mini-top a.home { color: var(--white); text-decoration: none; font-weight: 700; }
   .mini-top h1 { font: 700 20px var(--sans); margin: 0 auto 0 4px; }
@@ -35,15 +58,15 @@
   <section class="studio" aria-label="Mini IDE">
     <div class="tabs" role="tablist" aria-label="Effects">
         <button role="tab" aria-selected="false" data-file="aurora_sky" data-kind="sky">Aurora</button>
-        <button role="tab" aria-selected="false" data-file="sunset_sky" data-kind="sky">Sunset</button>
-        <button role="tab" aria-selected="false" data-file="synthwave_sky" data-kind="sky">Synthwave</button>
         <button role="tab" aria-selected="false" data-file="storm_clouds" data-kind="sky">Storm</button>
         <button role="tab" aria-selected="false" data-file="web_beat" data-kind="sky">Web beat</button>
-        <button role="tab" aria-selected="false" data-file="ender_pearl" data-kind="object">Ender pearl</button>
-        <button role="tab" aria-selected="false" data-file="hollow_purple" data-kind="object">Hollow purple</button>
-        <button role="tab" aria-selected="false" data-file="dragon_egg" data-kind="object">Dragon egg</button>
-        <button role="tab" aria-selected="false" data-file="frost_edges" data-kind="overlay">Frost edges</button>
-        <button role="tab" aria-selected="false" data-file="fire_border" data-kind="overlay">Fire border</button>
+        <button role="tab" aria-selected="false" data-file="ink_wash" data-kind="sky">Ink wash</button>
+        <button role="tab" aria-selected="false" data-file="black_hole_object" data-kind="object">Black hole</button>
+        <button role="tab" aria-selected="false" data-file="lightning_orb" data-kind="object">Lightning orb</button>
+        <button role="tab" aria-selected="false" data-file="ice_shard" data-kind="object">Ice shard</button>
+        <button role="tab" aria-selected="false" data-file="soap_bubble" data-kind="object">Soap bubble</button>
+        <button role="tab" aria-selected="false" data-file="rain_on_lens" data-kind="overlay">Rain on lens</button>
+        <button role="tab" aria-selected="false" data-file="snowfall" data-kind="overlay">Snowfall</button>
     </div>
     <div class="panes">
       <div class="code">
