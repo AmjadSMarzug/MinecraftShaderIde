@@ -45,6 +45,30 @@ void main() {
 `,
 };
 
+TAILS.overlay = `
+void main() {
+    float f = 1.0 / tan(radians(35.0));
+    vec3 dir = normalize(vec3(screen.x * uAspect, screen.y, -f));
+    vec4 o = overlay(screen * 0.5 + 0.5, dir, uTime);
+    float a = clamp(o.a, 0.0, 1.0);
+    outColor = vec4(clamp(o.rgb, 0.0, 1.0) * a + vec3(0.05, 0.05, 0.09) * (1.0 - a), 1.0);
+}
+`;
+
+// the kind comes from the function the code defines, so a tab never needs to say it
+function kindOf(code, fallback) {
+  if (/\bvec4\s+object\s*\(/.test(code)) return "object";
+  if (/\bvec4\s+overlay\s*\(/.test(code)) return "overlay";
+  if (/\bvec3\s+sky\s*\(/.test(code)) return "sky";
+  return fallback;
+}
+
+const STARTER = `// a new sky. dir is the way you look, time counts seconds
+vec3 sky(vec3 dir, float time) {
+    return mix(vec3(0.1, 0.2, 0.4), vec3(0.6, 0.4, 0.9), dir.y * 0.5 + 0.5);
+}
+`;
+
 const VERTEX = `#version 300 es
 out vec2 screen;
 void main() {
@@ -81,6 +105,7 @@ function renderer(canvas, { scale = 1.5 } = {}) {
   }
 
   r.compile = (code, kind) => {
+    kind = kindOf(code, kind);
     const headLines = HEAD.split("\n").length - 1;
     const vs = shader(gl.VERTEX_SHADER, VERTEX);
     const fs = shader(gl.FRAGMENT_SHADER, HEAD + code + TAILS[kind]);
@@ -92,8 +117,7 @@ function renderer(canvas, { scale = 1.5 } = {}) {
       const line = m ? Number(m[1]) - headLines : 0;
       const userLines = code.split("\n").length;
       if (line > userLines) {
-        return kind === "sky" ? "No main function found. A sky needs vec3 sky(vec3 dir, float time)"
-          : "No main function found. An object needs vec4 object(vec3 origin, vec3 dir, float time)";
+        return "No main function found. A sky needs vec3 sky(vec3 dir, float time), an object needs vec4 object(vec3 origin, vec3 dir, float time), an overlay needs vec4 overlay(vec2 screen, vec3 dir, float time)";
       }
       const message = m ? m[2].trim() : log.trim().split("\n")[0];
       return line > 0 ? `Line ${line}: ${message}` : message;
@@ -196,7 +220,8 @@ function editor() {
   const paint = studio.querySelector(".paint");
   const canvas = studio.querySelector("canvas");
   const status = studio.querySelector(".status");
-  const tabs = [...studio.querySelectorAll(".tabs button")];
+  const tabBar = studio.querySelector(".tabs");
+  let tabs = [...studio.querySelectorAll(".tabs button")];
   const r = renderer(canvas);
   if (!r) {
     status.textContent = "Your browser doesn't support WebGL2, so the live preview can't run here.";
@@ -227,7 +252,7 @@ function editor() {
     const file = tab.dataset.file;
     area.value = edits[file] ?? await source(file);
     area.scrollTop = 0;
-    if (tab.dataset.kind === "sky") {
+    if (kindOf(area.value, tab.dataset.kind) === "sky") {
       r.yaw = 0;
       r.pitch = 4;
     } else {
@@ -257,7 +282,51 @@ function editor() {
       area.blur();
     }
   });
-  tabs.forEach((t) => t.addEventListener("click", () => open(t)));
+  const bind = (t) => t.addEventListener("click", () => open(t));
+  tabs.forEach(bind);
+
+  // the mini studio's own buttons: a new effect, back to the example's code, a download, and Ctrl+S
+  const newButton = document.getElementById("new-effect");
+  if (newButton && tabBar) {
+    newButton.addEventListener("click", () => {
+      let n = 1;
+      while (tabs.some((t) => t.dataset.file === "new_" + n)) n++;
+      const tab = document.createElement("button");
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-selected", "false");
+      tab.dataset.file = "new_" + n;
+      tab.dataset.kind = "sky";
+      tab.textContent = "New " + n;
+      tabBar.appendChild(tab);
+      tabs.push(tab);
+      bind(tab);
+      edits[tab.dataset.file] = STARTER;
+      open(tab);
+    });
+  }
+  const resetButton = document.getElementById("reset-effect");
+  if (resetButton) {
+    resetButton.addEventListener("click", async () => {
+      delete edits[current.dataset.file];
+      area.value = await source(current.dataset.file);
+      repaint();
+      compile();
+    });
+  }
+  const download = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([area.value], { type: "text/plain" }));
+    a.download = (current ? current.dataset.file : "effect") + ".glsl";
+    a.click();
+  };
+  const downloadButton = document.getElementById("download-effect");
+  if (downloadButton) downloadButton.addEventListener("click", download);
+  addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && document.activeElement === area) {
+      e.preventDefault();
+      download();
+    }
+  });
 
   let drag = null;
   canvas.addEventListener("pointerdown", (e) => {

@@ -1,10 +1,10 @@
 :root {
-  --black: #0b0a18;
-  --panel: #141327;
-  --raised: #1e1c38;
-  --line: #302c56;
-  --dim: #a9a4cc;
-  --white: #f3f0ff;
+  --black: #f6f5ff;
+  --panel: #ffffff;
+  --raised: #ece8fb;
+  --line: #d8d2f2;
+  --dim: #5b5680;
+  --white: #15122b;
   --sans: "Space Grotesk", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
   --wide: "wdth" 100;
@@ -876,3 +876,7 @@ footer nav a[aria-current="page"] {
     scroll-behavior: auto;
   }
 }
+
+/* light theme: the gradient buttons keep dark text */
+.button.solid { color: #0b0a18; }
+.button.solid:hover { color: #0b0a18; }

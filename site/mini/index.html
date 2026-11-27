@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini IDE · Shader IDE</title>
+<meta name="description" content="A browser shader editor for Shader IDE. Write a sky, an object or an overlay and see it run live.">
+<link rel="icon" href="../img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+  body { min-height: 100vh; }
+  .mini-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .mini-top a.home { color: var(--white); text-decoration: none; font-weight: 700; }
+  .mini-top h1 { font: 700 20px var(--sans); margin: 0 auto 0 4px; }
+  .mini-top button { background: var(--raised); color: var(--white); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font: 600 14px var(--sans); cursor: pointer; }
+  .mini-top button:hover { border-color: var(--accent); }
+  .mini-main { padding: 16px; }
+  .mini-main .studio { margin-top: 0; }
+  .mini-help { color: var(--dim); font-size: 14px; padding: 0 20px 20px; max-width: 80ch; }
+  .mini-help code { color: var(--white); }
+</style>
+</head>
+<body>
+<header class="mini-top">
+  <a class="home" href="../">Shader IDE</a>
+  <h1>Mini IDE</h1>
+  <button id="new-effect" type="button">New effect</button>
+  <button id="reset-effect" type="button">Reset</button>
+  <button id="download-effect" type="button">Download .glsl</button>
+</header>
+<main class="mini-main">
+  <section class="studio" aria-label="Mini IDE">
+    <div class="tabs" role="tablist" aria-label="Effects">
+        <button role="tab" aria-selected="false" data-file="aurora_sky" data-kind="sky">Aurora</button>
+        <button role="tab" aria-selected="false" data-file="sunset_sky" data-kind="sky">Sunset</button>
+        <button role="tab" aria-selected="false" data-file="synthwave_sky" data-kind="sky">Synthwave</button>
+        <button role="tab" aria-selected="false" data-file="storm_clouds" data-kind="sky">Storm</button>
+        <button role="tab" aria-selected="false" data-file="web_beat" data-kind="sky">Web beat</button>
+        <button role="tab" aria-selected="false" data-file="ender_pearl" data-kind="object">Ender pearl</button>
+        <button role="tab" aria-selected="false" data-file="hollow_purple" data-kind="object">Hollow purple</button>
+        <button role="tab" aria-selected="false" data-file="dragon_egg" data-kind="object">Dragon egg</button>
+        <button role="tab" aria-selected="false" data-file="frost_edges" data-kind="overlay">Frost edges</button>
+        <button role="tab" aria-selected="false" data-file="fire_border" data-kind="overlay">Fire border</button>
+    </div>
+    <div class="panes">
+      <div class="code">
+        <pre class="paint" aria-hidden="true"></pre>
+        <textarea spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Shader code"></textarea>
+      </div>
+      <div class="view">
+        <canvas aria-label="Live preview. Drag to look around"></canvas>
+      </div>
+    </div>
+    <p class="status" role="status">Compiling</p>
+  </section>
+</main>
+<p class="mini-help">Write a <code>vec3 sky(vec3 dir, float time)</code>, a <code>vec4 object(vec3 origin, vec3 dir, float time)</code>
+or a <code>vec4 overlay(vec2 screen, vec3 dir, float time)</code>. The kind is found from the function, so you don't pick it.
+Drag the preview to look around. Ctrl+S downloads the code. Your edits stay in this tab only, and nothing is uploaded.</p>
+<script src="../app.js"></script>
+</body>
+</html>
