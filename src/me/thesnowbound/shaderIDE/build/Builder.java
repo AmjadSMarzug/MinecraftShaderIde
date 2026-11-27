@@ -21,6 +21,7 @@ public final class Builder {
               --no-check          skip the glslang check
               --skript            also write the Skript file next to the pack
               --unmap <map> <f>   print a shader with its original names put back
+              --give              print a /give command for each effect, then stop
               -h, --help          show this help
               -v, --version       show the version
 
@@ -53,6 +54,11 @@ public final class Builder {
         }
         if (args.contains("-v") || args.contains("--version")) {
             System.out.println(Forge.TOOL + " " + Forge.VERSION);
+            return;
+        }
+        if (args.contains("--give")) {
+            Path folder = Path.of(args.stream().filter(a -> !a.startsWith("-")).findFirst().orElse(".")).toAbsolutePath().normalize();
+            System.out.print(Give.text(Project.load(folder)));
             return;
         }
         if (args.contains("--unmap")) {

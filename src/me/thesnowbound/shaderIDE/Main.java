@@ -412,6 +412,16 @@ public final class Main extends JFrame {
 
         JMenu build = new JMenu("Build");
         build.add(item("Build Pack", KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), this::build));
+        build.add(item("Copy Give Commands", null, () -> {
+            if (project == null) return;
+            try {
+                String text = me.thesnowbound.shaderIDE.build.Give.text(project);
+                java.awt.Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new java.awt.datatransfer.StringSelection(text), null);
+                Fx.toast(this, "Copied " + project.effects.size() + " /give commands", false, null, null);
+            } catch (RuntimeException ex) {
+                error("Couldn't copy the commands", ex);
+            }
+        }));
         build.addSeparator();
         obfuscate.setSelected(PREFS.getBoolean("obfuscate", true));
         check.setSelected(PREFS.getBoolean("check", true));
