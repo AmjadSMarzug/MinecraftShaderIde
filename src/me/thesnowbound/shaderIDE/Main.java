@@ -1497,7 +1497,9 @@ public final class Main extends JFrame {
         if (id == null) return;
         id = id.strip().toLowerCase().replaceAll("[^a-z0-9_]", "_");
         if (id.isEmpty()) return;
-        Path file = project.dir.resolve("effects").resolve(id + ".glsl");
+        // a bulk template is saved as NAME.variants.glsl, and the project turns it into one effect per colour
+        boolean bulk = source.contains("//@each");
+        Path file = project.dir.resolve("effects").resolve(id + (bulk ? ".variants.glsl" : ".glsl"));
         if (Files.exists(file)) {
             JOptionPane.showMessageDialog(this, "There's already an effect called " + id + ".");
             return;
@@ -1505,6 +1507,11 @@ public final class Main extends JFrame {
         try {
             Files.createDirectories(file.getParent());
             Files.writeString(file, source, StandardCharsets.UTF_8);
+            if (bulk) {
+                openProject(project.dir);
+                log("added bulk effect " + id);
+                return;
+            }
             project.effects.add(new Project.Effect(id, "effects/" + id + ".glsl", project.freeAlpha(), id, new java.util.LinkedHashMap<>()));
             project.save();
             reloadOpen(project.file());
@@ -1679,6 +1686,14 @@ public final class Main extends JFrame {
         Project.Effect effect = project.effectFor(ed.file());
         Map<String, String> defines = effect != null ? effect.defines() : Map.of();
         String source = ed.source();
+        // a bulk template shows its first colour, the other colours are made when the project builds
+        if (source.contains("//@each")) {
+            try {
+                source = me.thesnowbound.shaderIDE.project.Variants.expand(source, "preview").get(0).source();
+            } catch (RuntimeException ex) {
+                // a template that doesn't expand is shown as it is, and the error says what's wrong
+            }
+        }
         // a text effect is drawn in the chat box instead of the sky or object preview
         boolean text = TEXT_MAIN.matcher(source).find() && textPreview != null;
         java.awt.CardLayout cards = (java.awt.CardLayout) previewStack.getLayout();

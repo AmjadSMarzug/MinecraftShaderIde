@@ -144,6 +144,8 @@ public final class Templates {
             new Example("bliss_plasma_orb", "Plasma Orb", "Object", "a pulsing plasma sphere with a gold glow"),
             new Example("text_slime_drip", "Slime Drip Text", "Text", "green slime dripping down each letter"),
             new Example("web_beat", "Web Beat", "Sky", "a cell web that fades in, holds, and fades out in a steady beat"),
+            new Example("web_sky_bulk", "Web Sky 32 Colours", "Sky", "32 colours in one effect. BulkEffect Example"),
+            new Example("vignette_bulk", "Swirl Vignette 32 Colours", "Overlay", "32 colours in one effect. BulkEffect Example"),
             new Example("dream_pastel", "Dream Pastel", "Sky", "peach and lilac with puffy clouds"));
 
     public static final String NEW_SURFACE = """
